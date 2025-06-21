@@ -2,7 +2,7 @@ version: '3'
 
 services:
   payload:
-    image: node:18-alpine
+    image: node:22-alpine
     ports:
       - '3003:3000'
     volumes:
@@ -17,6 +17,7 @@ services:
 
   mongo:
     image: mongo:latest
+    # Exposes DB publicly. Disable for production
     ports:
       - '27017:27017'
     command:
