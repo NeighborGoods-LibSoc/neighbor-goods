@@ -76,27 +76,23 @@ fi
 [[ -z "$DATABASE_URI" ]] && DATABASE_URI="mongodb://mongo:27017/neighbor-goods"
 
 # Generate random secrets if missing
-generate_secret() {
-    tr -dc 'A-Za-z0-9' </dev/urandom | head -c 32
-}
-
 if [[ -z "$PAYLOAD_SECRET" ]]; then
     echo "Generating PAYLOAD_SECRET..."
-    PAYLOAD_SECRET="$(generate_secret)"
+    PAYLOAD_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
     [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]] && echo -e "\nPAYLOAD_SECRET=$PAYLOAD_SECRET" >> .env
     echo "Done!"
 fi
 
 if [[ -z "$CRON_SECRET" ]]; then
     echo "Generating CRON_SECRET..."
-    CRON_SECRET="$(generate_secret)"
+    CRON_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
     [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]] && echo -e "\nCRON_SECRET=$CRON_SECRET" >> .env
     echo "Done!"
 fi
 
 if [[ -z "$PREVIEW_SECRET" ]]; then
     echo "Generating PREVIEW_SECRET..."
-    PREVIEW_SECRET="$(generate_secret)"
+    PREVIEW_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
     [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]] && echo -e "\nPREVIEW_SECRET=$PREVIEW_SECRET" >> .env
     echo "Done!"
 fi
