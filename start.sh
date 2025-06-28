@@ -97,7 +97,7 @@ fi
 if [[ -z "$PREVIEW_SECRET" ]]; then
     echo "Generating PREVIEW_SECRET..."
     PREVIEW_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
-    if [[ "$PREVIEW_SECRET" == "n" ]]; then
+    if [[ "$OVERWRITE_ENV" == "n" ]]; then
         echo -e "\nPREVIEW_SECRET=$PREVIEW_SECRET" >> .env
     fi
     echo "Done!"
