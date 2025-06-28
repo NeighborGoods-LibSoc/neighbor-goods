@@ -12,7 +12,7 @@ export const Items: CollectionConfig = {
     update: authenticated,
   },
   admin: {
-    defaultColumns: ['name', 'contributed_by', 'updatedAt'],
+    defaultColumns: ['name', 'contributed_by', 'tags', 'updatedAt'],
     useAsTitle: 'name',
   },
   fields: [
@@ -25,6 +25,15 @@ export const Items: CollectionConfig = {
       name: 'description',
       type: 'textarea',
       required: true,
+    },
+    {
+      name: 'tags',
+      type: 'relationship',
+      relationTo: 'tags',
+      hasMany: true,
+      admin: {
+        description: 'Select tags to categorize this item',
+      },
     },
     {
       name: 'contributed_by',
