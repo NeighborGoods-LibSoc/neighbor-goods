@@ -743,11 +743,11 @@ export interface Item {
    * Select tags to categorize this item
    */
   tags?: (string | Tag)[] | null;
-  contributed_by: string | User;
+  contributedBy: string | User;
   /**
    * Primary image used as thumbnail
    */
-  primary_image: string | Media;
+  primaryImage: string | Media;
   /**
    * Additional images for this item
    */
@@ -1342,8 +1342,8 @@ export interface ItemsSelect<T extends boolean = true> {
   name?: T;
   description?: T;
   tags?: T;
-  contributed_by?: T;
-  primary_image?: T;
+  contributedBy?: T;
+  primaryImage?: T;
   additional_images?: T;
   updatedAt?: T;
   createdAt?: T;
