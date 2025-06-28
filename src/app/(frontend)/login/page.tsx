@@ -40,8 +40,8 @@ export default function LoginPage() {
       })
 
       if (response.ok) {
-        // Redirect to home page on successful login
-        router.push('/')
+        // Redirect to dashboard on successful login
+        router.push('/dashboard')
       } else {
         const data = await response.json()
         setError(data.errors?.[0]?.message || 'Invalid email or password')
