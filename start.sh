@@ -79,21 +79,27 @@ fi
 if [[ -z "$PAYLOAD_SECRET" ]]; then
     echo "Generating PAYLOAD_SECRET..."
     PAYLOAD_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
-    [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]] && echo -e "\nPAYLOAD_SECRET=$PAYLOAD_SECRET" >> .env
+    if [[ "$OVERWRITE_ENV" == "n" ]]; then
+        echo -e "\nPAYLOAD_SECRET=$PAYLOAD_SECRET" >> .env
+    fi
     echo "Done!"
 fi
 
 if [[ -z "$CRON_SECRET" ]]; then
     echo "Generating CRON_SECRET..."
     CRON_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
-    [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]] && echo -e "\nCRON_SECRET=$CRON_SECRET" >> .env
+    if [[ "$OVERWRITE_ENV" == "n" ]]; then
+        echo -e "\nCRON_SECRET=$CRON_SECRET" >> .env
+    fi
     echo "Done!"
 fi
 
 if [[ -z "$PREVIEW_SECRET" ]]; then
     echo "Generating PREVIEW_SECRET..."
     PREVIEW_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
-    [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]] && echo -e "\nPREVIEW_SECRET=$PREVIEW_SECRET" >> .env
+    if [[ "$PREVIEW_SECRET" == "n" ]]; then
+        echo -e "\nPREVIEW_SECRET=$PREVIEW_SECRET" >> .env
+    fi
     echo "Done!"
 fi
 
