@@ -201,6 +201,251 @@
     margin: 0 auto;
     padding: 0 8px;
   }
+
+  /* Form Elements */
+  .form-container {
+    max-width: 500px;
+    margin: 32px auto;
+    background-color: var(--light-green);
+    padding: 32px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .form-group {
+    margin-bottom: 16px;
+  }
+  
+  .form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--dark-brown);
+  }
+  
+  .form-input {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid var(--medium-green);
+    border-radius: 4px;
+    font-size: 1rem;
+    background-color: var(--cream);
+    color: var(--dark-brown);
+    box-sizing: border-box;
+  }
+  
+  .form-input:focus {
+    outline: none;
+    border-color: var(--warm-brown);
+    box-shadow: 0 0 5px rgba(173, 193, 120, 0.5);
+  }
+  
+  .error-message {
+    color: var(--alert-red);
+    font-size: 0.9rem;
+    margin-top: 4px;
+  }
+  
+  .note {
+    font-size: 0.85rem;
+    margin-top: 16px;
+    color: var(--dark-brown);
+  }
+  
+  .note p {
+    margin-bottom: 8px;
+  }
+  
+  .login-link {
+    text-align: center;
+    margin-top: 24px;
+  }
+  
+  .login-link a {
+    color: var(--warm-brown);
+    text-decoration: none;
+  }
+  
+  .login-link a:hover {
+    text-decoration: underline;
+  }
+  
+  .signup-link {
+    text-align: center;
+    margin-top: 24px;
+  }
+  
+  .signup-link a {
+    color: var(--warm-brown);
+    text-decoration: none;
+  }
+  
+  .signup-link a:hover {
+    text-decoration: underline;
+  }
+  
+  .submit-btn {
+    width: 100%;
+    margin-top: 16px;
+  }
+
+  /* Dashboard Styles */
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .card {
+    background-color: var(--light-green);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .profile-header {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+    background-color: var(--light-green);
+    border-radius: 8px;
+    padding: 24px;
+  }
+  
+  .profile-top {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+  
+  .profile-name-section {
+    flex-grow: 1;
+  }
+  
+  .profile-name {
+    font-size: 32px;
+    margin-bottom: 8px;
+  }
+  
+  .trust-indicator {
+    display: inline-block;
+    background-color: var(--medium-green);
+    color: var(--lighter-green);
+    padding: 4px 8px;
+    border-radius: 16px;
+    font-size: 14px;
+    margin-right: 8px;
+  }
+  
+  .profile-actions {
+    display: flex;
+    gap: 16px;
+  }
+
+  .avatar img {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+  }
+
+  .dashboard {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+  }
+
+  .quick-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 12px;
+    list-style: none;
+    padding: 0;
+  }
+
+  .quick-actions-grid .btn {
+    width: 100%;
+  }
+
+  .list-item {
+    border-bottom: 1px solid var(--medium-green);
+    padding: 16px 0;
+  }
+
+  .list-item:last-child {
+    border-bottom: none;
+  }
+
+  .list-item-title {
+    font-weight: 600;
+    color: var(--dark-brown);
+    margin-bottom: 4px;
+  }
+
+  .list-item-description {
+    color: var(--warm-brown);
+    margin-bottom: 8px;
+  }
+
+  .list-item-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 0.9rem;
+    color: var(--warm-brown);
+    margin-bottom: 8px;
+  }
+
+  .view-all {
+    display: inline-block;
+    margin-top: 16px;
+    color: var(--link-blue);
+    font-weight: 500;
+  }
+
+  .view-all:hover {
+    color: var(--warm-brown);
+  }
+
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid var(--medium-green);
+    margin-bottom: 16px;
+  }
+
+  .tab {
+    padding: 12px 24px;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s ease-out;
+    font-weight: 500;
+  }
+
+  .tab:hover {
+    background-color: var(--lighter-green);
+  }
+
+  .tab.active {
+    border-bottom-color: var(--warm-brown);
+    color: var(--warm-brown);
+  }
+
+  .tab-content {
+    display: none;
+  }
+
+  .tab-content.active {
+    display: block;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 48px;
+    font-size: 1.2rem;
+    color: var(--warm-brown);
+  }
 }
 
 html {
