@@ -136,4 +136,4 @@ else
 fi
 
 # Run docker compose
-docker compose up --build -d
+sudo docker compose up --build -d
