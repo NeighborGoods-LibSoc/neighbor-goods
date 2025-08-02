@@ -1716,6 +1716,13 @@
   dependencies:
     nodemailer "6.9.16"
 
+"@payloadcms/email-nodemailer@3.49.1":
+  version "3.49.1"
+  resolved "https://registry.yarnpkg.com/@payloadcms/email-nodemailer/-/email-nodemailer-3.49.1.tgz#b47f8518516e37581865516b2a4789e6c396ee8d"
+  integrity sha512-9Y4OVPi+wwScCqSXOYHvK/Yuz9k93cCGJIJp/wBM7pJwv/IMPQobNWv1qBgRtPGO9H//EFf+7CMoRN6BVyf6yw==
+  dependencies:
+    nodemailer "6.9.16"
+
 "@payloadcms/graphql@3.44.0":
   version "3.44.0"
   resolved "https://registry.yarnpkg.com/@payloadcms/graphql/-/graphql-3.44.0.tgz#0f18c2a0a45598bfbe877dd85ff9a0d6125c3bef"

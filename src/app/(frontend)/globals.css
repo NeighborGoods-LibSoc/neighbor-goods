@@ -108,41 +108,41 @@
     color: var(--dark-brown);
     background-color: var(--cream);
   }
-  
+
   h1, h2, h3, h4 {
     font-family: 'Quando', serif;
     font-weight: 400;
     margin-bottom: 16px;
     color: var(--warm-brown);
   }
-  
+
   h1 {
     font-size: 2.5rem;
     margin-bottom: 0.5rem;
   }
-  
+
   h2 {
     font-size: 1.8rem;
   }
-  
+
   h3 {
     font-size: 1.25rem;
   }
-  
+
   h4 {
     font-size: 1rem;
   }
-  
+
   a {
     color: var(--link-blue);
     text-decoration: none;
     transition: all 0.15s ease-out;
   }
-  
+
   a:hover {
     color: var(--warm-brown);
   }
-  
+
   /* Button Styles */
   .btn,
   .action-button,
@@ -159,41 +159,41 @@
     text-decoration: none;
     border: none;
   }
-  
+
   .btn-primary,
   .action-button,
   .submit-btn {
     background-color: var(--medium-green);
     color: var(--cream);
   }
-  
+
   .btn-primary:hover,
   .action-button:hover,
   .submit-btn:hover {
     background-color: var(--warm-brown);
     color: var(--cream);
   }
-  
+
   .btn-secondary {
     background-color: var(--light-green);
     color: var(--dark-brown);
     border: 1px solid var(--medium-green);
   }
-  
+
   .btn-secondary:hover {
     background-color: #d0daa0;
     color: var(--dark-brown);
   }
-  
+
   .contribute-button {
     background-color: var(--warm-brown);
     color: var(--cream);
   }
-  
+
   .contribute-button:hover {
     background-color: var(--dark-brown);
   }
-  
+
   /* Container */
   .container {
     width: 90%;
@@ -211,18 +211,18 @@
     border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
-  
+
   .form-group {
     margin-bottom: 16px;
   }
-  
+
   .form-group label {
     display: block;
     margin-bottom: 8px;
     font-weight: 500;
     color: var(--dark-brown);
   }
-  
+
   .form-input {
     width: 100%;
     padding: 8px;
@@ -233,57 +233,71 @@
     color: var(--dark-brown);
     box-sizing: border-box;
   }
-  
+
   .form-input:focus {
     outline: none;
     border-color: var(--warm-brown);
     box-shadow: 0 0 5px rgba(173, 193, 120, 0.5);
   }
-  
+
   .error-message {
     color: var(--alert-red);
     font-size: 0.9rem;
     margin-top: 4px;
   }
-  
+
   .note {
     font-size: 0.85rem;
     margin-top: 16px;
     color: var(--dark-brown);
   }
-  
+
   .note p {
     margin-bottom: 8px;
   }
-  
+
   .login-link {
     text-align: center;
     margin-top: 24px;
   }
-  
+
   .login-link a {
     color: var(--warm-brown);
     text-decoration: none;
   }
-  
+
   .login-link a:hover {
     text-decoration: underline;
   }
-  
+
   .signup-link {
     text-align: center;
     margin-top: 24px;
   }
-  
+
   .signup-link a {
     color: var(--warm-brown);
     text-decoration: none;
   }
-  
+
   .signup-link a:hover {
     text-decoration: underline;
   }
-  
+
+  .forgot-password {
+    text-align: center;
+    margin-top: 24px;
+  }
+
+  .forgot-password a {
+    color: var(--warm-brown);
+    text-decoration: none;
+  }
+
+  .forgot-password a:hover {
+    text-decoration: underline;
+  }
+
   .submit-btn {
     width: 100%;
     margin-top: 16px;
@@ -314,22 +328,22 @@
     border-radius: 8px;
     padding: 24px;
   }
-  
+
   .profile-top {
     display: flex;
     gap: 24px;
     align-items: center;
   }
-  
+
   .profile-name-section {
     flex-grow: 1;
   }
-  
+
   .profile-name {
     font-size: 32px;
     margin-bottom: 8px;
   }
-  
+
   .trust-indicator {
     display: inline-block;
     background-color: var(--medium-green);
@@ -339,7 +353,7 @@
     font-size: 14px;
     margin-right: 8px;
   }
-  
+
   .profile-actions {
     display: flex;
     gap: 16px;
