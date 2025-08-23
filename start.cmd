@@ -8,6 +8,9 @@ set PAYLOAD_SECRET=
 set NEXT_PUBLIC_SERVER_URL=
 set CRON_SECRET=
 set PREVIEW_SECRET=
+set SMTP_SERVER=
+set SMTP_USER=
+set SMTP_PASSWORD=
 
 :: Check if .env file exists
 set OVERWRITE_ENV=n
@@ -31,6 +34,9 @@ if /i "!OVERWRITE_ENV!"=="n" (
         if /i "!key!"=="PAYLOAD_SECRET" set PAYLOAD_SECRET=!value!
         if /i "!key!"=="CRON_SECRET" set CRON_SECRET=!value!
         if /i "!key!"=="PREVIEW_SECRET" set PREVIEW_SECRET=!value!
+        if /i "!key!"=="SMTP_SERVER" set SMTP_SERVER=!value!
+        if /i "!key!"=="SMTP_USER" set SMTP_USER=!value!
+        if /i "!key!"=="SMTP_PASSWORD" set SMTP_PASSWORD=!value!
     )
 
     if not defined DATABASE_TYPE (
@@ -62,6 +68,18 @@ if /i "!OVERWRITE_ENV!"=="n" (
     if not defined PREVIEW_SECRET (
         echo WARNING: PREVIEW_SECRET is not set. This will be generated and added to .env.
     )
+
+    if not defined SMTP_SERVER (
+        echo WARNING: SMTP_SERVER is not set. You will be prompted to enter this (required for password reset emails).
+    )
+
+    if not defined SMTP_USER (
+        echo WARNING: SMTP_USER is not set. You will be prompted to enter this (required for password reset emails).
+    )
+
+    if not defined SMTP_PASSWORD (
+        echo WARNING: SMTP_PASSWORD is not set. You will be prompted to enter this (required for password reset emails).
+    )
 )
 
 :: Parse command-line arguments
@@ -80,17 +98,65 @@ goto parse_args
 :after_args
 :: Prompt for required values
 if not defined NEXT_PUBLIC_SERVER_URL (
-    set /p NEXT_PUBLIC_SERVER_URL=Enter NEXT_PUBLIC_SERVER_URL without http nor https nor www:
+    set /p NEXT_PUBLIC_SERVER_URL=Enter NEXT_PUBLIC_SERVER_URL (without http:// nor https:// nor www.):
     set NEXT_PUBLIC_SERVER_URL=http://!NEXT_PUBLIC_SERVER_URL!:3000
+
+    if /i "!OVERWRITE_ENV!"=="n" (
+        echo Adding missing NEXT_PUBLIC_SERVER_URL to .env...
+        echo( >> .env
+        echo NEXT_PUBLIC_SERVER_URL=!NEXT_PUBLIC_SERVER_URL! >> .env
+    )
+)
+
+if not defined SMTP_SERVER (
+    set /p SMTP_SERVER=Enter SMTP_SERVER (e.g. smtp.gmail.com):
+
+    if /i "!OVERWRITE_ENV!"=="n" (
+        echo Adding missing SMTP_SERVER to .env...
+        echo( >> .env
+        echo SMTP_SERVER=!SMTP_SERVER! >> .env
+    )
+)
+
+if not defined SMTP_USER (
+    set /p SMTP_USER=Enter SMTP_USER (e.g. example@gmail.com):
+
+    if /i "!OVERWRITE_ENV!"=="n" (
+        echo Adding missing SMTP_USER to .env...
+        echo( >> .env
+        echo SMTP_USER=!USER! >> .env
+    )
+)
+
+if not defined SMTP_PASSWORD (
+    set /p SMTP_PASSWORD=Enter SMTP_PASSWORD (this may be separate from your email login, depending on provider):
+
+    if /i "!OVERWRITE_ENV!"=="n" (
+        echo Adding missing SMTP_PASSWORD to .env...
+        echo( >> .env
+        echo SMTP_PASSWORD=!SMTP_PASSWORD! >> .env
+    )
 )
 
 :: Set defaults if needed
 if not defined DATABASE_TYPE (
     set DATABASE_TYPE=mongodb
+
+    if /i "!OVERWRITE_ENV!"=="n" (
+        echo Adding missing DATABASE_TYPE to .env...
+        echo( >> .env
+        echo DATABASE_TYPE=!DATABASE_TYPE! >> .env
+    )
 )
 
 if not defined DATABASE_URI (
     set DATABASE_URI=mongodb://mongo:27017/neighbor-goods
+
+    if /i "!OVERWRITE_ENV!"=="n" (
+        echo Adding missing DATABASE_URI to .env...
+        echo( >> .env
+        echo DATABASE_TYPE=!DATABASE_URI! >> .env
+    )
 )
 
 :: Setup unique value generation
@@ -157,6 +223,9 @@ if /i "!OVERWRITE_ENV!"=="y" (
         echo PAYLOAD_SECRET=!PAYLOAD_SECRET!
         echo CRON_SECRET=!CRON_SECRET!
         echo PREVIEW_SECRET=!PREVIEW_SECRET!
+        echo SMTP_SERVER=!SMTP_SERVER!
+        echo SMTP_USER=!SMTP_USER!
+        echo SMTP_PASSWORD=!SMTP_PASSWORD!
     ) > .env
 )
 
