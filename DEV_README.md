@@ -27,7 +27,9 @@ Git
 
 ### Cold Start
 
-Follow these steps to get the development environment running:
+Follow these steps to get the development environment running. Either follow the more automated path, or for more advanced users, follow the more manual path.
+
+First time starting the server will take a few minutes as it installs all the dependencies. Subsequent starts of the server will be significantly faster.
 
 Clone the repo
    ```bash
@@ -35,22 +37,53 @@ Clone the repo
    cd neighbor-goods
    ```
 
-Set up environment variables
+#### (More Automated)
+
+Utilize the start scripts to automate most of the setup. It will ask for certain values and generate the rest. It will also install dependencies and start the server afterwards.
+
+Linux
    ```bash
-   cp .env.example .env
+   ./start.sh
    ```
+
+Windows
+  ```bash
+   ./start.cmd
+   ```
+
+#### (More Manual)
+
+Setup your .env file. This will contain certain secrets/sensitive data and should not be shared outside the server.
+
+```aiignore
+DATABASE_URI: URI of your database that the web portion will communicate with. Default: mongodb://mongo:27017/neighbor-goods
+DATABASE_TYPE: Payload CMS supports multiple types of server types. Recommended to keep this value at: mongodb
+NEXT_PUBLIC_SERVER_URL: The URL of the server that will be used for browsers and API calls
+PAYLOAD_SECRET: Secret value used by Payload CMS. Start scripts will generate one. Try to make it long and complex.
+CRON_SECRET: Secret for setting up cron jobs. Start scripts will generate one. Try to make it long and complex.
+PREVIEW_SECRET: Secret for preview. Start scripts will generate one. Try to make it long and complex.
+SMTP_SERVER: Used for sending emails to users (e.g. password resets).
+SMTP_USER: Username for authenticating to the SMTP SMTP Server
+SMTP_PASSWORD: Password used for authenticating to the SMTP Server
+```
+
+Install the required packages. pnpm and yarn are utilized for this.
+
+```bash
+pnpm install
+```
 
 Start the development environment with Docker
    ```bash
    docker-compose up
    ```
 
-The application should now be running and accessible at http://localhost:3000.
+The application should now be running and accessible at the URL specified during the start script (the value in NEXT_PUBLIC_SERVER_URL).
 
 ## Developing NeighborGoods
 When developing, the Docker containers are set to rebuild upon changes being detected in the source code. The first build might take a few minutes to install dependencies, but subsequent rebuilds should be relatively quick.
 
-We are using GitHub issues to track what needs to be done. If you are unsure where to begin, start by going to [the repo issues page](https://github.com/NeighborGoods-LibSoc/neighbor-goods/issues) and picking out an issue with a `good first issue` tag. 
+We are using GitHub issues to track what needs to be done. If you are unsure where to begin, start by going to [the repo issues page](https://github.com/NeighborGoods-LibSoc/neighbor-goods/issues) and picking out an issue with a `good first issue` tag.
 
 ### Project Structure
 - `src/app/(frontend)/` - Next.js frontend pages and components
