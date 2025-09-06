@@ -243,15 +243,11 @@ if errorlevel 1 (
     )
 )
 
-if exist node_modules (
-    echo node_modules directory found, skipping pnpm install...
-) else (
-    echo node_modules directory not found, running pnpm install...
-    call pnpm install
-    if errorlevel 1 (
-        echo pnpm install failed. Aborting...
-        exit /b 1
-    )
+echo Running pnpm install...
+call pnpm install
+if errorlevel 1 (
+    echo pnpm install failed. Aborting...
+    exit /b 1
 )
 
 :: Run docker-compose

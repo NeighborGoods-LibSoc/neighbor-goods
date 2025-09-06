@@ -168,15 +168,11 @@ if ! command -v pnpm &>/dev/null; then
 fi
 
 # Install node_modules if needed
-if [[ -d node_modules ]]; then
-    echo "node_modules directory found, skipping pnpm install..."
-else
-    echo "node_modules directory not found, running pnpm install..."
-    pnpm install || {
-        echo "pnpm install failed. Aborting..."
-        exit 1
-    }
-fi
+echo "Running pnpm install..."
+pnpm install || {
+    echo "pnpm install failed. Aborting..."
+    exit 1
+}
 
 # Run docker compose
 sudo docker compose up --build -d
