@@ -7,6 +7,9 @@ PAYLOAD_SECRET=""
 NEXT_PUBLIC_SERVER_URL=""
 CRON_SECRET=""
 PREVIEW_SECRET=""
+SMTP_SERVER=""
+SMTP_USER=""
+SMTP_PASSWORD=""
 
 # Check if .env file exists
 OVERWRITE_ENV="n"
@@ -29,6 +32,9 @@ if [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]]; then
             PAYLOAD_SECRET) PAYLOAD_SECRET="$value" ;;
             CRON_SECRET) CRON_SECRET="$value" ;;
             PREVIEW_SECRET) PREVIEW_SECRET="$value" ;;
+            SMTP_SERVER) SMTP_SERVER="$value" ;;
+            SMTP_USER) SMTP_USER="$value" ;;
+            SMTP_PASSWORD) SMTP_PASSWORD="$value" ;;
         esac
     done < <(grep '=' .env)
 
@@ -48,6 +54,9 @@ if [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]]; then
     [[ -z "$PAYLOAD_SECRET" ]] && echo "WARNING: PAYLOAD_SECRET is not set. This will be generated and added to .env."
     [[ -z "$CRON_SECRET" ]] && echo "WARNING: CRON_SECRET is not set. This will be generated and added to .env."
     [[ -z "$PREVIEW_SECRET" ]] && echo "WARNING: PREVIEW_SECRET is not set. This will be generated and added to .env."
+    [[ -z "$SMTP_SERVER" ]] && echo "WARNING: SMTP_SERVER is not set. You will be prompted for this. Required for password reset emails."
+    [[ -z "$SMTP_USER" ]] && echo "WARNING: SMTP_USER is not set. You will be prompted for this. Required for password reset emails."
+    [[ -z "$SMTP_PASSWORD" ]] && echo "WARNING: SMTP_USER is not set. You will be prompted for this. Required for password reset emails."
 fi
 
 # Parse command-line arguments
@@ -66,8 +75,39 @@ done
 
 # Prompt if not set
 if [[ -z "$NEXT_PUBLIC_SERVER_URL" ]]; then
-    read -rp "Enter NEXT_PUBLIC_SERVER_URL without http nor https nor www: " INPUT_URL
+    read -rp "Enter NEXT_PUBLIC_SERVER_URL (without http:// nor https:// nor www.): " INPUT_URL
     NEXT_PUBLIC_SERVER_URL="http://$INPUT_URL:3000"
+
+    if [[ "$OVERWRITE_ENV" == "n" ]]; then
+        echo -e "\nNEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL" >> .env
+    fi
+fi
+
+if [[ -z "$SMTP_SERVER" ]]; then
+    read -rp "Enter SMTP_SERVER (e.g. smtp.gmail.com): " INPUT_SMTP_SERVER
+    SMTP_SERVER="$INPUT_SMTP_SERVER"
+
+    if [[ "$OVERWRITE_ENV" == "n" ]]; then
+        echo -e "\nSMTP_SERVER=$SMTP_SERVER" >> .env
+    fi
+fi
+
+if [[ -z "$SMTP_USER" ]]; then
+    read -rp "Enter SMTP_USER (e.g. example@gmail.com): " INPUT_SMTP_USER
+    SMTP_USER="$INPUT_SMTP_USER"
+
+    if [[ "$OVERWRITE_ENV" == "n" ]]; then
+        echo -e "\nSMTP_USER=$SMTP_USER" >> .env
+    fi
+fi
+
+if [[ -z "$SMTP_PASSWORD" ]]; then
+    read -rp "Enter SMTP_PASSWORD(this may be separate from your email login, depending on provider): " INPUT_SMTP_PASSWORD
+    SMTP_PASSWORD="$INPUT_SMTP_PASSWORD"
+
+    if [[ "$OVERWRITE_ENV" == "n" ]]; then
+        echo -e "\nSMTP_PASSWORD=$SMTP_PASSWORD" >> .env
+    fi
 fi
 
 # Set defaults if needed
@@ -112,6 +152,9 @@ NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 PAYLOAD_SECRET=$PAYLOAD_SECRET
 CRON_SECRET=$CRON_SECRET
 PREVIEW_SECRET=$PREVIEW_SECRET
+SMTP_SERVER=$SMTP_SERVER
+SMTP_USER=$SMTP_USER
+SMTP_PASSWORD=$SMTP_PASSWORD
 EOF
 fi
 
@@ -125,15 +168,11 @@ if ! command -v pnpm &>/dev/null; then
 fi
 
 # Install node_modules if needed
-if [[ -d node_modules ]]; then
-    echo "node_modules directory found, skipping pnpm install..."
-else
-    echo "node_modules directory not found, running pnpm install..."
-    pnpm install || {
-        echo "pnpm install failed. Aborting..."
-        exit 1
-    }
-fi
+echo "Running pnpm install..."
+pnpm install || {
+    echo "pnpm install failed. Aborting..."
+    exit 1
+}
 
 # Run docker compose
-docker compose up --build -d
+sudo docker compose up --build -d
