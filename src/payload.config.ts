@@ -4,6 +4,7 @@ import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import sharp from 'sharp' // sharp-import
 import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
+import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { fileURLToPath } from 'url'
 
 import { Categories } from './collections/Categories'
@@ -13,6 +14,7 @@ import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
 import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
+import { Admins } from './collections/Admins'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -35,7 +37,7 @@ export default buildConfig({
     importMap: {
       baseDir: path.resolve(dirname),
     },
-    user: Users.slug,
+    user: Admins.slug,
     livePreview: {
       breakpoints: [
         {
@@ -64,7 +66,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Items, Tags],
+  collections: [Pages, Posts, Media, Categories, Users, Admins, Items, Tags],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
@@ -91,4 +93,17 @@ export default buildConfig({
     },
     tasks: [],
   },
+  email: nodemailerAdapter({
+    defaultFromAddress: 'info@neighborgoods.com',
+    defaultFromName: 'NeighborGoods',
+    // Nodemailer transportOptions
+    transportOptions: {
+      host: process.env.SMTP_SERVER,
+      port: 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
+      },
+    },
+  }),
 })
