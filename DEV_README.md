@@ -36,6 +36,7 @@ Clone the repo
    git clone https://github.com/NeighborGoods-LibSoc/neighbor-goods.git
    cd neighbor-goods
    ```
+Ensure Docker Desktop (Windows) or Docker Engine (Linux) is running before continuing
 
 #### (More Automated)
 
