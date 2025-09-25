@@ -1,21 +1,21 @@
 import { describe, it, expect } from "vitest";
-import { SimpleLibrary } from "../../../src/entities/libraries/simple_library";
+import { SimpleLibrary } from "../../../entities/libraries/simple_library";
 import {
   ID,
   DueDate,
   LoanStatus,
   ThingStatus,
   ThingTitle,
-} from "../../../src/value_items";
-import { Person } from "../../../src/entities/people/person";
-import { PersonName } from "../../../src/value_items/person_name";
-import { URL } from "../../../src/value_items/url";
-import { MOPServer } from "../../../src/entities/mop_server";
-import { Money, Currency } from "../../../src/value_items/money";
-import { MoneyFactory } from "../../../src/factories/money_factory";
-import { FeeSchedule } from "../../../src/value_items/fee_schedules/fee_schedule";
-import { Thing } from "../../../src/entities/thing";
-import { PhysicalLocation } from "../../../src/value_items/location/physical_location";
+} from "../../../value_items";
+import { Person } from "../../../entities/people/person";
+import { PersonName } from "../../../value_items/person_name";
+import { URL } from "../../../value_items/url";
+import { MOPServer } from "../../../entities/mop_server";
+import { Money, Currency } from "../../../value_items/money";
+import { MoneyFactory } from "../../../factories/money_factory";
+import { FeeSchedule } from "../../../value_items/fee_schedules/fee_schedule";
+import { Thing } from "../../../entities/thing";
+import { PhysicalLocation } from "../../../value_items/location/physical_location";
 
 class TestFeeSchedule implements FeeSchedule {
   feeForOverdueItem(): Money {

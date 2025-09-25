@@ -1,22 +1,22 @@
 import { describe, it, expect } from "vitest";
-import { DistributedLibrary } from "../../../src";
-import { SimpleLibrary } from "../../../src";
-import { Thing } from "../../../src";
-import { ID } from "../../../src";
-import { ThingTitle } from "../../../src";
-import { PhysicalLocation } from "../../../src";
-import { PhysicalArea } from "../../../src";
-import { Distance } from "../../../src";
-import { Person } from "../../../src";
-import { PersonName } from "../../../src";
-import { URL } from "../../../src";
-import { MOPServer } from "../../../src";
-import { Money, Currency } from "../../../src";
-import { FeeSchedule } from "../../../src";
-import { WaitingListType } from "../../../src";
-import { LoanStatus } from "../../../src";
-import { ThingStatus } from "../../../src";
-import { DueDate } from "../../../src";
+import { DistributedLibrary } from "../../..";
+import { SimpleLibrary } from "../../..";
+import { Thing } from "../../..";
+import { ID } from "../../..";
+import { ThingTitle } from "../../..";
+import { PhysicalLocation } from "../../..";
+import { PhysicalArea } from "../../..";
+import { Distance } from "../../..";
+import { Person } from "../../..";
+import { PersonName } from "../../..";
+import { URL } from "../../..";
+import { MOPServer } from "../../..";
+import { Money, Currency } from "../../..";
+import { FeeSchedule } from "../../..";
+import { WaitingListType } from "../../..";
+import { LoanStatus } from "../../..";
+import { ThingStatus } from "../../..";
+import { DueDate } from "../../..";
 
 class TestFeeSchedule implements FeeSchedule {
   feeForOverdueItem() {

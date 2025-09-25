@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
-import { Thing } from "../../src/entities/thing";
-import { ID } from "../../src/value_items/id";
-import { ThingTitle } from "../../src/value_items/thing_title";
-import { ThingStatus } from "../../src/value_items/thing_status";
-import { PhysicalLocation } from "../../src/value_items/location/physical_location";
+import { Thing } from "../../entities/thing";
+import { ID } from "../../value_items/id";
+import { ThingTitle } from "../../value_items/thing_title";
+import { ThingStatus } from "../../value_items/thing_status";
+import { PhysicalLocation } from "../../value_items/location/physical_location";
 
 describe("Thing", () => {
   function makeThing(): Thing {

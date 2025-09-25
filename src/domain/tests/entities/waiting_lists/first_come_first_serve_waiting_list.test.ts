@@ -1,15 +1,15 @@
 import { describe, it, expect } from "vitest";
-import { FirstComeFirstServeWaitingList } from "../../../src";
-import { WaitingList } from "../../../src";
-import { WaitingListFactory } from "../../../src";
-import { WaitingListType } from "../../../src";
-import { Thing } from "../../../src";
-import { ID } from "../../../src";
-import { ThingTitle } from "../../../src";
-import { PhysicalLocation } from "../../../src";
-import { PersonBorrower } from "../../../src";
-import { PersonName } from "../../../src";
-import { ThingStatus } from "../../../src";
+import { FirstComeFirstServeWaitingList } from "../../..";
+import { WaitingList } from "../../..";
+import { WaitingListFactory } from "../../..";
+import { WaitingListType } from "../../..";
+import { Thing } from "../../..";
+import { ID } from "../../..";
+import { ThingTitle } from "../../..";
+import { PhysicalLocation } from "../../..";
+import { PersonBorrower } from "../../..";
+import { PersonName } from "../../..";
+import { ThingStatus } from "../../..";
 
 function makeThing(): Thing {
   return new Thing({
