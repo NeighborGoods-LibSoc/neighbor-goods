@@ -17,4 +17,5 @@ RUN apk add --no-cache curl \
 ENV PATH $NVM_DIR/versions/node/v$NODE_VERSION/bin:$PATH
 
 # Configure Docker group and user
-RUN addgroup vscode docker
+RUN addgroup vscode docker && \
+    npm install -g pnpm
