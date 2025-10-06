@@ -11,3 +11,7 @@ public/media/
 
 public/robots.txt
 public/sitemap*.xml
+
+.idea/
+
+.tool-versions
