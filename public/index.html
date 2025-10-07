@@ -7,7 +7,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Quando&family=Cabin:wght@400;500;700&display=swap" rel="stylesheet">
-    
+
     <!-- NeighborGoods Integrated Stylesheet -->
     <style>
         /* === Reset and Base Styles === */
@@ -16,7 +16,7 @@
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         :root {
             /* Color Palette */
             --cream: #F0EAD2;
@@ -29,12 +29,12 @@
             --alert-red: #BC4749;
             --link-blue: #597292;
             --lighter-green:#ebf3c1;
-            
+
             /* Spacing */
             --base-unit: 8px;
             --content-width: 1200px;
         }
-        
+
         body {
             font-family: 'Cabin', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             font-size: 16px;
@@ -44,7 +44,7 @@
             margin: 0;
             padding: 0;
         }
-        
+
         /* === Typography === */
         h1, h2, h3, h4 {
             font-family: 'Quando', serif;
@@ -52,20 +52,20 @@
             margin-bottom: 16px;
             color: var(--warm-brown);
         }
-        
+
         h1 {
             font-size: 2.5rem;
             margin-bottom: 0.5rem;
         }
-        
+
         h2 {
             font-size: 1.8rem;
         }
-        
+
         h3 {
             font-size: 1.25rem;
         }
-        
+
         h4 {
             font-size: 1rem;
             color:var(--dark-brown)
@@ -74,23 +74,23 @@
         p {
             margin: calc(.5 * var(--base-unit));
         }
-        
+
         .tagline {
             font-size: 1.25rem;
             margin-top: 0;
             font-weight: normal;
         }
-        
+
         a {
             color: var(--link-blue);
             text-decoration: none;
             transition: all 0.15s ease-out;
         }
-        
+
         a:hover {
             color: var(--warm-brown);
         }
-        
+
         /* === Layout Elements === */
         .container {
             width: 90%;
@@ -98,7 +98,7 @@
             margin: 0 auto;
             padding: 0 var(--base-unit);
         }
-        
+
         /* === Button Styles === */
         .btn,
         .action-button,
@@ -114,7 +114,7 @@
             transition: all 0.15s ease-out;
             text-decoration: none;
         }
-        
+
         .btn-primary,
         .action-button,
         .submit-btn {
@@ -122,66 +122,66 @@
             color: var(--cream);
             border: none;
         }
-        
+
         .btn-primary:hover,
         .action-button:hover,
         .submit-btn:hover {
             background-color: var(--warm-brown);
             color: var(--cream);
         }
-        
+
         .btn-secondary {
             background-color: var(--light-green);
             color: var(--dark-brown);
             border: 1px solid var(--medium-green);
         }
-        
+
         .btn-secondary:hover {
             background-color: #d0daa0;
             color: var(--dark-brown);
         }
-        
+
         .contribute-button {
             background-color: var(--warm-brown);
             color: var(--cream);
         }
-        
+
         .contribute-button:hover {
             background-color: var(--dark-brown);
         }
-        
+
         .submit-btn {
             width: 100%;
         }
-        
+
         /* Feature Cards */
         .features {
             padding: 64px 0;
         }
-        
+
         .features__title {
             text-align: center;
             margin-bottom: 48px;
         }
-        
+
         .features__grid {
             display: grid;
             grid-template-columns: repeat(1, 1fr);
             gap: 24px;
         }
-        
+
         @media (min-width: 640px) {
             .features__grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        
+
         @media (min-width: 1024px) {
             .features__grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
-        
+
         .feature-card {
             background-color: var(--light-green);
             border-radius: 8px;
@@ -191,29 +191,29 @@
             display: flex;
             flex-direction: column;
         }
-        
+
         .feature-card:hover {
             box-shadow: 0 4px 8px rgba(108, 88, 76, 0.2);
             transform: translateY(-2px);
             border-left: 4px solid var(--medium-green);
         }
-        
+
         .feature-card__icon {
             font-size: 2rem;
             margin-bottom: 16px;
             color: var(--medium-green);
             text-align: center;
         }
-        
+
         .feature-card__title {
             margin-bottom: 12px;
             text-align: center;
         }
-        
+
         .feature-card__content {
             flex-grow: 1;
         }
-        
+
         /* Hero Section */
         .hero {
             padding: 48px 0;
@@ -221,26 +221,26 @@
             background-color: var(--light-green);
             border-bottom: 4px solid var(--medium-green);
         }
-        
+
         .hero__logo {
-            max-width: 600px;  
+            max-width: 600px;
             width: 100%;
             height: auto;
         }
 
         @media (max-width: 600px) {
             .hero__logo {
-                max-width: 90vw; 
+                max-width: 90vw;
             }
         }
-            
+
         .hero__title {
             margin-bottom: 16px;
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
         }
-        
+
         .hero__subtitle {
             font-size: 1.25rem;
             margin-bottom: 32px;
@@ -248,57 +248,57 @@
             margin-left: auto;
             margin-right: auto;
         }
-        
+
         .hero__buttons {
             display: flex;
             justify-content: center;
             gap: 16px;
             flex-wrap: wrap;
         }
-        
+
         /* Values Section */
         .values {
             background-color: var(--warm-brown);
             padding: 64px 0;
         }
-        
+
         .values__title {
             text-align: center;
             margin-bottom: 48px;
             color: var(--light-green);
         }
-        
+
         .values__grid {
             display: grid;
             grid-template-columns: repeat(1, 1fr);
             gap: 24px;
         }
-        
+
         @media (min-width: 640px) {
             .values__grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
-        
+
         @media (min-width: 1024px) {
             .values__grid {
                 grid-template-columns: repeat(3, 1fr);
             }
         }
-        
+
         .value-card {
             padding: 24px;
             background-color: var(--light-green);
             border-radius: 8px;
             height: 100%;
         }
-        
+
         .value-card__title {
             font-weight: 700;
             margin-bottom: 8px;
             color: var(--warm-brown);
         }
-        
+
         /* CTA Section */
         .cta {
             background-color: var(--medium-green);
@@ -306,16 +306,16 @@
             text-align: center;
             color: var(--cream);
         }
-        
+
         .cta__title {
             color: var(--cream);
         }
-        
+
         .cta__content {
             max-width: 700px;
             margin: 0 auto 32px;
         }
-        
+
         /* Footer */
         .footer {
             background-color: var(--dark-brown);
@@ -323,14 +323,14 @@
             padding: calc(6 * var(--base-unit)) 0;
             margin-top: calc(4 * var(--base-unit));
         }
-        
+
         .footer__content {
             display: flex;
             flex-direction: column;
             align-items: center;
             text-align: center;
         }
-        
+
         .footer__links {
             margin: calc(3 * var(--base-unit)) 0;
             display: flex;
@@ -338,31 +338,68 @@
             gap: calc(3 * var(--base-unit));
             justify-content: center;
         }
-        
+
         .footer__link {
             color: var(--cream);
         }
-        
+
         .footer__link:hover {
             color: var(--light-green);
         }
-        
+
         .footer__copyright {
             font-size: 0.875rem;
             opacity: 0.8;
         }
-                
+
         /* Helper Classes */
         .text-center {
             text-align: center;
         }
-        
+
         /* Responsive Styles */
         @media (max-width: 768px) {
             .hero__buttons {
                 flex-direction: column;
                 align-items: center;
             }
+        }
+
+        /* Disabled link + tooltip */
+        .disabled-link {
+            opacity: 0.7;
+            cursor: not-allowed;
+            position: relative;
+        }
+        .disabled-link:focus {
+            outline: none;
+        }
+        .coming-soon:hover::after,
+        .coming-soon:focus::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 50%;
+            bottom: calc(100% + 8px);
+            transform: translateX(-50%);
+            background: var(--dark-brown);
+            color: var(--cream);
+            padding: 6px 10px;
+            border-radius: 6px;
+            white-space: nowrap;
+            font-size: 0.875rem;
+            z-index: 10;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        .coming-soon:hover::before,
+        .coming-soon:focus::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: 100%;
+            transform: translateX(-50%);
+            border-width: 6px;
+            border-style: solid;
+            border-color: transparent transparent var(--dark-brown) transparent;
         }
     </style>
 </head>
@@ -375,12 +412,12 @@
             <p class="hero__subtitle">NeighborGoods is a platform that empowers neighbors to share resources, time, skills, and support—strengthening solidarity, trust, and resilience within communities.</p>
             <p class="hero__subtitle">Connect with your local community and start sharing today!</p>
             <div class="hero__buttons">
-                <a href="/signup" class="btn btn-primary">Join Your Community</a>
-                <a href="/login" class="btn btn-secondary">Sign In</a>
+                <a href="#" class="btn btn-primary disabled-link coming-soon" data-tooltip="Coming Soon" aria-disabled="true" tabindex="-1" onclick="event.preventDefault();">Join Your Community</a>
+                <a href="#" class="btn btn-secondary disabled-link coming-soon" data-tooltip="Coming Soon" aria-disabled="true" tabindex="-1" onclick="event.preventDefault();">Sign In</a>
             </div>
         </div>
     </section>
-    
+
     <!-- Features Section -->
     <section class="features">
         <div class="container">
@@ -431,7 +468,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Values Section -->
     <section class="values">
         <div class="container">
@@ -464,7 +501,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- How It Works Section -->
     <section class="features">
         <div class="container">
@@ -494,7 +531,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- CTA Section -->
     <section class="cta">
         <div class="container">
@@ -506,7 +543,7 @@
             </div>
         </div>
     </section>
-    
+
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
