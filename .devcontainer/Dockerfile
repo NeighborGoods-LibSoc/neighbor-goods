@@ -1,6 +1,5 @@
 ARG NODE_VERSION=21.7.3
 FROM node:${NODE_VERSION}-alpine AS node
-USER vscode
 
 FROM mcr.microsoft.com/devcontainers/base:alpine-3.20
 
@@ -15,3 +14,5 @@ RUN apk add --no-cache curl \
     docker-compose && \
     addgroup vscode docker && \
     npm install -g --force pnpm yarn
+
+USER vscode
