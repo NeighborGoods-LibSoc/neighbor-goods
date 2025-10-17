@@ -1,0 +1,27 @@
+{
+  "name": "neighbor-goods",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "mounts": ["source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"],
+  "postCreateCommand": {
+    "configure-docker": "sudo chown $(whoami) /var/run/docker.sock"
+  },
+  "remoteUser": "vscode",
+  "remoteEnv": {
+    "PROJECT_PATH": "${localWorkspaceFolder}"
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-azuretools.vscode-containers",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "redocly.openapi-vs-code"
+      ],
+      "settings": {
+        "dev.containers.copyGitConfig": true
+      }
+    }
+  }
+}
