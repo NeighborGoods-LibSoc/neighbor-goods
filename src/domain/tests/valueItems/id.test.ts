@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ID } from '../../value_items';
+import { ID } from '../../valueItems';
 
 describe("ID", () => {
   it("generates and parses UUIDs", () => {

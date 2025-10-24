@@ -1,9 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { Thing } from "../../entities/thing";
-import { ID } from "../../value_items/id";
-import { ThingTitle } from "../../value_items/thing_title";
-import { ThingStatus } from "../../value_items/thing_status";
-import { PhysicalLocation } from "../../value_items/location/physical_location";
+import { ID } from "../../valueItems/id";
+import { ThingTitle } from "../../valueItems/thingTitle";
+import { ThingStatus } from "../../valueItems/thingStatus";
+import { PhysicalLocation } from "../../valueItems/location/physical_location";
 
 describe("Thing", () => {
   function makeThing(): Thing {
@@ -13,7 +13,7 @@ describe("Thing", () => {
       description: null,
       owner_id: ID.generate(),
       storage_location: new PhysicalLocation({
-        street_address: "1 Main",
+        streetAddress: "1 Main",
         city: "X",
         state: "Y",
         zip_code: "00000",

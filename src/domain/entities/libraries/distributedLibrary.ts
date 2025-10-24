@@ -9,17 +9,17 @@ import {
   LoanStatus,
   PhysicalArea,
   ThingStatus,
-} from "../../value_items";
+} from "../../valueItems";
 
 export class DistributedLibrary extends Library {
   area!: PhysicalArea;
   private _lenders: Lender[] = [];
 
-  get entity_id(): ID {
-    return this.library_id;
+  override get entityID(): ID {
+    return this.libraryID;
   }
 
-  get all_things(): Iterable<Thing> {
+  get allThings(): Iterable<Thing> {
     const items: Thing[] = [];
     for (const lender of this._lenders) {
       for (const thing of lender.items) items.push(thing);
@@ -27,13 +27,13 @@ export class DistributedLibrary extends Library {
     return items;
   }
 
-  get_owner_of_item(item: Thing): Lender {
+  getOwnerOfItem(item: Thing): Lender {
     for (const lender of this._lenders) {
       for (const lender_item of lender.items) {
         if (
-          item.entity_id &&
-          lender_item.entity_id &&
-          item.entity_id.equals(lender_item.entity_id)
+          item.entityID &&
+          lender_item.entityID &&
+          item.entityID.equals(lender_item.entityID)
         ) {
           return lender;
         }
@@ -50,18 +50,18 @@ export class DistributedLibrary extends Library {
     if (thing.status !== ThingStatus.READY) {
       throw new Error(String(thing.status));
     }
-    if (!this.can_borrow(borrower)) {
+    if (!this.canBorrow(borrower)) {
       throw new Error("BorrowerNotInGoodStandingError");
     }
 
-    const lender = this.get_owner_of_item(thing);
+    const lender = this.getOwnerOfItem(thing);
     if (!lender)
-      throw new Error(`Cannot find owner of item ${thing.entity_id}`);
+      throw new Error(`Cannot find owner of item ${thing.entityID}`);
 
     if (!until) {
       const now = new Date();
       const due = new Date(now);
-      due.setDate(due.getDate() + this.default_loan_time.days);
+      due.setDate(due.getDate() + this.defaultLoanTime.days);
       until = new DueDate({ date: due });
     }
 
@@ -70,33 +70,33 @@ export class DistributedLibrary extends Library {
     const loan = new Loan({
       loan_id: ID.generate(),
       item: thing,
-      borrower_id: borrower.entity_id,
+      borrower_id: borrower.entityID,
       due_date: until,
-      return_location: lender.preferred_return_location,
+      return_location: lender.preferredReturnLocation,
       time_returned: null,
     });
     loan.status = LoanStatus.BORROWED;
     return loan;
   }
 
-  async finish_library_return(loan: Loan, borrower: Borrower): Promise<Loan> {
-    const owner = this.get_owner_of_item(loan.item);
-    const from_owner = await owner.finish_return(loan);
-    return super.finish_library_return(from_owner, borrower);
+  async finishLibraryReturn(loan: Loan, borrower: Borrower): Promise<Loan> {
+    const owner = this.getOwnerOfItem(loan.item);
+    const from_owner = await owner.finishReturn(loan);
+    return super.finishLibraryReturn(from_owner, borrower);
   }
 
-  async start_return(loan: Loan): Promise<Loan> {
-    const owner = this.get_owner_of_item(loan.item);
-    const updated = await owner.start_return(loan);
+  async startReturn(loan: Loan): Promise<Loan> {
+    const owner = this.getOwnerOfItem(loan.item);
+    const updated = await owner.startReturn(loan);
 
-    loan.time_returned = new Date();
+    loan.timeReturned = new Date();
     if (updated.status !== LoanStatus.WAITING_ON_LENDER_ACCEPTANCE) {
       updated.status = LoanStatus.WAITING_ON_LENDER_ACCEPTANCE;
     }
     return updated;
   }
 
-  add_lender(lender: Lender): Lender {
+  addLender(lender: Lender): Lender {
     this._lenders.push(lender);
     return lender;
   }

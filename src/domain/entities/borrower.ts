@@ -1,11 +1,11 @@
 import { Entity } from "./entity";
-import { LibraryFee } from "./libraries/library_fee";
-import { ID, BorrowerVerificationFlags } from "../value_items";
+import { LibraryFee } from "./libraries/libraryFee";
+import { ID, BorrowerVerificationFlags } from "../valueItems";
 
 export abstract class Borrower extends Entity {
-  library_id!: ID;
-  verification_flags!: BorrowerVerificationFlags[];
+  libraryID!: ID;
+  verificationFlags!: BorrowerVerificationFlags[];
 
   abstract get fees(): ReadonlyArray<LibraryFee>;
-  abstract apply_fee(fee: LibraryFee): this;
+  abstract applyFee(fee: LibraryFee): this;
 }

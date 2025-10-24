@@ -7,7 +7,7 @@ import {
   ThingStatus,
   ThingTitle,
   WaitingListType,
-} from "../../../value_items"
+} from "../../../valueItems"
 import { Person } from "../../..";
 import { PersonName } from "../../..";
 import { URL } from "../../..";
@@ -30,35 +30,35 @@ class TestFeeSchedule implements FeeSchedule {
 describe("SimpleLibrary (expanded tests)", () => {
   function makeLibrary() {
     const admin = new Person({
-      person_id: ID.generate(),
-      name: new PersonName({ first_name: "Admin", last_name: "User" }),
+      personID: ID.generate(),
+      name: new PersonName({ firstName: "Admin", lastName: "User" }),
     });
-    const fee_schedule = new TestFeeSchedule();
-    const money_factory = new MoneyFactory();
-    const mop_server = MOPServer.localhost();
+    const feeSchedule = new TestFeeSchedule();
+    const moneyFactory = new MoneyFactory();
+    const mopServer = MOPServer.localhost();
 
     const lib = new SimpleLibrary({
-      library_id: ID.generate(),
+      libraryID: ID.generate(),
       name: "Test Simple Library",
       administrator: admin,
-      waiting_list_type: WaitingListType.FIRST_COME_FIRST_SERVE,
-      max_fines_before_suspension: new Money({
+      waitingListType: WaitingListType.FIRST_COME_FIRST_SERVE,
+      maxFinesBeforeSuspension: new Money({
         amount: 50,
         currency: Currency.USD,
       }),
-      fee_schedule,
-      default_loan_time: { days: 14 },
-      mop_server,
-      public_url: URL.parse("https://example.com") as any,
+      feeSchedule,
+      defaultLoanTime: { days: 14 },
+      mopServer,
+      publicURL: URL.parse("https://example.com") as any,
     });
     lib.location = new PhysicalLocation({
-      street_address: "1 Main",
+      streetAddress: "1 Main",
       city: "X",
       state: "Y",
       zip_code: "00000",
       country: "US",
     });
-    (lib as any).money_factory.default_currency = Currency.USD;
+    (lib as any).moneyFactory.defaultCurrency = Currency.USD;
     return lib;
   }
 
@@ -69,7 +69,7 @@ describe("SimpleLibrary (expanded tests)", () => {
       description: null,
       owner_id: ID.generate(),
       storage_location: new PhysicalLocation({
-        street_address: "1 Main",
+        streetAddress: "1 Main",
         city: "X",
         state: "Y",
         zip_code: "00000",
@@ -78,17 +78,17 @@ describe("SimpleLibrary (expanded tests)", () => {
     });
   }
 
-  it("entity_id returns library_id", () => {
+  it("entityID returns libraryID", () => {
     const lib = makeLibrary();
-    expect(lib.entity_id.equals(lib.library_id)).toBe(true);
+    expect(lib.entityID.equals(lib.libraryID)).toBe(true);
   });
 
   it("add_item stores and returns item; all_things and items include it", () => {
     const lib = makeLibrary();
     const thing = makeThing();
-    const result = lib.add_item(thing);
+    const result = lib.addItem(thing);
     expect(result).toBe(thing);
-    expect(Array.from(lib.all_things)).toContain(thing);
+    expect(Array.from(lib.allThings)).toContain(thing);
     expect(Array.from(lib.items)).toContain(thing);
   });
 
@@ -96,22 +96,22 @@ describe("SimpleLibrary (expanded tests)", () => {
     const lib = makeLibrary();
     const thing = makeThing();
     const borrower: any = {
-      entity_id: ID.generate(),
-      library_id: lib.entity_id,
+      entityID: ID.generate(),
+      libraryID: lib.entityID,
       fees: [],
-      apply_fee: () => borrower,
+      applyFee: () => borrower,
     };
-    lib.add_item(thing);
+    lib.addItem(thing);
 
     // monkey-patch can_borrow to true similar to Python test patch
-    const original = lib.can_borrow.bind(lib);
-    (lib as any).can_borrow = () => true;
+    const original = lib.canBorrow.bind(lib);
+    (lib as any).canBorrow = () => true;
     const loan = await lib.borrow(thing, borrower);
-    (lib as any).can_borrow = original;
+    (lib as any).canBorrow = original;
 
-    expect(loan.due_date).toBeTruthy();
+    expect(loan.dueDate).toBeTruthy();
     const today = new Date();
-    const dd = loan.due_date.date!;
+    const dd = loan.dueDate.date!;
     expect(dd.getTime()).toBeGreaterThan(today.getTime() - 1000);
     // rough upper bound ~ 15 days out
     const upper = new Date();
@@ -131,20 +131,20 @@ describe("SimpleLibrary (expanded tests)", () => {
     const lib = makeLibrary();
     const thing = makeThing();
     const borrower: any = {
-      entity_id: ID.generate(),
-      library_id: lib.entity_id,
+      entityID: ID.generate(),
+      libraryID: lib.entityID,
       fees: [],
-      apply_fee: () => borrower,
+      applyFee: () => borrower,
     };
-    (lib as any).can_borrow = () => true;
+    (lib as any).canBorrow = () => true;
     const loan = await lib.borrow(
       thing,
       borrower,
       new DueDate({ date: new Date(Date.now() + 8640000) }),
     );
-    const res = await lib.start_return(loan);
+    const res = await lib.startReturn(loan);
     expect(res.status).toBe(LoanStatus.WAITING_ON_LENDER_ACCEPTANCE);
-    expect(res.time_returned).toBeInstanceOf(Date);
+    expect(res.timeReturned).toBeInstanceOf(Date);
   });
 
   it("all_titles deduplicates and available_titles filters by READY", () => {
@@ -159,11 +159,11 @@ describe("SimpleLibrary (expanded tests)", () => {
     const t3 = makeThing();
     t3.title = new ThingTitle({ name: "Book 1" });
     t3.status = ThingStatus.BORROWED;
-    lib.add_item(t1);
-    lib.add_item(t2);
-    lib.add_item(t3);
+    lib.addItem(t1);
+    lib.addItem(t2);
+    lib.addItem(t3);
 
-    const all = Array.from(lib.all_titles);
+    const all = Array.from(lib.allTitles);
     expect(
       all.some((tt) => tt.equals(new ThingTitle({ name: "Book 1" }))),
     ).toBe(true);
@@ -181,6 +181,6 @@ describe("SimpleLibrary (expanded tests)", () => {
 
   it("preferred_return_location returns library.location", () => {
     const lib = makeLibrary();
-    expect(lib.preferred_return_location).toEqual(lib.location);
+    expect(lib.preferredReturnLocation).toEqual(lib.location);
   });
 });

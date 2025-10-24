@@ -3,20 +3,20 @@ import { PhysicalLocation } from "./physical_location";
 import { Distance } from "./distance";
 
 export class PhysicalArea implements Location {
-  public readonly center_point: PhysicalLocation;
+  public readonly centerPoint: PhysicalLocation;
   public readonly radius: Distance;
 
-  constructor(params: { center_point: PhysicalLocation; radius: Distance }) {
-    this.center_point = params.center_point;
+  constructor(params: { centerPoint: PhysicalLocation; radius: Distance }) {
+    this.centerPoint = params.centerPoint;
     this.radius = params.radius;
   }
 
   contains(other: Location): boolean {
     if (other instanceof PhysicalLocation) {
-      const distance = this.center_point.distance(other);
+      const distance = this.centerPoint.distance(other);
       return distance.lt(this.radius);
     } else if (other instanceof PhysicalArea) {
-      const offset = this.center_point.distance(other.center_point);
+      const offset = this.centerPoint.distance(other.centerPoint);
       return offset.add(other.radius).lt(this.radius);
     }
     throw new Error(`Cannot compute contain for location type ${typeof other}`);

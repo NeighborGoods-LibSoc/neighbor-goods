@@ -1,47 +1,47 @@
 import { Entity } from "../entity";
 import { Borrower } from "../borrower";
 import { Thing } from "../thing";
-import { ID, ReservationStatus, ThingStatus } from "../../value_items";
+import { ID, ReservationStatus, ThingStatus, WaitingListType } from '../../valueItems'
 
 export abstract class WaitingList extends Entity {
-  waiting_list_id: ID;
+  waitingListId: ID;
   item: Thing;
-  current_reservation: Reservation | null = null;
-  expired_reservations: Reservation[] = [];
+  currentReservation: Reservation | null = null;
+  expiredReservations: Reservation[] = [];
 
   constructor(params: { waiting_list_id?: ID; item: Thing }) {
     super();
-    this.waiting_list_id = params.waiting_list_id ?? ID.generate();
+    this.waitingListId = params.waiting_list_id ?? ID.generate();
     this.item = params.item;
   }
 
-  get entity_id(): ID {
-    return this.waiting_list_id;
+  get entityID(): ID {
+    return this.waitingListId;
   }
 
   abstract add(borrower: Borrower): this;
-  abstract find_next_borrower(): Borrower | null;
-  abstract is_on_list(borrower: Borrower): boolean;
-  abstract process_reservation_expired(reservation: Reservation): this;
+  abstract findNextBorrower(): Borrower | null;
+  abstract isOnList(borrower: Borrower): boolean;
+  abstract processReservationExpired(reservation: Reservation): this;
   abstract cancel(borrower: Borrower): this;
-  abstract get_reservation_time(): { days: number };
-  abstract waitingListType: string;
+  abstract getReservationTime(): { days: number };
+  abstract waitingListType: WaitingListType;
 
-  clear_current_reservation(): void {
-    this.current_reservation = null;
+  clearCurrentReservation(): void {
+    this.currentReservation = null;
   }
 
-  reserve_item_for_next_borrower(): Reservation {
-    if (this.current_reservation) {
+  reserveItemForNextBorrower(): Reservation {
+    if (this.currentReservation) {
       throw new Error(
         "This item already has a reservation, please remove that first",
       );
     }
-    const next_borrower = this.find_next_borrower();
+    const next_borrower = this.findNextBorrower();
     if (!next_borrower)
       throw new Error("No borrower is waiting for this item!");
 
-    const days = this.get_reservation_time().days;
+    const days = this.getReservationTime().days;
     const good_until = new Date();
     good_until.setDate(good_until.getDate() + days);
 
@@ -56,7 +56,7 @@ export abstract class WaitingList extends Entity {
     });
 
     this.cancel(next_borrower);
-    this.current_reservation = res;
+    this.currentReservation = res;
     return res;
   }
 }
@@ -83,7 +83,7 @@ export class Reservation extends Entity {
     this._status = params.status;
   }
 
-  get entity_id(): ID {
+  get entityID(): ID {
     return this.reservation_id;
   }
   get status(): ReservationStatus {

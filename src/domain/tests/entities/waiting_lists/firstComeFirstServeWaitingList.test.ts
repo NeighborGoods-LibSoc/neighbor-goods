@@ -18,7 +18,7 @@ function makeThing(): Thing {
     description: null,
     owner_id: ID.generate(),
     storage_location: new PhysicalLocation({
-      street_address: "1 Main",
+      streetAddress: "1 Main",
       city: "X",
       state: "Y",
       zip_code: "00000",
@@ -27,11 +27,11 @@ function makeThing(): Thing {
   });
 }
 
-function makeBorrower(library_id: ID): PersonBorrower {
+function makeBorrower(libraryID: ID): PersonBorrower {
   return new PersonBorrower({
-    person_id: ID.generate(),
-    name: new PersonName({ first_name: "B", last_name: "R" }),
-    library_id,
+    personID: ID.generate(),
+    name: new PersonName({ firstName: "B", lastName: "R" }),
+    libraryID: libraryID,
   });
 }
 
@@ -40,9 +40,9 @@ describe("FirstComeFirstServeWaitingList", () => {
     const item = makeThing();
     const wl = new FirstComeFirstServeWaitingList({ item });
     const borrower = makeBorrower(ID.generate());
-    expect(wl.is_on_list(borrower)).toBe(false);
+    expect(wl.isOnList(borrower)).toBe(false);
     wl.add(borrower);
-    expect(wl.is_on_list(borrower)).toBe(true);
+    expect(wl.isOnList(borrower)).toBe(true);
   });
 
   it("find_next_borrower returns the first added", () => {
@@ -51,8 +51,8 @@ describe("FirstComeFirstServeWaitingList", () => {
     const b1 = makeBorrower(ID.generate());
     const b2 = makeBorrower(ID.generate());
     wl.add(b1).add(b2);
-    const nextB = wl.find_next_borrower();
-    expect(nextB?.entity_id.equals(b1.entity_id)).toBe(true);
+    const nextB = wl.findNextBorrower();
+    expect(nextB?.entityID.equals(b1.entityID)).toBe(true);
   });
 
   it("reserve_item_for_next_borrower sets reservation and item status RESERVED", () => {
@@ -61,11 +61,11 @@ describe("FirstComeFirstServeWaitingList", () => {
     const b1 = makeBorrower(ID.generate());
     const b2 = makeBorrower(ID.generate());
     wl.add(b1).add(b2);
-    const res = wl.reserve_item_for_next_borrower();
-    expect(res.holder.entity_id.equals(b1.entity_id)).toBe(true);
+    const res = wl.reserveItemForNextBorrower();
+    expect(res.holder.entityID.equals(b1.entityID)).toBe(true);
     expect(item.status).toBe(ThingStatus.RESERVED);
     // b1 should be removed from list
-    expect(wl.is_on_list(b1)).toBe(false);
+    expect(wl.isOnList(b1)).toBe(false);
   });
 
   it("cancel removes a borrower from the list", () => {
@@ -74,35 +74,35 @@ describe("FirstComeFirstServeWaitingList", () => {
     const b2 = makeBorrower(ID.generate());
     wl.add(b1).add(b2);
     wl.cancel(b1);
-    expect(wl.is_on_list(b1)).toBe(false);
-    expect(wl.is_on_list(b2)).toBe(true);
+    expect(wl.isOnList(b1)).toBe(false);
+    expect(wl.isOnList(b2)).toBe(true);
   });
 
   it("process_reservation_expired clears current reservation", () => {
     const wl = new FirstComeFirstServeWaitingList({ item: makeThing() });
     const b1 = makeBorrower(ID.generate());
     wl.add(b1);
-    const res = wl.reserve_item_for_next_borrower();
-    expect(wl.current_reservation).toBeTruthy();
+    const res = wl.reserveItemForNextBorrower();
+    expect(wl.currentReservation).toBeTruthy();
     // In our minimal TS implementation, status is not changed here, but clear_current_reservation should execute
-    wl.process_reservation_expired(res);
-    expect(wl.current_reservation).toBeNull();
+    wl.processReservationExpired(res);
+    expect(wl.currentReservation).toBeNull();
   });
 });
 
 describe("WaitingListFactory", () => {
   it("creates FCFS or Null waiting lists", () => {
     const item = makeThing();
-    const fcfs = WaitingListFactory.create_new_list(
-      { waiting_list_type: WaitingListType.FIRST_COME_FIRST_SERVE },
+    const fcfs = WaitingListFactory.createNewList(
+      { waitingListType: WaitingListType.FIRST_COME_FIRST_SERVE },
       item,
     );
     expect(fcfs).toBeInstanceOf(FirstComeFirstServeWaitingList);
 
-    const none = WaitingListFactory.create_new_list(
-      { waiting_list_type: WaitingListType.NONE },
+    const none = WaitingListFactory.createNewList(
+      { waitingListType: WaitingListType.NONE },
       item,
     );
-    expect((none as WaitingList).get_reservation_time().days).toBe(0);
+    expect((none as WaitingList).getReservationTime().days).toBe(0);
   });
 });
