@@ -61,7 +61,7 @@ describe("SimpleLibrary", () => {
     if (!(lib as any).moneyFactory) {
       (lib as any).moneyFactory = new MoneyFactory();
     }
-    (lib as any).moneyFactory.default_currency = Currency.USD;
+    (lib as any).moneyFactory.defaultCurrency = Currency.USD;
     return lib;
   }
 
