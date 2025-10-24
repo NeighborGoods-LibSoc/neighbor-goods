@@ -6,6 +6,7 @@ export class FirstComeFirstServeWaitingList extends WaitingList {
   members: Borrower[] = [];
   reservation_days: number = 3;
   private _expired_reservations: Reservation[] = [];
+  waitingListType: string = "FirstComeFirstServe";
 
   add(borrower: Borrower): this {
     this.members.push(borrower);
@@ -27,7 +28,7 @@ export class FirstComeFirstServeWaitingList extends WaitingList {
   }
 
   process_reservation_expired(reservation: Reservation): this {
-    // Mark as expired if allowed; otherwise just clear current reservation
+    // Mark as expired if allowed; otherwise just clear the current reservation
     try {
       // Only transition if currently BORROWER_NOTIFIED per Python logic; our Reservation setter enforces transitions
       (reservation as any)._status = ReservationStatus.BORROWER_NOTIFIED;

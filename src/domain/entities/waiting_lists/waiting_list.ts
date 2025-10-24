@@ -25,6 +25,7 @@ export abstract class WaitingList extends Entity {
   abstract process_reservation_expired(reservation: Reservation): this;
   abstract cancel(borrower: Borrower): this;
   abstract get_reservation_time(): { days: number };
+  abstract waitingListType: string;
 
   clear_current_reservation(): void {
     this.current_reservation = null;

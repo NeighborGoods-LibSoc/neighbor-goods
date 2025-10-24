@@ -148,6 +148,7 @@ import { Thing } from '@/domain/entities/thing'
 import { ID, DueDate, LoanStatus } from '@/domain/value_items'
 import { PhysicalLocation } from '@/domain/value_items/location/physical_location'
 import { ThingTitle } from '@/domain/value_items/thing_title'
+import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
 
 async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
   const loan_id = new ID(String(data.loan_id))
@@ -176,7 +177,7 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
     time_returned,
   })
 
-  // Apply requested status through domain rules
+  // Apply the requested status through domain rules
   const desired = String(data.status || 'RETURNED') as keyof typeof LoanStatus
   if (!(desired in LoanStatus)) {
     throw new Error(`Invalid status '${data.status}'`)
@@ -187,41 +188,4 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
   return loan
 }
 
-function mapItemToThing(item: any): Thing {
-  const thing_id = new ID(String(item?.id || item?._id))
-  const title = new ThingTitle({ name: String(item?.name || 'Untitled'), description: item?.description || undefined })
-  const owner_id = new ID(String(item?.contributedBy?.id || item?.contributedBy || 'unknown'))
-  const storage_location = new PhysicalLocation({
-    latitude: null,
-    longitude: null,
-    street_address: '',
-    city: '',
-    state: '',
-    zip_code: '',
-    country: '',
-  })
-  return new Thing({
-    thing_id,
-    title,
-    description: item?.description ?? null,
-    owner_id,
-    storage_location,
-    image_urls: [],
-    purchase_cost: null,
-  })
-}
 
-function mapReturnLocation(loc: any) {
-  if (!loc) return null
-  const hasAny = ['street_address','city','state','zip_code','country','latitude','longitude'].some(k => loc?.[k])
-  if (!hasAny) return null
-  return new PhysicalLocation({
-    latitude: loc.latitude ?? null,
-    longitude: loc.longitude ?? null,
-    street_address: String(loc.street_address || ''),
-    city: String(loc.city || ''),
-    state: String(loc.state || ''),
-    zip_code: String(loc.zip_code || ''),
-    country: String(loc.country || ''),
-  })
-}
