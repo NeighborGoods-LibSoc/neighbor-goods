@@ -3,7 +3,7 @@ import { Thing } from "../../entities/thing";
 import { ID } from "../../valueItems/id";
 import { ThingTitle } from "../../valueItems/thingTitle";
 import { ThingStatus } from "../../valueItems/thingStatus";
-import { PhysicalLocation } from "../../valueItems/location/physical_location";
+import { PhysicalLocation } from "../../valueItems/location/physicalLocation";
 
 describe("Thing", () => {
   function makeThing(): Thing {
@@ -16,7 +16,7 @@ describe("Thing", () => {
         streetAddress: "1 Main",
         city: "X",
         state: "Y",
-        zip_code: "00000",
+        zipCode: "00000",
         country: "US",
       }),
     });

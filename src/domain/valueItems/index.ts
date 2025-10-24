@@ -21,6 +21,6 @@ export * from "./feeSchedules/feeSchedule";
 export * from "./feeSchedules/perDayFeeSchedule";
 export * from "./location/distance";
 export * from "./location/location";
-export * from "./location/physical_location";
+export * from "./location/physicalLocation";
 export * from "./location/physicalArea";
 export * from "./location/virtualLocation";

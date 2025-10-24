@@ -106,7 +106,7 @@ export abstract class Library extends Entity {
     const key = item.entityID.toString();
     let waitingList = this.waitingListsByItemId.get(key);
     if (!waitingList) {
-      waitingList = WaitingListFactory.createNewList(this.waitingListType, item);
+      waitingList = WaitingListFactory.createNewList(this, item);
       this.waitingListsByItemId.set(key, waitingList);
     }
     waitingList.add(borrower);

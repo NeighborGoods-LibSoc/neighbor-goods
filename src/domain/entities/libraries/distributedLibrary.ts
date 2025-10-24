@@ -79,7 +79,7 @@ export class DistributedLibrary extends Library {
     return loan;
   }
 
-  async finishLibraryReturn(loan: Loan, borrower: Borrower): Promise<Loan> {
+  override async finishLibraryReturn(loan: Loan, borrower: Borrower): Promise<Loan> {
     const owner = this.getOwnerOfItem(loan.item);
     const from_owner = await owner.finishReturn(loan);
     return super.finishLibraryReturn(from_owner, borrower);

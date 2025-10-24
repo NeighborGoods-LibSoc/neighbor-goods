@@ -16,7 +16,7 @@ export class PhysicalLocation implements Location {
     streetAddress: string;
     city: string;
     state: string;
-    zip_code: string;
+    zipCode: string;
     country: string;
   }) {
     this.latitude = params.latitude ?? null;
@@ -24,7 +24,7 @@ export class PhysicalLocation implements Location {
     this.streetAddress = params.streetAddress;
     this.city = params.city;
     this.state = params.state;
-    this.zipCode = params.zip_code;
+    this.zipCode = params.zipCode;
     this.country = params.country;
   }
 

@@ -55,7 +55,7 @@ describe("SimpleLibrary (expanded tests)", () => {
       streetAddress: "1 Main",
       city: "X",
       state: "Y",
-      zip_code: "00000",
+      zipCode: "00000",
       country: "US",
     });
     (lib as any).moneyFactory.defaultCurrency = Currency.USD;
@@ -72,7 +72,7 @@ describe("SimpleLibrary (expanded tests)", () => {
         streetAddress: "1 Main",
         city: "X",
         state: "Y",
-        zip_code: "00000",
+        zipCode: "00000",
         country: "US",
       }),
     });

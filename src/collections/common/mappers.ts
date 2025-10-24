@@ -1,6 +1,6 @@
 import { Thing } from '@/domain/entities/thing'
 import { ID } from '@/domain/valueItems'
-import { PhysicalLocation } from '@/domain/valueItems/location/physical_location'
+import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
 import { ThingTitle } from '@/domain/valueItems/thingTitle'
 
 export function mapItemToThing(item: any): Thing {
@@ -13,7 +13,7 @@ export function mapItemToThing(item: any): Thing {
     streetAddress: '',
     city: '',
     state: '',
-    zip_code: '',
+    zipCode: '',
     country: '',
   })
   return new Thing({
@@ -37,7 +37,7 @@ export function mapReturnLocation(loc: any) {
     streetAddress: String(loc.street_address || ''),
     city: String(loc.city || ''),
     state: String(loc.state || ''),
-    zip_code: String(loc.zip_code || ''),
+    zipCode: String(loc.zip_code || ''),
     country: String(loc.country || ''),
   })
 }

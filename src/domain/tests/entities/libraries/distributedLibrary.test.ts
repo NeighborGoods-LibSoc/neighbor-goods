@@ -53,7 +53,7 @@ function makeSimpleLibrary(name: string) {
     streetAddress: "1 Main",
     city: "X",
     state: "Y",
-    zip_code: "00000",
+    zipCode: "00000",
     country: "US",
   });
   (lib as any).moneyFactory.defaultCurrency = Currency.USD;
@@ -99,7 +99,7 @@ function makeThing(owner_id: ID): Thing {
       streetAddress: "2 Main",
       city: "X",
       state: "Y",
-      zip_code: "00000",
+      zipCode: "00000",
       country: "US",
     }),
   });

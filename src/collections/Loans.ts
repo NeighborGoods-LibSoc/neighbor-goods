@@ -146,7 +146,7 @@ export const Loans: CollectionConfig = {
 import { Loan } from '@/domain/entities/loan'
 import { Thing } from '@/domain/entities/thing'
 import { ID, DueDate, LoanStatus } from '@/domain/valueItems'
-import { PhysicalLocation } from '@/domain/valueItems/location/physical_location'
+import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
 import { ThingTitle } from '@/domain/valueItems/thingTitle'
 import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
 

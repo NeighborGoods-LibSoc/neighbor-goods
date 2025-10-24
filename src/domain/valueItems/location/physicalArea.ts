@@ -1,5 +1,5 @@
 import { Location } from "./location";
-import { PhysicalLocation } from "./physical_location";
+import { PhysicalLocation } from "./physicalLocation";
 import { Distance } from "./distance";
 
 export class PhysicalArea implements Location {

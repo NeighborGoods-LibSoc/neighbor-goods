@@ -14,9 +14,9 @@ import { URL } from "../../../valueItems/url";
 import { MOPServer } from "../../../entities/mopServer";
 import { Money, Currency } from "../../../valueItems/money";
 import { MoneyFactory } from "../../../factories/moneyFactory";
-import { FeeSchedule } from "../../../valueItems/fee_schedules/fee_schedule";
+import { FeeSchedule } from "../../../valueItems/feeSchedules/feeSchedule";
 import { Thing } from "../../../entities/thing";
-import { PhysicalLocation } from "../../../valueItems/location/physical_location";
+import { PhysicalLocation } from "../../../valueItems/location/physicalLocation";
 
 class TestFeeSchedule implements FeeSchedule {
   feeForOverdueItem(): Money {
@@ -54,7 +54,7 @@ describe("SimpleLibrary", () => {
       streetAddress: "1 Main",
       city: "X",
       state: "Y",
-      zip_code: "00000",
+      zipCode: "00000",
       country: "US",
     });
     // Ensure moneyFactory exists before setting its property
@@ -75,7 +75,7 @@ describe("SimpleLibrary", () => {
         streetAddress: "1 Main",
         city: "X",
         state: "Y",
-        zip_code: "00000",
+        zipCode: "00000",
         country: "US",
       }),
     });
