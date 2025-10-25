@@ -6,6 +6,7 @@ import path from 'path'
 import { buildConfig, PayloadRequest } from 'payload'
 import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 import { fileURLToPath } from 'url'
+import { openapi, swaggerUI } from 'payload-oapi'
 
 import { Categories } from './collections/Categories'
 import { Items } from './collections/Items'
@@ -71,6 +72,8 @@ export default buildConfig({
   globals: [Header, Footer],
   plugins: [
     ...plugins,
+    openapi({ openapiVersion: '3.0', metadata: { title: 'NeighborGoods API', version: '0.0.1' } }),
+    swaggerUI({ specEndpoint: '/openapi.json', enabled: true }),
     // storage-adapter-placeholder
   ],
   secret: process.env.PAYLOAD_SECRET,
