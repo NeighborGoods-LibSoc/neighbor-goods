@@ -1,0 +1,45 @@
+name: Nuclei Security Scan
+
+on:
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'src/**'
+      - 'package.json'
+      - 'yarn.lock'
+      - 'pnpm-lock.yaml'
+      - 'Dockerfile'
+      - 'start.sh'
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.25'
+
+      - name: Install Nuclei
+        run: |
+          go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+          nuclei -version
+
+      - name: Start Docker containers
+        run: |
+          start.sh --ci
+        
+      - name: Wait for application to be ready
+        run: |
+          echo "Waiting for the application to start..."
+          sleep 30  # Adjust the sleep time as necessary
+
+      - name: Run Nuclei scan
+        run: |
+          nuclei -u http://localhost:3000 -stats
+          
+      - name: Stop Docker containers
+        if: always()  # Run even if previous steps fail
+        run: docker-compose down
