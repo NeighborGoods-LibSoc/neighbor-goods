@@ -1,5 +1,5 @@
-import { ReservationStatus } from "./reservation_status";
-import { ThingStatus } from "./thing_status";
+import { ReservationStatus } from "./reservationStatus";
+import { ThingStatus } from "./thingStatus";
 
 export class CurrencyMismatchException extends Error {
   constructor(message?: string) {

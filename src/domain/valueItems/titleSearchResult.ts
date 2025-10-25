@@ -1,5 +1,5 @@
 import { ID } from "./id";
-import { ThingTitle } from "./thing_title";
+import { ThingTitle } from "./thingTitle";
 import { EntityNotAssignedIdError } from "./exceptions";
 
 export class LibrarySearchResult<TLibrary, TThing> {

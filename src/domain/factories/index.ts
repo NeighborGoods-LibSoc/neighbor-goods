@@ -1,2 +1,2 @@
-export * from "./money_factory";
-export * from "./waiting_list_factory";
+export * from "./moneyFactory";
+export * from "./waitingListFactory";

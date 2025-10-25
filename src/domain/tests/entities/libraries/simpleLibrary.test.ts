@@ -1,21 +1,22 @@
 import { describe, it, expect } from "vitest";
-import { SimpleLibrary } from "../../../entities/libraries/simple_library";
+import { SimpleLibrary } from "../../../entities/libraries/simpleLibrary";
 import {
   ID,
   DueDate,
   LoanStatus,
   ThingStatus,
   ThingTitle,
-} from "../../../value_items";
+  WaitingListType,
+} from '../../../valueItems'
 import { Person } from "../../../entities/people/person";
-import { PersonName } from "../../../value_items/person_name";
-import { URL } from "../../../value_items/url";
-import { MOPServer } from "../../../entities/mop_server";
-import { Money, Currency } from "../../../value_items/money";
-import { MoneyFactory } from "../../../factories/money_factory";
-import { FeeSchedule } from "../../../value_items/fee_schedules/fee_schedule";
+import { PersonName } from "../../../valueItems/personName";
+import { URL } from "../../../valueItems/url";
+import { MOPServer } from "../../../entities/mopServer";
+import { Money, Currency } from "../../../valueItems/money";
+import { MoneyFactory } from "../../../factories/moneyFactory";
+import { FeeSchedule } from "../../../valueItems/feeSchedules/feeSchedule";
 import { Thing } from "../../../entities/thing";
-import { PhysicalLocation } from "../../../value_items/location/physical_location";
+import { PhysicalLocation } from "../../../valueItems/location/physicalLocation";
 
 class TestFeeSchedule implements FeeSchedule {
   feeForOverdueItem(): Money {
@@ -29,36 +30,38 @@ class TestFeeSchedule implements FeeSchedule {
 describe("SimpleLibrary", () => {
   function makeLibrary() {
     const admin = new Person({
-      person_id: ID.generate(),
-      name: new PersonName({ first_name: "Admin", last_name: "User" }),
+      personID: ID.generate(),
+      name: new PersonName({ firstName: "Admin", lastName: "User" }),
     });
-    const fee_schedule = new TestFeeSchedule();
-    const money_factory = new MoneyFactory();
-    const mop_server = MOPServer.localhost();
+    const feeSchedule = new TestFeeSchedule();
+    const mopServer = MOPServer.localhost();
 
     const lib = new SimpleLibrary({
-      library_id: ID.generate(),
+      libraryID: ID.generate(),
       name: "Test Simple Library",
       administrator: admin,
-      waiting_list_type: 0 as any, // WaitingListType.FIRST_COME_FIRST_SERVE
-      max_fines_before_suspension: new Money({
+      waitingListType: WaitingListType.FIRST_COME_FIRST_SERVE,
+      maxFinesBeforeSuspension: new Money({
         amount: 50,
         currency: Currency.USD,
       }),
-      fee_schedule,
-      default_loan_time: { days: 14 },
-      mop_server,
-      public_url: URL.parse("https://example.com") as any,
+      feeSchedule,
+      defaultLoanTime: { days: 14 },
+      mopServer,
+      publicURL: URL.parse("https://example.com") as any,
     });
     lib.location = new PhysicalLocation({
-      street_address: "1 Main",
+      streetAddress: "1 Main",
       city: "X",
       state: "Y",
-      zip_code: "00000",
+      zipCode: "00000",
       country: "US",
     });
-    // ensure default currency aligns with max_fines currency to avoid mismatch when borrower has no fees
-    (lib as any).money_factory.default_currency = Currency.USD;
+    // Ensure moneyFactory exists before setting its property
+    if (!(lib as any).moneyFactory) {
+      (lib as any).moneyFactory = new MoneyFactory();
+    }
+    (lib as any).moneyFactory.defaultCurrency = Currency.USD;
     return lib;
   }
 
@@ -69,10 +72,10 @@ describe("SimpleLibrary", () => {
       description: null,
       owner_id: ID.generate(),
       storage_location: new PhysicalLocation({
-        street_address: "1 Main",
+        streetAddress: "1 Main",
         city: "X",
         state: "Y",
-        zip_code: "00000",
+        zipCode: "00000",
         country: "US",
       }),
     });
@@ -82,14 +85,14 @@ describe("SimpleLibrary", () => {
     const lib = makeLibrary();
     const thing = makeThing();
     const borrower = new Person({
-      person_id: ID.generate(),
-      name: new PersonName({ first_name: "B", last_name: "R" }),
+      personID: ID.generate(),
+      name: new PersonName({ firstName: "B", lastName: "R" }),
     }) as any;
-    (borrower as any).library_id = lib.entity_id; // minimal borrower shape
+    (borrower as any).libraryID = lib.entityID; // minimal borrower shape
     (borrower as any).fees = [];
-    (borrower as any).apply_fee = () => borrower;
+    (borrower as any).applyFee = () => borrower;
 
-    lib.add_item(thing);
+    lib.addItem(thing);
     const until = new DueDate({ date: new Date(Date.now() + 3 * 86400000) });
     const loan = await lib.borrow(thing, borrower, until);
     expect(loan.status).toBe(LoanStatus.BORROWED);

@@ -1,5 +1,5 @@
 import { Money } from "../money";
-import { FeeSchedule } from "./fee_schedule";
+import { FeeSchedule } from "./feeSchedule";
 
 export class PerDayFeeSchedule implements FeeSchedule {
   public readonly daily_charge: Money;

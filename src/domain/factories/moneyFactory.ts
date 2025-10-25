@@ -1,10 +1,10 @@
-import { Currency, Money } from "../value_items/money";
+import { Currency, Money } from "../valueItems/money";
 
 export class MoneyFactory {
-  default_currency: Currency = Currency.EUR;
+  defaultCurrency: Currency = Currency.EUR;
 
-  empty(currency_name?: Currency | null): Money {
-    const c = currency_name ?? this.default_currency;
+  empty(currencyName?: Currency | null): Money {
+    const c = currencyName ?? this.defaultCurrency;
     return new Money({ amount: 0, currency: c });
   }
 
@@ -12,7 +12,7 @@ export class MoneyFactory {
     if (!amounts || amounts.length === 0) return this.empty();
     return amounts.reduce(
       (acc, cur) => acc.add(cur),
-      this.empty(amounts[0].currency),
+      this.empty(amounts[0]?.currency),
     );
   }
 }

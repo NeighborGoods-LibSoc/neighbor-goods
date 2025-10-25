@@ -10,26 +10,26 @@ import {
   ThingStatus,
   ThingTitle,
   Location,
-} from "../../value_items";
+} from "../../valueItems";
 import {
   BorrowerNotInGoodStandingError,
   InvalidThingStatusToBorrowError,
-} from "../../value_items";
+} from "../../valueItems";
 
 export class SimpleLibrary extends Library implements Lender {
   private _items: Thing[] = [];
   location!: Location; // PhysicalLocation in Python, but keep generic Location interface
 
-  get entity_id(): ID {
-    return this.library_id;
+  override get entityID(): ID {
+    return this.libraryID;
   }
 
-  add_item(item: Thing): Thing {
+  addItem(item: Thing): Thing {
     this._items.push(item);
     return item;
   }
 
-  get all_things(): Iterable<Thing> {
+  get allThings(): Iterable<Thing> {
     return this._items;
   }
 
@@ -45,21 +45,21 @@ export class SimpleLibrary extends Library implements Lender {
     if (thing.status !== ThingStatus.READY) {
       throw new InvalidThingStatusToBorrowError(thing.status as any);
     }
-    if (!this.can_borrow(borrower)) {
+    if (!this.canBorrow(borrower)) {
       throw new BorrowerNotInGoodStandingError();
     }
 
     if (!until) {
       const now = new Date();
       const due = new Date(now);
-      due.setDate(due.getDate() + this.default_loan_time.days);
+      due.setDate(due.getDate() + this.defaultLoanTime.days);
       until = new DueDate({ date: due });
     }
 
     const loan = new Loan({
       loan_id: ID.generate(),
       item: thing,
-      borrower_id: borrower.entity_id,
+      borrower_id: borrower.entityID,
       due_date: until,
       return_location: this.location,
       time_returned: null,
@@ -67,33 +67,33 @@ export class SimpleLibrary extends Library implements Lender {
     loan.status = LoanStatus.BORROWED;
     thing.status = ThingStatus.BORROWED;
 
-    this.add_loan(loan);
+    this.addLoan(loan);
     return loan;
   }
 
-  get all_titles(): Iterable<ThingTitle> {
-    return Library.get_titles_from_items(this.items);
+  get allTitles(): Iterable<ThingTitle> {
+    return Library.getTitlesFromItems(this.items);
   }
 
   get available_titles(): Iterable<ThingTitle> {
     const available_items = Array.from(this.items).filter(
       (i) => i.status === ThingStatus.READY,
     );
-    return Library.get_titles_from_items(available_items);
+    return Library.getTitlesFromItems(available_items);
   }
 
-  get preferred_return_location(): Location {
+  get preferredReturnLocation(): Location {
     return this.location;
   }
 
-  async start_return(loan: Loan): Promise<Loan> {
+  async startReturn(loan: Loan): Promise<Loan> {
     loan.status = LoanStatus.RETURN_STARTED;
     loan.status = LoanStatus.WAITING_ON_LENDER_ACCEPTANCE;
-    loan.time_returned = new Date();
+    loan.timeReturned = new Date();
     return loan;
   }
 
-  async finish_return(loan: Loan): Promise<Loan> {
+  async finishReturn(loan: Loan): Promise<Loan> {
     loan.status = LoanStatus.RETURNED;
     return loan;
   }

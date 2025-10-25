@@ -1,10 +1,10 @@
-import { ID } from "../value_items";
+import { ID } from "../valueItems";
 
 export abstract class Entity {
   // In TS we expose an abstract getter similar to Python's abstract property
-  abstract get entity_id(): ID;
+  abstract get entityID(): ID;
 
   equals(other: unknown): boolean {
-    return other instanceof Entity && this.entity_id.equals(other.entity_id);
+    return other instanceof Entity && this.entityID.equals(other.entityID);
   }
 }

@@ -1,6 +1,6 @@
 import { Entity } from "./entity";
-import { ID, Location, Money, ThingStatus, ThingTitle } from "../value_items";
-import { InvalidThingStateTransitionError } from "../value_items";
+import { ID, Location, Money, ThingStatus, ThingTitle } from "../valueItems";
+import { InvalidThingStateTransitionError } from "../valueItems";
 
 export class Thing extends Entity {
   thing_id: ID;
@@ -31,7 +31,7 @@ export class Thing extends Entity {
     this.purchase_cost = params.purchase_cost ?? null;
   }
 
-  get entity_id(): ID {
+  get entityID(): ID {
     return this.thing_id;
   }
 

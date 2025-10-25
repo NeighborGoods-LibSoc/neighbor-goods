@@ -1,15 +1,15 @@
 import { Entity } from "./entity";
 import { Thing } from "./thing";
-import { ID, DueDate, LoanStatus, Location } from "../value_items";
+import { ID, DueDate, LoanStatus, Location } from "../valueItems";
 
 export class Loan extends Entity {
-  loan_id: ID;
+  loanID: ID;
   item: Thing;
-  due_date: DueDate;
-  borrower_id: ID;
+  dueDate: DueDate;
+  borrowerID: ID;
   private _status: LoanStatus = LoanStatus.RETURNED;
-  return_location: Location | null;
-  time_returned: Date | null;
+  returnLocation: Location | null;
+  timeReturned: Date | null;
 
   constructor(params: {
     loan_id: ID;
@@ -20,20 +20,20 @@ export class Loan extends Entity {
     time_returned: Date | null;
   }) {
     super();
-    this.loan_id = params.loan_id;
+    this.loanID = params.loan_id;
     this.item = params.item;
-    this.due_date = params.due_date;
-    this.borrower_id = params.borrower_id;
-    this.return_location = params.return_location;
-    this.time_returned = params.time_returned;
+    this.dueDate = params.due_date;
+    this.borrowerID = params.borrower_id;
+    this.returnLocation = params.return_location;
+    this.timeReturned = params.time_returned;
   }
 
-  get lender_id(): ID {
+  get lenderId(): ID {
     return this.item.owner_id;
   }
 
-  get entity_id(): ID {
-    return this.loan_id;
+  get entityID(): ID {
+    return this.loanID;
   }
 
   get active(): boolean {
@@ -42,8 +42,8 @@ export class Loan extends Entity {
 
   get status(): LoanStatus {
     if (
-      this.due_date &&
-      !this.due_date.isAfterNow() &&
+      this.dueDate &&
+      !this.dueDate.isAfterNow() &&
       this._status === LoanStatus.BORROWED
     ) {
       this._status = LoanStatus.OVERDUE;
@@ -90,7 +90,7 @@ export class Loan extends Entity {
     this._status = value;
   }
 
-  get is_permanent_loan(): boolean {
-    return this.due_date.date === null;
+  get isPermanentLoan(): boolean {
+    return this.dueDate.date === null;
   }
 }

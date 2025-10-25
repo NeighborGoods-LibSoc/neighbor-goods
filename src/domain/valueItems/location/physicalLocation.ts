@@ -4,27 +4,27 @@ import { Distance } from "./distance";
 export class PhysicalLocation implements Location {
   public readonly latitude?: number | null;
   public readonly longitude?: number | null;
-  public readonly street_address: string;
+  public readonly streetAddress: string;
   public readonly city: string;
   public readonly state: string;
-  public readonly zip_code: string;
+  public readonly zipCode: string;
   public readonly country: string;
 
   constructor(params: {
     latitude?: number | null;
     longitude?: number | null;
-    street_address: string;
+    streetAddress: string;
     city: string;
     state: string;
-    zip_code: string;
+    zipCode: string;
     country: string;
   }) {
     this.latitude = params.latitude ?? null;
     this.longitude = params.longitude ?? null;
-    this.street_address = params.street_address;
+    this.streetAddress = params.streetAddress;
     this.city = params.city;
     this.state = params.state;
-    this.zip_code = params.zip_code;
+    this.zipCode = params.zipCode;
     this.country = params.country;
   }
 
@@ -35,10 +35,10 @@ export class PhysicalLocation implements Location {
     if (this.longitude && other.longitude && this.longitude !== other.longitude)
       return false;
     return (
-      this.street_address === other.street_address &&
+      this.streetAddress === other.streetAddress &&
       this.city === other.city &&
       this.state === other.state &&
-      this.zip_code === other.zip_code
+      this.zipCode === other.zipCode
     );
   }
 

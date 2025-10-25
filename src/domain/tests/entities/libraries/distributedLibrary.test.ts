@@ -29,59 +29,59 @@ class TestFeeSchedule implements FeeSchedule {
 
 function makePerson(name: string) {
   return new Person({
-    person_id: ID.generate(),
-    name: new PersonName({ first_name: name, last_name: "Admin" }),
+    personID: ID.generate(),
+    name: new PersonName({ firstName: name, lastName: "Admin" }),
   });
 }
 
 function makeSimpleLibrary(name: string) {
   const lib = new SimpleLibrary({
-    library_id: ID.generate(),
+    libraryID: ID.generate(),
     name,
     administrator: makePerson(name),
-    waiting_list_type: WaitingListType.FIRST_COME_FIRST_SERVE,
-    max_fines_before_suspension: new Money({
+    waitingListType: WaitingListType.FIRST_COME_FIRST_SERVE,
+    maxFinesBeforeSuspension: new Money({
       amount: 100,
       currency: Currency.USD,
     }),
-    fee_schedule: new TestFeeSchedule(),
-    default_loan_time: { days: 14 },
-    mop_server: MOPServer.localhost(),
-    public_url: URL.parse("https://example.com") as any,
+    feeSchedule: new TestFeeSchedule(),
+    defaultLoanTime: { days: 14 },
+    mopServer: MOPServer.localhost(),
+    publicURL: URL.parse("https://example.com") as any,
   });
   lib.location = new PhysicalLocation({
-    street_address: "1 Main",
+    streetAddress: "1 Main",
     city: "X",
     state: "Y",
-    zip_code: "00000",
+    zipCode: "00000",
     country: "US",
   });
-  (lib as any).money_factory.default_currency = Currency.USD;
+  (lib as any).moneyFactory.defaultCurrency = Currency.USD;
   return lib;
 }
 
 function makeDistributedLibrary() {
   const dl = new DistributedLibrary({
-    library_id: ID.generate(),
+    libraryID: ID.generate(),
     name: "Distributed",
     administrator: makePerson("Dist"),
-    waiting_list_type: WaitingListType.FIRST_COME_FIRST_SERVE,
-    max_fines_before_suspension: new Money({
+    waitingListType: WaitingListType.FIRST_COME_FIRST_SERVE,
+    maxFinesBeforeSuspension: new Money({
       amount: 100,
       currency: Currency.USD,
     }),
-    fee_schedule: new TestFeeSchedule(),
-    default_loan_time: { days: 7 },
-    mop_server: MOPServer.localhost(),
-    public_url: URL.parse("https://distributed.example") as any,
+    feeSchedule: new TestFeeSchedule(),
+    defaultLoanTime: { days: 7 },
+    mopServer: MOPServer.localhost(),
+    publicURL: URL.parse("https://distributed.example") as any,
   });
-  (dl as any).money_factory.default_currency = Currency.USD;
+  (dl as any).moneyFactory.defaultCurrency = Currency.USD;
   dl.area = new PhysicalArea({
-    center_point: new PhysicalLocation({
-      street_address: "1 Center",
+    centerPoint: new PhysicalLocation({
+      streetAddress: "1 Center",
       city: "X",
       state: "Y",
-      zip_code: "00000",
+      zipCode: "00000",
       country: "US",
     }),
     radius: new Distance(50),
@@ -96,10 +96,10 @@ function makeThing(owner_id: ID): Thing {
     description: null,
     owner_id,
     storage_location: new PhysicalLocation({
-      street_address: "2 Main",
+      streetAddress: "2 Main",
       city: "X",
       state: "Y",
-      zip_code: "00000",
+      zipCode: "00000",
       country: "US",
     }),
   });
@@ -110,15 +110,15 @@ describe("DistributedLibrary", () => {
     const dl = makeDistributedLibrary();
     const lender1 = makeSimpleLibrary("L1");
     const lender2 = makeSimpleLibrary("L2");
-    dl.add_lender(lender1);
-    dl.add_lender(lender2);
+    dl.addLender(lender1);
+    dl.addLender(lender2);
 
-    const thing = makeThing(lender1.library_id);
-    lender1.add_item(thing);
+    const thing = makeThing(lender1.libraryID);
+    lender1.addItem(thing);
 
     const borrower: any = {
-      entity_id: ID.generate(),
-      library_id: dl.entity_id,
+      entityID: ID.generate(),
+      libraryID: dl.entityID,
       fees: [],
     };
 
@@ -128,19 +128,19 @@ describe("DistributedLibrary", () => {
     expect(loan.status).toBe(LoanStatus.BORROWED);
     expect(thing.status).toBe(ThingStatus.BORROWED);
     // return_location should be owner's preferred_return_location (lender1)
-    expect(loan.return_location).toEqual(lender1.preferred_return_location);
+    expect(loan.returnLocation).toEqual(lender1.preferredReturnLocation);
   });
 
   it("start_return delegates to owner and marks waiting on acceptance", async () => {
     const dl = makeDistributedLibrary();
     const lender = makeSimpleLibrary("L1");
-    dl.add_lender(lender);
-    const thing = makeThing(lender.library_id);
-    lender.add_item(thing);
+    dl.addLender(lender);
+    const thing = makeThing(lender.libraryID);
+    lender.addItem(thing);
 
     const borrower: any = {
-      entity_id: ID.generate(),
-      library_id: dl.entity_id,
+      entityID: ID.generate(),
+      libraryID: dl.entityID,
       fees: [],
     };
     const loan = await dl.borrow(
@@ -149,8 +149,8 @@ describe("DistributedLibrary", () => {
       new DueDate({ date: new Date(Date.now() + 86400000) }),
     );
 
-    const updated = await dl.start_return(loan);
+    const updated = await dl.startReturn(loan);
     expect(updated.status).toBe(LoanStatus.WAITING_ON_LENDER_ACCEPTANCE);
-    expect(loan.time_returned).toBeInstanceOf(Date);
+    expect(loan.timeReturned).toBeInstanceOf(Date);
   });
 });

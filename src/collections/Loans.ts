@@ -95,10 +95,10 @@ export const Loans: CollectionConfig = {
           // Normalize status (may auto-transition to OVERDUE based on due_date)
           data.status = domainLoan.status
           // Ensure loan_id remains consistent
-          data.loan_id = domainLoan.loan_id.toString()
+          data.loan_id = domainLoan.loanID.toString()
           // Normalize due_date to ISO date (YYYY-MM-DD) if present
-          if (domainLoan.due_date?.date) {
-            const d = domainLoan.due_date.date
+          if (domainLoan.dueDate?.date) {
+            const d = domainLoan.dueDate.date
             const yyyy = d.getUTCFullYear()
             const mm = String(d.getUTCMonth() + 1).padStart(2, '0')
             const dd = String(d.getUTCDate()).padStart(2, '0')
@@ -118,7 +118,7 @@ export const Loans: CollectionConfig = {
           const domainLoan = await buildDomainLoanFromData(data, req)
           // write back normalized values again
           data.status = domainLoan.status
-          data.loan_id = domainLoan.loan_id.toString()
+          data.loan_id = domainLoan.loanID.toString()
           return data
         } catch (e: any) {
           throw new Error(e?.message || 'Invalid Loan domain state')
@@ -145,9 +145,9 @@ export const Loans: CollectionConfig = {
 // --- Domain mapping helpers ---
 import { Loan } from '@/domain/entities/loan'
 import { Thing } from '@/domain/entities/thing'
-import { ID, DueDate, LoanStatus } from '@/domain/value_items'
-import { PhysicalLocation } from '@/domain/value_items/location/physical_location'
-import { ThingTitle } from '@/domain/value_items/thing_title'
+import { ID, DueDate, LoanStatus } from '@/domain/valueItems'
+import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
+import { ThingTitle } from '@/domain/valueItems/thingTitle'
 import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
 
 async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
