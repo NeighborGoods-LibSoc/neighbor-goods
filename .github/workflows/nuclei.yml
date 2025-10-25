@@ -12,7 +12,7 @@ on:
       - 'start.sh'
 
 jobs:
-  scan:
+  nuclei-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -24,11 +24,17 @@ jobs:
 
       - name: Install Nuclei
         run: |
-          go install -v github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+          go install -v=0 github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
           nuclei -version
+      
+      - name: Set up Docker Compose
+        uses: docker/setup-compose-action@v1
+        with:
+          version: latest
 
       - name: Start Docker containers
         run: |
+          chmod +x ./start.sh
           start.sh --ci
         
       - name: Wait for application to be ready
@@ -38,7 +44,7 @@ jobs:
 
       - name: Run Nuclei scan
         run: |
-          nuclei -u http://localhost:3000 -stats
+          nuclei -target http://localhost:3000 -stats
           
       - name: Stop Docker containers
         if: always()  # Run even if previous steps fail
