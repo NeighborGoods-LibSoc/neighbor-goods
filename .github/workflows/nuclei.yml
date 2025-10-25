@@ -35,7 +35,7 @@ jobs:
       - name: Start Docker containers
         run: |
           chmod +x ./start.sh
-          start.sh --ci
+          ./start.sh --ci
         
       - name: Wait for application to be ready
         run: |
