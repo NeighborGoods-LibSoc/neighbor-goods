@@ -94,7 +94,7 @@ describe("SimpleLibrary", () => {
 
     lib.addItem(thing);
     const until = new DueDate({ date: new Date(Date.now() + 3 * 86400000) });
-    const loan = await lib.borrow(thing, borrower, until);
+    const loan = await lib.finishBorrow(thing, borrower, until);
     expect(loan.status).toBe(LoanStatus.BORROWED);
     expect(thing.status).toBe(ThingStatus.BORROWED);
   });

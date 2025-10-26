@@ -123,7 +123,7 @@ describe("DistributedLibrary", () => {
     };
 
     const until = new DueDate({ date: new Date(Date.now() + 3 * 86400000) });
-    const loan = await dl.borrow(thing, borrower, until);
+    const loan = await dl.finishBorrow(thing, borrower, until);
 
     expect(loan.status).toBe(LoanStatus.BORROWED);
     expect(thing.status).toBe(ThingStatus.BORROWED);
@@ -143,7 +143,7 @@ describe("DistributedLibrary", () => {
       libraryID: dl.entityID,
       fees: [],
     };
-    const loan = await dl.borrow(
+    const loan = await dl.finishBorrow(
       thing,
       borrower,
       new DueDate({ date: new Date(Date.now() + 86400000) }),

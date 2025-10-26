@@ -72,13 +72,6 @@ export abstract class Library extends Entity {
     return result;
   }
 
-  abstract borrow(
-    thing: Thing,
-    borrower: Borrower,
-    until: DueDate,
-  ): Promise<Loan>;
-  abstract startReturn(loan: Loan): Promise<Loan>;
-
   get borrowers(): Iterable<Borrower> {
     return this._borrowers;
   }
@@ -127,6 +120,19 @@ export abstract class Library extends Entity {
     }
     return titles;
   }
+
+  abstract startBorrow(
+    thing: Thing,
+    borrower: Borrower
+  ): Promise<Thing>;
+
+  abstract finishBorrow(
+    thing: Thing,
+    borrower: Borrower,
+    until: DueDate,
+  ): Promise<Loan>;
+
+  abstract startReturn(loan: Loan): Promise<Loan>;
 
   async finishLibraryReturn(loan: Loan, borrower: Borrower): Promise<Loan> {
     if (

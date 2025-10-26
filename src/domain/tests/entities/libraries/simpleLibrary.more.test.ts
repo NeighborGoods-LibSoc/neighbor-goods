@@ -106,7 +106,7 @@ describe("SimpleLibrary (expanded tests)", () => {
     // monkey-patch can_borrow to true similar to Python test patch
     const original = lib.canBorrow.bind(lib);
     (lib as any).canBorrow = () => true;
-    const loan = await lib.borrow(thing, borrower);
+    const loan = await lib.finishBorrow(thing, borrower);
     (lib as any).canBorrow = original;
 
     expect(loan.dueDate).toBeTruthy();
@@ -124,7 +124,7 @@ describe("SimpleLibrary (expanded tests)", () => {
     const thing = makeThing();
     thing.status = ThingStatus.BORROWED;
     const borrower: any = { entity_id: ID.generate() };
-    await expect(lib.borrow(thing, borrower)).rejects.toBeTruthy();
+    await expect(lib.startBorrow(thing, borrower)).rejects.toBeTruthy();
   });
 
   it("start_return sets WAITING_ON_LENDER_ACCEPTANCE and time_returned", async () => {
@@ -137,7 +137,7 @@ describe("SimpleLibrary (expanded tests)", () => {
       applyFee: () => borrower,
     };
     (lib as any).canBorrow = () => true;
-    const loan = await lib.borrow(
+    const loan = await lib.finishBorrow(
       thing,
       borrower,
       new DueDate({ date: new Date(Date.now() + 8640000) }),
