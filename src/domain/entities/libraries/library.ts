@@ -22,7 +22,7 @@ import {
 export abstract class Library extends Entity {
   libraryID: ID;
   name: string;
-  administrator: Person;
+  administrators: Person[];
   waitingListType: WaitingListType;
   waitingListsByItemId: Map<string, WaitingList> = new Map();
   maxFinesBeforeSuspension: Money;
@@ -38,7 +38,7 @@ export abstract class Library extends Entity {
   constructor(params: {
     libraryID: ID;
     name: string;
-    administrator: Person;
+    administrators: Person[];
     waitingListType: WaitingListType;
     maxFinesBeforeSuspension: Money;
     feeSchedule: FeeSchedule;
@@ -49,7 +49,7 @@ export abstract class Library extends Entity {
     super();
     this.libraryID = params.libraryID;
     this.name = params.name;
-    this.administrator = params.administrator;
+    this.administrators = params.administrators;
     this.waitingListType = params.waitingListType;
     this.maxFinesBeforeSuspension = params.maxFinesBeforeSuspension;
     this.feeSchedule = params.feeSchedule;
