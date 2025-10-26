@@ -40,7 +40,7 @@ describe("SimpleLibrary (expanded tests)", () => {
     const lib = new SimpleLibrary({
       libraryID: ID.generate(),
       name: "Test Simple Library",
-      administrator: admin,
+      administrators: [admin],
       waitingListType: WaitingListType.FIRST_COME_FIRST_SERVE,
       maxFinesBeforeSuspension: new Money({
         amount: 50,
