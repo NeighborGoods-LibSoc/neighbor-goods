@@ -39,11 +39,12 @@ export class DistributedLibrary extends Library {
   }
 
   override async startBorrow(thing: Thing, borrower: Borrower): Promise<Thing> {
+    thing.status = ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW
     return thing;
   }
 
   override async finishBorrow(thing: Thing, borrower: Borrower, until?: DueDate | null): Promise<Loan> {
-    if (thing.status !== ThingStatus.READY) {
+    if (thing.status !== ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW) {
       throw new Error(String(thing.status))
     }
     if (!this.canBorrow(borrower)) {
