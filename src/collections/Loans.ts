@@ -169,12 +169,12 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
   const time_returned = data.time_returned ? new Date(data.time_returned) : null
 
   const loan = new Loan({
-    loan_id,
+    loanId: loan_id,
     item: thing,
-    due_date,
-    borrower_id,
-    return_location: return_location as any,
-    time_returned,
+    dueDate: due_date,
+    borrowerId: borrower_id,
+    returnLocation: return_location as any,
+    timeReturned: time_returned,
   })
 
   // Apply the requested status through domain rules

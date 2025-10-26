@@ -40,8 +40,8 @@ export class SimpleLibrary extends Library implements Lender {
   }
 
   get available_titles(): Iterable<ThingTitle> {
-    const available_items = Array.from(this.items).filter((i) => i.status === ThingStatus.READY)
-    return Library.getTitlesFromItems(available_items)
+    const availableItems = Array.from(this.items).filter((i) => i.status === ThingStatus.READY)
+    return Library.getTitlesFromItems(availableItems)
   }
 
   get preferredReturnLocation(): Location {
@@ -73,12 +73,12 @@ export class SimpleLibrary extends Library implements Lender {
     }
 
     const loan = new Loan({
-      loan_id: ID.generate(),
+      loanId: ID.generate(),
       item: thing,
-      borrower_id: borrower.entityID,
-      due_date: until,
-      return_location: this.location,
-      time_returned: null,
+      borrowerId: borrower.entityID,
+      dueDate: until,
+      returnLocation: this.location,
+      timeReturned: null,
     })
     loan.status = LoanStatus.BORROWED
     thing.status = ThingStatus.BORROWED

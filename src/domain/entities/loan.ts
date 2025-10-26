@@ -12,20 +12,20 @@ export class Loan extends Entity {
   timeReturned: Date | null;
 
   constructor(params: {
-    loan_id: ID;
+    loanId: ID;
     item: Thing;
-    due_date: DueDate;
-    borrower_id: ID;
-    return_location: Location;
-    time_returned: Date | null;
+    dueDate: DueDate;
+    borrowerId: ID;
+    returnLocation: Location;
+    timeReturned: Date | null;
   }) {
     super();
-    this.loanID = params.loan_id;
+    this.loanID = params.loanId;
     this.item = params.item;
-    this.dueDate = params.due_date;
-    this.borrowerID = params.borrower_id;
-    this.returnLocation = params.return_location;
-    this.timeReturned = params.time_returned;
+    this.dueDate = params.dueDate;
+    this.borrowerID = params.borrowerId;
+    this.returnLocation = params.returnLocation;
+    this.timeReturned = params.timeReturned;
   }
 
   get lenderId(): ID {
@@ -91,6 +91,11 @@ export class Loan extends Entity {
   }
 
   get isPermanentLoan(): boolean {
+    /**
+     *  * Represents if this is a loan that doesn't require a return.
+     *  * It is a gift, but we expect people to return it to the library if they don't need it
+     *  * From a legal standpoint, it remains the property of the library
+     *  */
     return this.dueDate.date === null;
   }
 }

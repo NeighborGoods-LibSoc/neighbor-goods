@@ -64,12 +64,12 @@ export class DistributedLibrary extends Library {
     thing.status = ThingStatus.BORROWED
 
     const loan = new Loan({
-      loan_id: ID.generate(),
+      loanId: ID.generate(),
       item: thing,
-      borrower_id: borrower.entityID,
-      due_date: until,
-      return_location: lender.preferredReturnLocation,
-      time_returned: null,
+      borrowerId: borrower.entityID,
+      dueDate: until,
+      returnLocation: lender.preferredReturnLocation,
+      timeReturned: null,
     })
     loan.status = LoanStatus.BORROWED
     return loan
