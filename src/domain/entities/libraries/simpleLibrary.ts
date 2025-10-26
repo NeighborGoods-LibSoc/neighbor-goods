@@ -57,6 +57,7 @@ export class SimpleLibrary extends Library implements Lender {
     if (!this.canBorrow(borrower)) {
       throw new BorrowerNotInGoodStandingError()
     }
+    thing.status = ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW
     return thing
   }
 
