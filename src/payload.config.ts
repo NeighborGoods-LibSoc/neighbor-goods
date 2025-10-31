@@ -17,6 +17,7 @@ import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
 import { Admins } from './collections/Admins'
 import { Loans } from './collections/Loans'
+import { DistributedLibraries } from './collections/DistributedLibraries'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -68,7 +69,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Admins, Items, Loans, Tags],
+  collections: [Pages, Posts, Media, Categories, Users, Admins, Items, Loans, DistributedLibraries, Tags],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
