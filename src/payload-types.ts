@@ -75,6 +75,7 @@ export interface Config {
     users: User;
     admins: Admin;
     items: Item;
+    loans: Loan;
     tags: Tag;
     redirects: Redirect;
     forms: Form;
@@ -94,6 +95,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     admins: AdminsSelect<false> | AdminsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
+    loans: LoansSelect<false> | LoansSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -836,6 +838,42 @@ export interface Tag {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "loans".
+ */
+export interface Loan {
+  id: string;
+  /**
+   * UUID for the loan (domain ID)
+   */
+  loan_id: string;
+  item: string | Item;
+  borrower: string | User;
+  /**
+   * Due date for returning the item (no time component)
+   */
+  due_date?: string | null;
+  status: 'BORROWED' | 'OVERDUE' | 'RETURN_STARTED' | 'WAITING_ON_LENDER_ACCEPTANCE' | 'RETURNED_DAMAGED' | 'RETURNED';
+  /**
+   * Where the item was returned (if applicable)
+   */
+  return_location?: {
+    latitude?: number | null;
+    longitude?: number | null;
+    street_address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip_code?: string | null;
+    country?: string | null;
+  };
+  /**
+   * Timestamp when the item was returned
+   */
+  time_returned?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1034,6 +1072,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'items';
         value: string | Item;
+      } | null)
+    | ({
+        relationTo: 'loans';
+        value: string | Loan;
       } | null)
     | ({
         relationTo: 'tags';
@@ -1448,6 +1490,31 @@ export interface ItemsSelect<T extends boolean = true> {
   contributedBy?: T;
   primaryImage?: T;
   additional_images?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "loans_select".
+ */
+export interface LoansSelect<T extends boolean = true> {
+  loan_id?: T;
+  item?: T;
+  borrower?: T;
+  due_date?: T;
+  status?: T;
+  return_location?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+        street_address?: T;
+        city?: T;
+        state?: T;
+        zip_code?: T;
+        country?: T;
+      };
+  time_returned?: T;
   updatedAt?: T;
   createdAt?: T;
 }
