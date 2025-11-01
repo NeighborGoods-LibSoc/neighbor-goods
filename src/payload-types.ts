@@ -798,11 +798,19 @@ export interface Admin {
 export interface Item {
   id: string;
   name: string;
-  description: string;
+  description?: string | null;
   /**
    * Select tags to categorize this item
    */
   tags?: (string | Tag)[] | null;
+  /**
+   * Rules and guidelines for using this item
+   */
+  rulesForUse: string;
+  /**
+   * Maximum borrowing time in days
+   */
+  borrowingTime: number;
   contributedBy: string | User;
   /**
    * Primary image used as thumbnail
@@ -1487,6 +1495,8 @@ export interface ItemsSelect<T extends boolean = true> {
   name?: T;
   description?: T;
   tags?: T;
+  rulesForUse?: T;
+  borrowingTime?: T;
   contributedBy?: T;
   primaryImage?: T;
   additional_images?: T;

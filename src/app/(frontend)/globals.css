@@ -14,51 +14,51 @@
   }
 
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    --background: 48, 50%, 88%;
+    --foreground: 23, 17%, 36%;
 
-    --card: 240 5% 96%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 70, 47%, 81%;
+    --card-foreground: 23, 17%, 36%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 48, 50%, 88%;
+    --popover-foreground: 23, 17%, 36%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    --primary: 76, 37%, 61%;
+    --primary-foreground: *23, 17%, 36%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 76, 37%, 61%;
+    --secondary-foreground: 76, 37%, 61%;
 
     --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted-foreground: 26, 28%, 53%;
 
     --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent-foreground: 76, 37%, 61%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 240 6% 80%;
+    --border: 76, 37%, 61%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --ring: 26, 28%, 53%;
 
     --radius: 0.2rem;
 
-    --success: 196 52% 74%;
-    --warning: 34 89% 85%;
-    --error: 10 100% 86%;
+    --success: 98, 32%, 45%;
+    --warning: 43, 74%, 66%;
+    --error: 359, 47%, 51%;
 
     /* NeighborGoods Color Palette */
-    --cream: #F0EAD2;
-    --light-green: #DDE5B6;
-    --medium-green: #ADC178;
-    --warm-brown: #A98467;
-    --dark-brown: #6C584C;
-    --success-green: #6A994E;
-    --warning-amber: #E9C46A;
-    --alert-red: #BC4749;
-    --link-blue: #597292;
-    --lighter-green: #ebf3c1;
+    --cream: #F0EAD2; /*48, 50%, 88%*/
+    --light-green: #DDE5B6; /*70, 47%, 81%*/
+    --medium-green: #adc178; /*76, 37%, 61%*/
+    --warm-brown: #A98467; /*26, 28%, 53%*/
+    --dark-brown: #6C584C;  /*23, 17%, 36%*/
+    --success-green: #6A994E; /*98, 32%, 45%*/
+    --warning-amber: #E9C46A; /*43, 74%, 66%*/
+    --alert-red: #BC4749; /*359, 47%, 51%*/
+    --link-blue: #597292; /*214, 24%, 46%*/
+    --lighter-green: #ebf3c1; /*70, 68%, 85%*/
   }
 
   [data-theme='dark'] {

@@ -35,25 +35,25 @@ export const AuthNav: React.FC = () => {
       <nav className="flex gap-4 items-center">
         <Link
           href="/dashboard"
-          className="text-white hover:text-var(--light-green) transition-colors"
+          className="text-primary hover:text-var(--light-green) transition-colors"
         >
           Dashboard
         </Link>
         <Link
           href="/inventory"
-          className="text-white hover:text-var(--light-green) transition-colors"
+          className="text-primary hover:text-var(--light-green) transition-colors"
         >
           Inventory
         </Link>
         <Link
           href="/profile"
-          className="text-white hover:text-var(--light-green) transition-colors"
+          className="text-primary hover:text-var(--light-green) transition-colors"
         >
           My Profile
         </Link>
         <Link
           href="/items/transfers"
-          className="text-white hover:text-var(--light-green) transition-colors"
+          className="text-primary hover:text-var(--light-green) transition-colors"
         >
           Transfers
         </Link>
@@ -62,7 +62,7 @@ export const AuthNav: React.FC = () => {
             await fetch('/api/users/logout', { method: 'POST' })
             window.location.href = '/'
           }}
-          className="text-white hover:text-var(--light-green) transition-colors bg-transparent border-none cursor-pointer"
+          className="text-white primary:text-var(--light-green) transition-colors bg-transparent border-none cursor-pointer"
         >
           Logout
         </button>
@@ -72,10 +72,10 @@ export const AuthNav: React.FC = () => {
 
   return (
     <nav className="flex gap-4 items-center">
-      <Link href="/login" className="text-white hover:text-var(--light-green) transition-colors">
+      <Link href="/login" className="text-primary hover:text-var(--light-green) transition-colors">
         Log In
       </Link>
-      <Link href="/signup" className="text-white hover:text-var(--light-green) transition-colors">
+      <Link href="/signup" className="text-primary hover:text-var(--light-green) transition-colors">
         Sign Up
       </Link>
     </nav>

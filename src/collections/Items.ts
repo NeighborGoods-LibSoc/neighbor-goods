@@ -24,15 +24,32 @@ export const Items: CollectionConfig = {
     {
       name: 'description',
       type: 'textarea',
-      required: true,
+      required: false,
     },
     {
       name: 'tags',
       type: 'relationship',
       relationTo: 'tags',
       hasMany: true,
+      required: false,
       admin: {
         description: 'Select tags to categorize this item',
+      },
+    },
+    {
+      name: 'rulesForUse',
+      type: 'textarea',
+      required: true,
+      admin: {
+        description: 'Rules and guidelines for using this item',
+      },
+    },
+    {
+      name: 'borrowingTime',
+      type: 'number',
+      required: true,
+      admin: {
+        description: 'Maximum borrowing time in days',
       },
     },
     {
