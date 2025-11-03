@@ -19,9 +19,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="container">
           <div className="hero__logo">
             <div className="logo-text">
-              <h1 style={{ fontSize: '3rem', margin: 0, color: 'var(--warm-brown)' }}>
-                NeighborGoods
-              </h1>
+              <img src="/Logo-lightbg.png"></img>
             </div>
           </div>
           <h1 className="hero__title">
