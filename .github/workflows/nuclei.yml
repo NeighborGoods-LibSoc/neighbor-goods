@@ -42,6 +42,7 @@ jobs:
         run: |
           echo "Waiting for the application to start..."
           sleep 30  # Adjust the sleep time as necessary
+          curl http://localhost:3000
 
       - name: Run Nuclei scan
         run: |
