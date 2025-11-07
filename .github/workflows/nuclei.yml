@@ -14,13 +14,19 @@ on:
 jobs:
   nuclei-scan:
     runs-on: ubuntu-latest
-    container: projectdiscovery/nuclei:v3.4
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      - name: Setup Container
-        run: apk add --quiet nodejs npm docker bash sudo
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.25'
+
+      - name: Install Nuclei
+        run: |
+          go install -v=0 github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
+          nuclei -version
       
       - name: Set up Docker Compose
         uses: docker/setup-compose-action@v1
