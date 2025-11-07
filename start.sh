@@ -146,4 +146,4 @@ pnpm install || {
 }
 
 # Run docker compose
-sudo docker compose up --detach
+sudo docker-compose up -
