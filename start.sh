@@ -146,4 +146,9 @@ pnpm install || {
 }
 
 # Run docker compose
-sudo docker compose up --build -d
+# Use sudo only if not in CI mode (GitHub Actions doesn't need it)
+if [[ "$CI_MODE" == true ]]; then
+    docker compose up --build -d
+else
+    sudo docker compose up --build -d
+fi
