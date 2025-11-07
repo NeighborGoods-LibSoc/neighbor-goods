@@ -97,19 +97,19 @@ fi
 # Generate random secrets if missing
 if [[ -z "$PAYLOAD_SECRET" ]]; then
     echo "Generating PAYLOAD_SECRET..."
-    PAYLOAD_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+    PAYLOAD_SECRET=$(head -c 32 /dev/urandom | base64 | tr -dc A-Za-z0-9 | head -c 32)
     echo "Done!"
 fi
 
 if [[ -z "$CRON_SECRET" ]]; then
     echo "Generating CRON_SECRET..."
-    CRON_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+    CRON_SECRET=$(head -c 32 /dev/urandom | base64 | tr -dc A-Za-z0-9 | head -c 32)
     echo "Done!"
 fi
 
 if [[ -z "$PREVIEW_SECRET" ]]; then
     echo "Generating PREVIEW_SECRET..."
-    PREVIEW_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
+    PREVIEW_SECRET=$(head -c 32 /dev/urandom | base64 | tr -dc A-Za-z0-9 | head -c 32)
     echo "Done!"
 fi
 
