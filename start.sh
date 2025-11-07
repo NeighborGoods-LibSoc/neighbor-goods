@@ -146,4 +146,4 @@ pnpm install || {
 }
 
 # Run docker compose
-sudo docker compose up --build -d
+sudo docker compose up -d
