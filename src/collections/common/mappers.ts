@@ -1,6 +1,11 @@
 import { Thing } from '@/domain/entities/thing'
-import { ID } from '@/domain/valueItems'
+import { DistributedLibrary as DomainDistributedLibrary } from '@/domain/entities/libraries/distributedLibrary'
+import { MOPServer } from '@/domain/entities/mopServer'
+import { ID, WaitingListType, Money, Currency } from '@/domain/valueItems'
+import type { FeeSchedule } from '@/domain/valueItems'
 import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
+import { PhysicalArea } from '@/domain/valueItems/location/physicalArea'
+import { Distance } from '@/domain/valueItems/location/distance'
 import { ThingTitle } from '@/domain/valueItems/thingTitle'
 
 export function mapItemToThing(item: any): Thing {
@@ -40,4 +45,77 @@ export function mapReturnLocation(loc: any) {
     zipCode: String(loc.zip_code || ''),
     country: String(loc.country || ''),
   })
+}
+
+class ZeroFeeSchedule implements FeeSchedule {
+  feeForOverdueItem() { return new Money({ amount: 0, currency: Currency.USD }) }
+  feeForDamagedItem() { return new Money({ amount: 0, currency: Currency.USD }) }
+}
+
+export function buildDomainDistributedLibraryFromData(data: any): DomainDistributedLibrary {
+  const libraryID = new ID(String(data.library_id))
+  const name = String(data.name || '')
+  if (!name) throw new Error('Name is required')
+
+  const defaultDays = Math.max(1, Number(data.default_loan_time_days ?? 14))
+  const publicURL = typeof data.public_url === 'string' && data.public_url.trim().length > 0
+    ? data.public_url.trim()
+    : null
+
+  const dl = new DomainDistributedLibrary({
+    libraryID,
+    name,
+    administrators: [],
+    waitingListType: WaitingListType.FIRST_COME_FIRST_SERVE,
+    maxFinesBeforeSuspension: new Money({ amount: 100, currency: Currency.USD }),
+    feeSchedule: new ZeroFeeSchedule(),
+    defaultLoanTime: { days: defaultDays },
+    mopServer: MOPServer.localhost(),
+    publicURL: publicURL,
+  })
+
+  const area = toPhysicalArea(data.area)
+  if (area) {
+    dl.area = area
+  }
+
+  return dl
+}
+
+export function toPhysicalArea(area: any): PhysicalArea | null {
+  if (!area) return null
+  const cp = area.center_point || {}
+  const hasCenter = ['street_address','city','state','zip_code','country','latitude','longitude'].some(k => cp?.[k])
+  const radiusKm = typeof area.radius_kilometers === 'number' ? area.radius_kilometers : Number(area.radius_kilometers)
+  if (!hasCenter || !(radiusKm >= 0)) return null
+
+  const center = new PhysicalLocation({
+    latitude: cp.latitude ?? null,
+    longitude: cp.longitude ?? null,
+    streetAddress: String(cp.street_address || ''),
+    city: String(cp.city || ''),
+    state: String(cp.state || ''),
+    zipCode: String(cp.zip_code || ''),
+    country: String(cp.country || ''),
+  })
+  const radius = new Distance(radiusKm)
+  return new PhysicalArea({ centerPoint: center, radius })
+}
+
+export function serializeArea(dl: DomainDistributedLibrary) {
+  const a = dl.area
+  if (!a) return undefined
+  const cp = a.centerPoint as PhysicalLocation
+  return {
+    center_point: {
+      latitude: cp.latitude ?? null,
+      longitude: cp.longitude ?? null,
+      street_address: cp.streetAddress,
+      city: cp.city,
+      state: cp.state,
+      zip_code: cp.zipCode,
+      country: cp.country,
+    },
+    radius_kilometers: a.radius.kilometers,
+  }
 }
