@@ -10,13 +10,37 @@ PREVIEW_SECRET=""
 SMTP_SERVER=""
 SMTP_USER=""
 SMTP_PASSWORD=""
+CI_MODE=false
+
+# Parse command-line arguments
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --server-url)
+            NEXT_PUBLIC_SERVER_URL="$2"
+            shift 2
+            ;;
+        --ci)
+            CI_MODE=true
+            shift
+            ;;
+        *)
+            echo "Unknown argument: $1"
+            echo "Usage: $0 [--server-url <url>] [--ci]"
+            exit 1
+            ;;
+    esac
+done
 
 # Check if .env file exists
 OVERWRITE_ENV="n"
 if [[ -f .env ]]; then
-    echo "A .env file already exists."
-    read -rp "Do you want to overwrite it? (y/n) [default: n]: " OVERWRITE_ENV
-    OVERWRITE_ENV="${OVERWRITE_ENV:-n}"
+    if [[ "$CI_MODE" == true ]]; then
+        OVERWRITE_ENV="n"
+    else
+        echo "A .env file already exists."
+        read -rp "Do you want to overwrite it? (y/n) [default: n]: " OVERWRITE_ENV
+        OVERWRITE_ENV="${OVERWRITE_ENV:-n}"
+    fi
 else
     OVERWRITE_ENV="y"
 fi
@@ -37,108 +61,55 @@ if [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]]; then
             SMTP_PASSWORD) SMTP_PASSWORD="$value" ;;
         esac
     done < <(grep '=' .env)
-
-    [[ -z "$DATABASE_TYPE" ]] && {
-        echo "WARNING: DATABASE_TYPE is not set. Setting to mongodb..."
-        DATABASE_TYPE="mongodb"
-        echo -e "\nDATABASE_TYPE=$DATABASE_TYPE" >> .env
-    }
-
-    [[ -z "$DATABASE_URI" ]] && {
-        echo "WARNING: DATABASE_URI is not set. Setting default..."
-        DATABASE_URI="mongodb://mongo:27017/neighbor-goods"
-        echo -e "\nDATABASE_URI=$DATABASE_URI" >> .env
-    }
-
-    [[ -z "$NEXT_PUBLIC_SERVER_URL" ]] && echo "WARNING: NEXT_PUBLIC_SERVER_URL is not set. You will be prompted for this."
-    [[ -z "$PAYLOAD_SECRET" ]] && echo "WARNING: PAYLOAD_SECRET is not set. This will be generated and added to .env."
-    [[ -z "$CRON_SECRET" ]] && echo "WARNING: CRON_SECRET is not set. This will be generated and added to .env."
-    [[ -z "$PREVIEW_SECRET" ]] && echo "WARNING: PREVIEW_SECRET is not set. This will be generated and added to .env."
-    [[ -z "$SMTP_SERVER" ]] && echo "WARNING: SMTP_SERVER is not set. You will be prompted for this. Required for password reset emails."
-    [[ -z "$SMTP_USER" ]] && echo "WARNING: SMTP_USER is not set. You will be prompted for this. Required for password reset emails."
-    [[ -z "$SMTP_PASSWORD" ]] && echo "WARNING: SMTP_USER is not set. You will be prompted for this. Required for password reset emails."
 fi
 
-# Parse command-line arguments
-while [[ $# -gt 0 ]]; do
-    case "$1" in
-        --server-url)
-            NEXT_PUBLIC_SERVER_URL="$2"
-            shift 2
-            ;;
-        *)
-            echo "Unknown argument: $1"
-            exit 1
-            ;;
-    esac
-done
-
-# Prompt if not set
-if [[ -z "$NEXT_PUBLIC_SERVER_URL" ]]; then
-    read -rp "Enter NEXT_PUBLIC_SERVER_URL (without http:// nor https:// nor www.): " INPUT_URL
-    NEXT_PUBLIC_SERVER_URL="http://$INPUT_URL:3000"
-
-    if [[ "$OVERWRITE_ENV" == "n" ]]; then
-        echo -e "\nNEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL" >> .env
-    fi
-fi
-
-if [[ -z "$SMTP_SERVER" ]]; then
-    read -rp "Enter SMTP_SERVER (e.g. smtp.gmail.com): " INPUT_SMTP_SERVER
-    SMTP_SERVER="$INPUT_SMTP_SERVER"
-
-    if [[ "$OVERWRITE_ENV" == "n" ]]; then
-        echo -e "\nSMTP_SERVER=$SMTP_SERVER" >> .env
-    fi
-fi
-
-if [[ -z "$SMTP_USER" ]]; then
-    read -rp "Enter SMTP_USER (e.g. example@gmail.com): " INPUT_SMTP_USER
-    SMTP_USER="$INPUT_SMTP_USER"
-
-    if [[ "$OVERWRITE_ENV" == "n" ]]; then
-        echo -e "\nSMTP_USER=$SMTP_USER" >> .env
-    fi
-fi
-
-if [[ -z "$SMTP_PASSWORD" ]]; then
-    read -rp "Enter SMTP_PASSWORD(this may be separate from your email login, depending on provider): " INPUT_SMTP_PASSWORD
-    SMTP_PASSWORD="$INPUT_SMTP_PASSWORD"
-
-    if [[ "$OVERWRITE_ENV" == "n" ]]; then
-        echo -e "\nSMTP_PASSWORD=$SMTP_PASSWORD" >> .env
-    fi
-fi
-
-# Set defaults if needed
+# Set defaults if needed or using no-input mode
 [[ -z "$DATABASE_TYPE" ]] && DATABASE_TYPE="mongodb"
 [[ -z "$DATABASE_URI" ]] && DATABASE_URI="mongodb://mongo:27017/neighbor-goods"
+[[ -z "$NEXT_PUBLIC_SERVER_URL" ]] && NEXT_PUBLIC_SERVER_URL="http://localhost:3000"
+[[ -z "$SMTP_SERVER" ]] && SMTP_SERVER=""
+[[ -z "$SMTP_USER" ]] && SMTP_USER=""
+[[ -z "$SMTP_PASSWORD" ]] && SMTP_PASSWORD=""
+
+# Only prompt if not in CI mode and values are not set
+if [[ "$CI_MODE" == false ]]; then
+    if [[ -z "$NEXT_PUBLIC_SERVER_URL" ]]; then
+        read -rp "Enter NEXT_PUBLIC_SERVER_URL (without http:// nor https:// nor www.): " INPUT_URL
+        NEXT_PUBLIC_SERVER_URL="http://$INPUT_URL:3000"
+    fi
+
+    if [[ -z "$SMTP_SERVER" ]]; then
+        read -rp "Enter SMTP_SERVER (e.g. smtp.gmail.com): " INPUT_SMTP_SERVER
+        SMTP_SERVER="$INPUT_SMTP_SERVER"
+    fi
+
+    if [[ -z "$SMTP_USER" ]]; then
+        read -rp "Enter SMTP_USER (e.g. example@gmail.com): " INPUT_SMTP_USER
+        SMTP_USER="$INPUT_SMTP_USER"
+    fi
+
+    if [[ -z "$SMTP_PASSWORD" ]]; then
+        read -rp "Enter SMTP_PASSWORD(this may be separate from your email login, depending on provider): " INPUT_SMTP_PASSWORD
+        SMTP_PASSWORD="$INPUT_SMTP_PASSWORD"
+    fi
+fi
 
 # Generate random secrets if missing
 if [[ -z "$PAYLOAD_SECRET" ]]; then
     echo "Generating PAYLOAD_SECRET..."
-    PAYLOAD_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
-    if [[ "$OVERWRITE_ENV" == "n" ]]; then
-        echo -e "\nPAYLOAD_SECRET=$PAYLOAD_SECRET" >> .env
-    fi
+    PAYLOAD_SECRET=$(head -c 32 /dev/urandom | base64 | tr -dc A-Za-z0-9 | head -c 32)
     echo "Done!"
 fi
 
 if [[ -z "$CRON_SECRET" ]]; then
     echo "Generating CRON_SECRET..."
-    CRON_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
-    if [[ "$OVERWRITE_ENV" == "n" ]]; then
-        echo -e "\nCRON_SECRET=$CRON_SECRET" >> .env
-    fi
+    CRON_SECRET=$(head -c 32 /dev/urandom | base64 | tr -dc A-Za-z0-9 | head -c 32)
     echo "Done!"
 fi
 
 if [[ -z "$PREVIEW_SECRET" ]]; then
     echo "Generating PREVIEW_SECRET..."
-    PREVIEW_SECRET=$(tr -dc A-Za-z0-9 </dev/urandom | head -c 32)
-    if [[ "$OVERWRITE_ENV" == "n" ]]; then
-        echo -e "\nPREVIEW_SECRET=$PREVIEW_SECRET" >> .env
-    fi
+    PREVIEW_SECRET=$(head -c 32 /dev/urandom | base64 | tr -dc A-Za-z0-9 | head -c 32)
     echo "Done!"
 fi
 
@@ -175,4 +146,9 @@ pnpm install || {
 }
 
 # Run docker compose
-sudo docker compose up --build -d
+# Use sudo only if not in CI mode (GitHub Actions doesn't need it)
+if [[ "$CI_MODE" == true ]]; then
+    docker compose up --build -d
+else
+    sudo docker compose up --build -d
+fi
