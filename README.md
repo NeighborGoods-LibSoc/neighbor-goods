@@ -23,7 +23,7 @@ The NeighborGoods Project aims to create a hyper-local, non-commercial platform 
 ## Design Philosophy & Principles
 ### Design Values
 Community-Focused: Maximize hyper-local, face-to-face interactions
-Accessibility: Ensure the platform is usable by neighbors of all technical abilities 
+Accessibility: Ensure the platform is usable by neighbors of all technical abilities
 
  - [ ] Referring to disabilities, low computer literacy, or both?
 
@@ -32,7 +32,7 @@ Simplicity: Keep interfaces clean and straightforward to encourage participation
 Trust-Building: Incorporate elements that foster trust among community members
 
 ### Visual Language
-Color Palette: Primary colors should be warm and welcoming. 
+Color Palette: Primary colors should be warm and welcoming.
 
  - [ ] Reference style guide?
 
@@ -46,13 +46,13 @@ Consistent navigation patterns across device sizes
 
 # Features
 ## Item Borrowing (Top Priority)
-A user should be able to offer items they own on their community node. 
+A user should be able to offer items they own on their community node.
 This includes creating a listing for the item which includes the item name, picture, description, borrowing status, maintenance, rules to use, borrowing duration, and other details.
-Once the item has been entered into the system, its location and stewardship is tracked, and it is displayed in a store-like list where other users can borrow it. 
-As NeighborGoods is a distributed network of individuals offering up their items, there is no central repository that items must be checked in to. Instead, items are tracked according to their last known steward. 
+Once the item has been entered into the system, its location and stewardship is tracked, and it is displayed in a store-like list where other users can borrow it.
+As NeighborGoods is a distributed network of individuals offering up their items, there is no central repository that items must be checked in to. Instead, items are tracked according to their last known steward.
 Checking out an item involves clicking the borrow button, and confirming that the user meets any requirements.
-Then, the item must transfer to the stewardship of the borrower. 
-The owner of the item will receive a notification that the item has been reserved for borrowing, and it is up to the owner and the borrower to move the item. 
+Then, the item must transfer to the stewardship of the borrower.
+The owner of the item will receive a notification that the item has been reserved for borrowing, and it is up to the owner and the borrower to move the item.
 In the future, it should be possible to have network members volunteer as intermediaries that move items around, but at launch it will up to individual members to retrieve their borrowed items.
 
 ## Calendar Integration
@@ -63,13 +63,13 @@ Implementation of return dates and availability
 ## Dispute Resolution
 Users will be encouraged to resolve their own disputes as a first resort.
 If resolution cannot be reached a request for moderation can be made, either to the server Admin(s) or the broader User Base. Moderator guidelines will recommend a framework of Restorative Justice in handling disputes.
-While a dispute is pending, all Users involved will have flags on their public profiles with a simple summery of the issue automatically generated (overdue, damaged, etc). 
+While a dispute is pending, all Users involved will have flags on their public profiles with a simple summery of the issue automatically generated (overdue, damaged, etc).
 
 ## ActivityPub Integration
 A Federation system will allow users to create NeighborGoods networks for their own communities, each network or "node" can connect to other independent nodes to exchange NeighborGoods services with other communities as needed.
 
 ## Social Media (Future Priority)
-Social media posts will essentially be markdown documents, with delayed publishing. Posts will not be visible to anyone besides the author and moderators until 6 am the next morning. 
+Social media posts will essentially be markdown documents, with delayed publishing. Posts will not be visible to anyone besides the author and moderators until 6 am the next morning.
 
  - [ ] If a post is made at 5:50am, will it wait 10min, or 24hrs?
 
@@ -88,12 +88,12 @@ To help align individual incentives with pro-social actions, contributions are t
 To facilitate Contribution and Gamification, and also allow for interfacing with the world at large, the application supports a complementary currency system, based off of the [ROCS paradigm](https://transaction.net/money/rocs/).
 
 ## Collective Action (Future Priority)
-Users will sometimes need to solve a problem collectively, such as establishing a new cert for their node, or organizing community project. For NeighborGoods, the problem is solved using a procedure similar to crowdfunding. 
-When an action needs to be performed, individuals can start a Collective Action Campaign. 
+Users will sometimes need to solve a problem collectively, such as establishing a new cert for their node, or organizing community project. For NeighborGoods, the problem is solved using a procedure similar to crowdfunding.
+When an action needs to be performed, individuals can start a Collective Action Campaign.
 
- - [ ] CAC page will include necessary manpower roles and resources required? 
+ - [ ] CAC page will include necessary manpower roles and resources required?
 
-This campaign expires after a set amount of time, and is an all or nothing affair. 
+This campaign expires after a set amount of time, and is an all or nothing affair.
 If the campaign is successful, each member who pledges to the campaign must execute on their commitment. Commitments that can be performed automatically by the system are performed immediately.
 
  - [ ] Examples including listing items as "borrowed" or transferring money?
@@ -112,7 +112,7 @@ The following are database models that will be needed for the above system:
 10. ItemTags - Join table for items and tags
 11. NodeSettings - An Entity Attribute Value (EAV) table that contains node specific server settings, such as item budget per person, node name, node id, collective action settings, etc.
 12. PeerAssessment - records of both peer punishments and peer endorsements. One mechanism by which certs are created and removed.
-13. CertAssessment - a join table between certifications and peer assessments. this join table is in part what determines which certs are active, and which are not. 
+13. CertAssessment - a join table between certifications and peer assessments. this join table is in part what determines which certs are active, and which are not.
 14. CollectiveActionCampaign - the record of a (possibly attempted) collective action. Can be either system external (arranging a potluck) or system internal (assigning a cert to a user, modifying node settings.)
 15. CollectiveActionCert - similar to CertAssessment, this is a join table between certs and collective action campaigns, that helps determine if a cert is active or not.
 16. Commitment - an individual user's commitment to a collective action campaign. Could be resources, could be a vote, etc. Once a campaign succeeds, the commitment is marked as "Outstanding", awaiting the campaign manager(s) confirmation that the commitment has been honored, or it is performed automatically (if it is a system internal campaign).
@@ -139,14 +139,14 @@ The following are the available pages to interact with the application:
 
 # UI/UX
 [proposed palette](https://coolors.co/palette/f0ead2-dde5b6-adc178-a98467-6c584c)
------------ 
+-----------
 F0EAD2
 DDE5B6
 ADC178
 A98467
 6C584C (text only)
 
-## Theming  
+## Theming
 Mutual Aid	"We uplift each other through shared resources, not profit."
 Solidarity	"We act together, not alone. We show up for our neighbors."
 Trust & Care	"Our platform is built on kindness, consent, and community accountability."
@@ -336,7 +336,7 @@ Balance between local node autonomy and network coherence
 Phase 1: Core borrowing and lending functionality
 Phase 2: Community events and resources
 Phase 3: Nonprofit establishment and governance structure
-Phase 4: Federation protocol implementation 
+Phase 4: Federation protocol implementation
 Phase 5: Ratings, reviews, and enhanced trust mechanisms
 
 # Glossary
@@ -359,8 +359,27 @@ Phase 5: Ratings, reviews, and enhanced trust mechanisms
  - Tickets - Individual user transactions, IE "Borrowing Ticket" instead
    of "Borrowing request" to avoid confusion. (Internal use
    only)
- - Posting - Catch-all term for all core actions for Users. (Offers, requests, plans, etc.) 
+ - Posting - Catch-all term for all core actions for Users. (Offers, requests, plans, etc.)
  - Node - An individual server running a Neighborgoods instance.
  - Admin - A User with additional responsibilities of hosting a node,
    moderating it, adding new Users, watching for problems and requesting
-   additional features from developers. 
+   additional features from developers.
+
+
+# Developer Setup
+## PNPM
+We use [PNPM](https://pnpm.io/) for package management.
+
+## Mailpit
+For integration testing, we use [Mailpit](https://mailpit.axllent.org/) to mock an SMTP server
+
+You can just launch it with docker using
+```bash
+docker run -d \
+--restart unless-stopped \
+--name=mailpit \
+-p 8025:8025 \
+-p 1025:1025 \
+axllent/mailpit
+```
+

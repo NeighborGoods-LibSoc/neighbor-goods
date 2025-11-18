@@ -1,5 +1,10 @@
 // storage-adapter-import-placeholder
+import dotenv from 'dotenv';
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+dotenv.config(); // ensure env vars are loaded when config is imported
+
+const disableEmailForTests = process.env.DISABLE_EMAIL_FOR_TESTS === 'true';
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
@@ -97,17 +102,22 @@ export default buildConfig({
     },
     tasks: [],
   },
-  email: nodemailerAdapter({
-    defaultFromAddress: 'info@neighborgoods.com',
-    defaultFromName: 'NeighborGoods',
-    // Nodemailer transportOptions
-    transportOptions: {
-      host: process.env.SMTP_SERVER,
-      port: 587,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
+  email: disableEmailForTests
+    ? undefined
+    : {
+        transportOptions: {
+          host: process.env.SMTP_HOST || '127.0.0.1',
+          port: Number(process.env.SMTP_PORT || 587),
+          secure: false,
+          auth:
+            process.env.SMTP_USER && process.env.SMTP_PASS
+              ? {
+                  user: process.env.SMTP_USER,
+                  pass: process.env.SMTP_PASS,
+                }
+              : undefined,
+        },
+        fromName: process.env.SMTP_FROM_NAME || 'NeighborGoods',
+        fromAddress: process.env.SMTP_FROM_ADDRESS || 'no-reply@example.com',
       },
-    },
-  }),
 })

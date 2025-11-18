@@ -812,10 +812,7 @@ export interface Item {
    */
   borrowingTime: number;
   contributedBy: string | User;
-  /**
-   * Primary image used as thumbnail
-   */
-  primaryImage: string | Media;
+  primaryImage?: (string | null) | Media;
   /**
    * Additional images for this item
    */

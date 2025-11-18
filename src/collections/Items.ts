@@ -63,12 +63,11 @@ export const Items: CollectionConfig = {
     },
     {
       name: 'primaryImage',
-      type: 'upload',
+      type: 'relationship',
       relationTo: 'media',
-      required: true,
-      admin: {
-        description: 'Primary image used as thumbnail',
-      },
+      label: 'Primary Image',
+      required: false, // was true before; now not required
+      // ... any other options (admin, etc.) ...
     },
     {
       name: 'additional_images',
