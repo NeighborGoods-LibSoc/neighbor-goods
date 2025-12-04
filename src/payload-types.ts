@@ -76,6 +76,7 @@ export interface Config {
     admins: Admin;
     items: Item;
     loans: Loan;
+    distributedLibraries: DistributedLibrary;
     tags: Tag;
     redirects: Redirect;
     forms: Form;
@@ -96,6 +97,7 @@ export interface Config {
     admins: AdminsSelect<false> | AdminsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     loans: LoansSelect<false> | LoansSelect<true>;
+    distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
@@ -882,6 +884,44 @@ export interface Loan {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "distributedLibraries".
+ */
+export interface DistributedLibrary {
+  id: string;
+  /**
+   * UUID for the library (domain ID)
+   */
+  library_id: string;
+  name: string;
+  /**
+   * Public URL for this distributed library
+   */
+  public_url?: string | null;
+  administrators?: (string | User)[] | null;
+  /**
+   * Default loan time in days
+   */
+  default_loan_time_days: number;
+  /**
+   * Geographic service area
+   */
+  area: {
+    center_point?: {
+      latitude?: number | null;
+      longitude?: number | null;
+      street_address?: string | null;
+      city?: string | null;
+      state?: string | null;
+      zip_code?: string | null;
+      country?: string | null;
+    };
+    radius_kilometers: number;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1084,6 +1124,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'loans';
         value: string | Loan;
+      } | null)
+    | ({
+        relationTo: 'distributedLibraries';
+        value: string | DistributedLibrary;
       } | null)
     | ({
         relationTo: 'tags';
@@ -1525,6 +1569,35 @@ export interface LoansSelect<T extends boolean = true> {
         country?: T;
       };
   time_returned?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "distributedLibraries_select".
+ */
+export interface DistributedLibrariesSelect<T extends boolean = true> {
+  library_id?: T;
+  name?: T;
+  public_url?: T;
+  administrators?: T;
+  default_loan_time_days?: T;
+  area?:
+    | T
+    | {
+        center_point?:
+          | T
+          | {
+              latitude?: T;
+              longitude?: T;
+              street_address?: T;
+              city?: T;
+              state?: T;
+              zip_code?: T;
+              country?: T;
+            };
+        radius_kilometers?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
