@@ -813,7 +813,7 @@ export interface Item {
    * Maximum borrowing time in days
    */
   borrowingTime: number;
-  contributedBy: string | User;
+  offeredBy: string | User;
   /**
    * Primary image used as thumbnail
    */
@@ -1541,7 +1541,7 @@ export interface ItemsSelect<T extends boolean = true> {
   tags?: T;
   rulesForUse?: T;
   borrowingTime?: T;
-  contributedBy?: T;
+  offeredBy?: T;
   primaryImage?: T;
   additional_images?: T;
   updatedAt?: T;

@@ -34,7 +34,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
     const fetchDashboardData = async () => {
       try {
         // Fetch user's offered items
-        const itemsResponse = await fetch('/api/items?where[contributed_by][equals]=' + user.id)
+        const itemsResponse = await fetch('/api/items?where[offeredBy][equals]=' + user.id)
         if (itemsResponse.ok) {
           const itemsData = await itemsResponse.json()
           setOfferedItems(itemsData.docs || [])
@@ -82,8 +82,8 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
           <h1>Dashboard</h1>
         </div>
         <div>
-          <Link href="/items/contribute" className="btn btn-primary">
-            Contribute New Item
+          <Link href="/items/offer" className="btn btn-primary">
+            Offer New Item
           </Link>
         </div>
       </div>
@@ -117,7 +117,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
             <Link href="#" className="btn btn-secondary">
               Request
             </Link>
-            <Link href="/items/contribute" className="btn btn-secondary">
+            <Link href="/items/offer" className="btn btn-secondary">
               Offer
             </Link>
             <Link href="/items/transfers" className="btn btn-secondary">

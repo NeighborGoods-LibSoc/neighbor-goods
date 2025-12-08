@@ -19,7 +19,7 @@ function makeItem(overrides: any = {}) {
     id: 'item-1',
     name: 'Hammer',
     description: 'A heavy hammer',
-    contributedBy: { id: 'user-1' },
+    offeredBy: { id: 'user-1' },
     ...overrides,
   }
 }
@@ -50,7 +50,7 @@ describe('collections/common/mappers', () => {
       expect(thing.entityID.toString()).toBe(String(item.id))
       expect(thing.title.name).toBe('Hammer')
       expect(thing.description).toBe('A heavy hammer')
-      // owner id comes from contributedBy
+      // owner id comes from offeredBy
       // mapItemToThing accepts either object with id or plain value
       expect(thing.owner_id).toBeInstanceOf(ID)
       expect(thing.owner_id.toString()).toBe('user-1')
@@ -62,7 +62,7 @@ describe('collections/common/mappers', () => {
     })
 
     it('uses fallback names and ids if missing', () => {
-      const item = makeItem({ id: undefined, _id: 'mongo-id-123', name: undefined, description: undefined, contributedBy: 'user-xyz' })
+      const item = makeItem({ id: undefined, _id: 'mongo-id-123', name: undefined, description: undefined, offeredBy: 'user-xyz' })
       const thing = mapItemToThing(item)
       expect(thing.entityID.toString()).toBe('mongo-id-123')
       expect(thing.title.name).toBe('Untitled')

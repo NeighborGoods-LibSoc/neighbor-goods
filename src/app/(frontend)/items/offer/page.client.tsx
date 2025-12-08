@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -8,11 +8,16 @@ import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card } from '@/components/ui/card'
 
-interface ContributeClientProps {
+interface OfferClientProps {
   user: any
 }
 
-export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
+interface Tag {
+  id: string
+  name: string
+}
+
+export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -22,12 +27,29 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string>('')
-  const [tags, setTags] = useState<string>('')
+  const [availableTags, setAvailableTags] = useState<Tag[]>([])
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [submitMessage, setSubmitMessage] = useState<{
     type: 'success' | 'error'
     message: string
   } | null>(null)
+
+  // Fetch available tags on mount
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await fetch('/api/tags')
+        if (response.ok) {
+          const data = await response.json()
+          setAvailableTags(data.docs || [])
+        }
+      } catch (error) {
+        console.error('Error fetching tags:', error)
+      }
+    }
+    fetchTags()
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -75,6 +97,9 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
       if (!imageFile) {
         throw new Error('Image is required')
       }
+      if (!formData.agreeToTerms) {
+        throw new Error('You must agree to the terms and conditions')
+      }
 
       // Create FormData for multipart/form-data submission
       const submitFormData = new FormData()
@@ -102,11 +127,8 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
         rulesForUse: formData.rulesForUse,
         borrowingTime: Number(formData.borrowingTime),
         primaryImage: mediaId,
-        contributedBy: user.id,
-        tags: tags
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter((tag) => tag.length > 0),
+        offeredBy: user.id,
+        tags: selectedTags,
       }
 
       // Submit item
@@ -124,7 +146,7 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
 
       setSubmitMessage({
         type: 'success',
-        message: 'Item successfully contributed!',
+        message: 'Item successfully offered!',
       })
 
       // Reset form
@@ -137,7 +159,7 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
       })
       setImageFile(null)
       setImagePreview('')
-      setTags('')
+      setSelectedTags([])
     } catch (error) {
       setSubmitMessage({
         type: 'error',
@@ -151,7 +173,7 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
       <Card className="p-6">
-        <h1 className="mb-6 text-3xl font-bold">Contribute an Item</h1>
+        <h1 className="mb-6 text-3xl font-bold">Offer an Item</h1>
 
         {submitMessage && (
           <div
@@ -221,16 +243,37 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
 
           {/* Tags (Optional) */}
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
-            <Input
-              id="tags"
-              name="tags"
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="Enter tags separated by commas (optional)"
-            />
-            <p className="text-sm text-muted-foreground">Example: tools, gardening, outdoor</p>
+            <Label>Tags</Label>
+            {availableTags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {availableTags.map((tag) => (
+                  <label
+                    key={tag.id}
+                    className={`cursor-pointer rounded-full border px-3 py-1 text-sm transition-colors ${
+                      selectedTags.includes(tag.id)
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-input bg-background hover:bg-accent'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={selectedTags.includes(tag.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTags([...selectedTags, tag.id])
+                        } else {
+                          setSelectedTags(selectedTags.filter((id) => id !== tag.id))
+                        }
+                      }}
+                    />
+                    {tag.name}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No tags available</p>
+            )}
           </div>
 
           {/* Rules for Use */}

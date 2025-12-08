@@ -12,7 +12,7 @@ export const Items: CollectionConfig = {
     update: authenticated,
   },
   admin: {
-    defaultColumns: ['name', 'contributedBy', 'tags', 'updatedAt'],
+    defaultColumns: ['name', 'offeredBy', 'tags', 'updatedAt'],
     useAsTitle: 'name',
   },
   fields: [
@@ -53,7 +53,7 @@ export const Items: CollectionConfig = {
       },
     },
     {
-      name: 'contributedBy',
+      name: 'offeredBy',
       type: 'relationship',
       relationTo: 'users',
       required: true,
