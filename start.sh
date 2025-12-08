@@ -10,6 +10,7 @@ PREVIEW_SECRET=""
 SMTP_SERVER=""
 SMTP_USER=""
 SMTP_PASSWORD=""
+NG_ENV=""
 CI_MODE=false
 
 # Parse command-line arguments
@@ -59,6 +60,7 @@ if [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]]; then
             SMTP_SERVER) SMTP_SERVER="$value" ;;
             SMTP_USER) SMTP_USER="$value" ;;
             SMTP_PASSWORD) SMTP_PASSWORD="$value" ;;
+            NG_ENV) NG_ENV="$value" ;;
         esac
     done < <(grep '=' .env)
 fi
@@ -113,6 +115,26 @@ if [[ -z "$PREVIEW_SECRET" ]]; then
     echo "Done!"
 fi
 
+# Prompt for NG_ENV if not set (default to production)
+if [[ -z "$NG_ENV" ]]; then
+    if [[ "$CI_MODE" == true ]]; then
+        NG_ENV="production"
+    else
+        read -rp "Is this a development server? (y/n) [default: n]: " IS_DEV
+        if [[ "$IS_DEV" =~ ^[Yy]$ ]]; then
+            NG_ENV="development"
+        else
+            NG_ENV="production"
+        fi
+
+        if [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]]; then
+            echo "Adding NG_ENV to .env..."
+            echo "" >> .env
+            echo "NG_ENV=$NG_ENV" >> .env
+        fi
+    fi
+fi
+
 # Write new .env file if overwriting
 if [[ "$OVERWRITE_ENV" =~ ^[Yy]$ ]]; then
     echo "Writing new values to .env file..."
@@ -126,6 +148,7 @@ PREVIEW_SECRET=$PREVIEW_SECRET
 SMTP_SERVER=$SMTP_SERVER
 SMTP_USER=$SMTP_USER
 SMTP_PASSWORD=$SMTP_PASSWORD
+NG_ENV=$NG_ENV
 EOF
 fi
 

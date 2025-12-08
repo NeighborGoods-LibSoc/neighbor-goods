@@ -1,7 +1,7 @@
 @echo off
 setlocal ENABLEEXTENSIONS ENABLEDELAYEDEXPANSION
 
-:: Default all variables to empty
+:: Default all variables
 set "DATABASE_URI="
 set "DATABASE_TYPE="
 set "PAYLOAD_SECRET="
@@ -11,6 +11,7 @@ set "PREVIEW_SECRET="
 set "SMTP_SERVER="
 set "SMTP_USER="
 set "SMTP_PASSWORD="
+set "NG_ENV="
 
 :: Check if .env file exists
 set "OVERWRITE_ENV=n"
@@ -38,6 +39,7 @@ if /i "!OVERWRITE_ENV!"=="n" (
             if /i "!key!"=="SMTP_SERVER" set "SMTP_SERVER=!value!"
             if /i "!key!"=="SMTP_USER" set "SMTP_USER=!value!"
             if /i "!key!"=="SMTP_PASSWORD" set "SMTP_PASSWORD=!value!"
+            if /i "!key!"=="NG_ENV" set "NG_ENV=!value!"
         )
     )
 
@@ -215,6 +217,22 @@ if "!PREVIEW_SECRET!"=="" (
     echo Done!
 )
 
+:: Default to production, prompt if this is a development server
+if "!NG_ENV!"=="" (
+    set /p "IS_DEV=Is this a development server? (y/n) [default: n]: "
+    if /i "!IS_DEV!"=="y" (
+        set "NG_ENV=development"
+    ) else (
+        set "NG_ENV=production"
+    )
+
+    if /i "!OVERWRITE_ENV!"=="n" (
+        echo Adding NG_ENV to .env...
+        echo. >> .env
+        echo NG_ENV=!NG_ENV! >> .env
+    )
+)
+
 :: Write to .env
 if /i "!OVERWRITE_ENV!"=="y" (
     echo Writing new values to .env file...
@@ -228,6 +246,7 @@ if /i "!OVERWRITE_ENV!"=="y" (
         echo SMTP_SERVER=!SMTP_SERVER!
         echo SMTP_USER=!SMTP_USER!
         echo SMTP_PASSWORD=!SMTP_PASSWORD!
+        echo NG_ENV=!NG_ENV!
     ) > .env
 )
 
