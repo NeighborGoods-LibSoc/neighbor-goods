@@ -22,6 +22,24 @@ export default function LoginPage() {
     }
   }, [searchParams])
 
+  // Redirect to dashboard if already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const response = await fetch('/api/users/me')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.user) {
+            router.push('/dashboard')
+          }
+        }
+      } catch (error) {
+        // Not logged in, stay on login page
+      }
+    }
+    checkAuth()
+  }, [router])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')

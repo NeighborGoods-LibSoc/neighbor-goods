@@ -2,11 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import type { User } from '@/payload-types'
 
 export const AuthNav: React.FC = () => {
   const [user, setUser] = useState<User | null>(null)
   const [isLoading, setIsLoading] = useState(true)
+  const pathname = usePathname()
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -15,16 +17,19 @@ export const AuthNav: React.FC = () => {
         if (response.ok) {
           const data = await response.json()
           setUser(data.user)
+        } else {
+          setUser(null)
         }
       } catch (error) {
         console.error('Error checking auth:', error)
+        setUser(null)
       } finally {
         setIsLoading(false)
       }
     }
 
     checkAuth()
-  }, [])
+  }, [pathname])
 
   if (isLoading) {
     return null
