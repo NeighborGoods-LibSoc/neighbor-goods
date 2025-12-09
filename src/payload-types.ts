@@ -800,6 +800,10 @@ export interface Admin {
 export interface Item {
   id: string;
   name: string;
+  /**
+   * Current availability status of this item
+   */
+  status: 'READY' | 'WAITING_FOR_LENDER_APPROVAL_TO_BORROW' | 'BORROWED' | 'DAMAGED' | 'RESERVED';
   description?: string | null;
   /**
    * Select tags to categorize this item
@@ -1537,6 +1541,7 @@ export interface AdminsSelect<T extends boolean = true> {
  */
 export interface ItemsSelect<T extends boolean = true> {
   name?: T;
+  status?: T;
   description?: T;
   tags?: T;
   rulesForUse?: T;

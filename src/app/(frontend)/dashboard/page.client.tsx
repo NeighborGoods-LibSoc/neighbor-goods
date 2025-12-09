@@ -6,6 +6,7 @@ import type { User } from '@/payload-types'
 
 interface DashboardClientProps {
   user: User
+  showDeletedMessage?: boolean
 }
 
 interface Item {
@@ -22,7 +23,7 @@ interface Event {
   location: string
 }
 
-export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
+export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDeletedMessage }) => {
   const [borrowedItems, setBorrowedItems] = useState<Item[]>([])
   const [offeredItems, setOfferedItems] = useState<Item[]>([])
   const [events, setEvents] = useState<Event[]>([])
@@ -77,6 +78,15 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
 
   return (
     <main className="container">
+      {showDeletedMessage && (
+        <div
+          className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800"
+          role="alert"
+        >
+          <strong>Success!</strong> Your item has been removed.
+        </div>
+      )}
+
       <div className="page-header">
         <div>
           <h1>Dashboard</h1>

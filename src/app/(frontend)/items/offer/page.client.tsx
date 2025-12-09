@@ -1,12 +1,21 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
 interface OfferClientProps {
   user: any
@@ -18,6 +27,7 @@ interface Tag {
 }
 
 export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -30,10 +40,13 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitMessage, setSubmitMessage] = useState<{
+  const [modalState, setModalState] = useState<{
+    open: boolean
     type: 'success' | 'error'
     message: string
-  } | null>(null)
+    itemId?: string
+    itemName?: string
+  }>({ open: false, type: 'success', message: '' })
 
   // Fetch available tags on mount
   useEffect(() => {
@@ -78,10 +91,33 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
     }))
   }
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      rulesForUse: '',
+      borrowingTime: '',
+      agreeToTerms: false,
+    })
+    setImageFile(null)
+    setImagePreview('')
+    setSelectedTags([])
+  }
+
+  const handleGoToItem = () => {
+    if (modalState.itemId) {
+      router.push(`/items/${modalState.itemId}?created=true`)
+    }
+  }
+
+  const handleOfferAnother = () => {
+    setModalState({ open: false, type: 'success', message: '' })
+    resetForm()
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setSubmitMessage(null)
 
     try {
       // Validation
@@ -100,9 +136,6 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
       if (!formData.agreeToTerms) {
         throw new Error('You must agree to the terms and conditions')
       }
-
-      // Create FormData for multipart/form-data submission
-      const submitFormData = new FormData()
 
       // First upload the image to get media ID
       const mediaFormData = new FormData()
@@ -144,24 +177,18 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
         throw new Error('Failed to create item')
       }
 
-      setSubmitMessage({
-        type: 'success',
-        message: 'Item successfully offered!',
-      })
+      const itemResult = await itemResponse.json()
 
-      // Reset form
-      setFormData({
-        name: '',
-        description: '',
-        rulesForUse: '',
-        borrowingTime: '',
-        agreeToTerms: false,
+      setModalState({
+        open: true,
+        type: 'success',
+        message: 'Your item has been successfully added!',
+        itemId: itemResult.doc.id,
+        itemName: formData.name,
       })
-      setImageFile(null)
-      setImagePreview('')
-      setSelectedTags([])
     } catch (error) {
-      setSubmitMessage({
+      setModalState({
+        open: true,
         type: 'error',
         message: error instanceof Error ? error.message : 'Failed to submit item',
       })
@@ -172,20 +199,48 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
+      <Dialog open={modalState.open} onOpenChange={(open) => setModalState((prev) => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className={modalState.type === 'success' ? 'text-green-700' : 'text-red-700'}>
+              {modalState.type === 'success' ? 'Item Created Successfully!' : 'Error'}
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              {modalState.type === 'success' ? (
+                <>
+                  <span className="block text-base">{modalState.message}</span>
+                  {modalState.itemName && (
+                    <span className="mt-2 block font-medium text-foreground">
+                      &quot;{modalState.itemName}&quot; is now available for your neighbors to borrow.
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-red-600">{modalState.message}</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            {modalState.type === 'success' ? (
+              <>
+                <Button variant="outline" onClick={handleOfferAnother}>
+                  Offer Another Item
+                </Button>
+                <Button onClick={handleGoToItem}>
+                  View Item
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => setModalState((prev) => ({ ...prev, open: false }))}>
+                Try Again
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Card className="p-6">
         <h1 className="mb-6 text-3xl font-bold">Offer an Item</h1>
-
-        {submitMessage && (
-          <div
-            className={`mb-4 rounded p-4 ${
-              submitMessage.type === 'success'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
-            }`}
-          >
-            {submitMessage.message}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name */}

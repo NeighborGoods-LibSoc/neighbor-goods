@@ -7,6 +7,7 @@ import {
   ThingStatus,
   ThingTitle,
 } from '../valueItems'
+import statusTransitions from '../valueItems/statusTransitions.json'
 
 export class Thing extends Entity {
   thing_id: ID
@@ -46,26 +47,11 @@ export class Thing extends Entity {
   }
 
   set status(value: ThingStatus) {
-    let valid_next_statuses: ThingStatus[] = []
-
     if (value !== this._status) {
-      if (this._status === ThingStatus.READY) {
-        valid_next_statuses = [
-          ThingStatus.BORROWED,
-          ThingStatus.RESERVED,
-          ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW,
-        ]
-      } else if (this._status === ThingStatus.BORROWED) {
-        valid_next_statuses = [ThingStatus.READY, ThingStatus.RESERVED, ThingStatus.DAMAGED]
-      } else if (this._status === ThingStatus.RESERVED) {
-        valid_next_statuses = [ThingStatus.READY, ThingStatus.BORROWED]
-      } else if (this._status === ThingStatus.DAMAGED) {
-        valid_next_statuses = []
-      } else if (this._status === ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW) {
-        valid_next_statuses = [ThingStatus.READY, ThingStatus.BORROWED]
-      }
+      const transitions = statusTransitions.thingStatus as Record<string, string[]>
+      const validNextStatuses = (transitions[this._status] || []) as ThingStatus[]
 
-      if (!valid_next_statuses.includes(value)) {
+      if (!validNextStatuses.includes(value)) {
         throw new InvalidThingStateTransitionError(this._status, value)
       }
 
