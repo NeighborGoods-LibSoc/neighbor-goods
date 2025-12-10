@@ -5,5 +5,10 @@
     "RESERVED": ["READY", "BORROWED"],
     "DAMAGED": ["READY"],
     "WAITING_FOR_LENDER_APPROVAL_TO_BORROW": ["READY", "BORROWED"]
+  },
+  "requestStatus": {
+    "OPEN": ["FULFILLED", "CLOSED"],
+    "FULFILLED": [],
+    "CLOSED": ["OPEN"]
   }
 }

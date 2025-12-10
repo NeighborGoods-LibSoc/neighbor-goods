@@ -124,14 +124,14 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
         <div className="card">
           <h2>Quick Actions</h2>
           <ul className="quick-actions-grid">
-            <Link href="#" className="btn btn-secondary">
+            <Link href="/items/request" className="btn btn-secondary">
               Request
             </Link>
             <Link href="/items/offer" className="btn btn-secondary">
               Offer
             </Link>
-            <Link href="/items/transfers" className="btn btn-secondary">
-              Manage Items
+            <Link href="/my-items" className="btn btn-secondary">
+              My Items
             </Link>
             <Link href="#" className="btn btn-secondary">
               Plan Event

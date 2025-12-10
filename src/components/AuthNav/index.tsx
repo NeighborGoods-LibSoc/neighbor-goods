@@ -57,10 +57,10 @@ export const AuthNav: React.FC = () => {
           My Profile
         </Link>
         <Link
-          href="/items/transfers"
+          href="/my-items"
           className="text-primary hover:text-var(--light-green) transition-colors"
         >
-          Transfers
+          My Items
         </Link>
         <button
           onClick={async () => {

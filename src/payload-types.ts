@@ -76,6 +76,7 @@ export interface Config {
     admins: Admin;
     items: Item;
     loans: Loan;
+    requests: Request;
     distributedLibraries: DistributedLibrary;
     tags: Tag;
     redirects: Redirect;
@@ -97,6 +98,7 @@ export interface Config {
     admins: AdminsSelect<false> | AdminsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     loans: LoansSelect<false> | LoansSelect<true>;
+    requests: RequestsSelect<false> | RequestsSelect<true>;
     distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -888,6 +890,30 @@ export interface Loan {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "requests".
+ */
+export interface Request {
+  id: string;
+  name: string;
+  /**
+   * Current status of this request
+   */
+  status: 'OPEN' | 'FULFILLED' | 'CLOSED';
+  description?: string | null;
+  /**
+   * Select tags to categorize this request
+   */
+  tags?: (string | Tag)[] | null;
+  requestedBy: string | User;
+  /**
+   * Optional reference image showing what you are looking for
+   */
+  referenceImage?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "distributedLibraries".
  */
 export interface DistributedLibrary {
@@ -1128,6 +1154,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'loans';
         value: string | Loan;
+      } | null)
+    | ({
+        relationTo: 'requests';
+        value: string | Request;
       } | null)
     | ({
         relationTo: 'distributedLibraries';
@@ -1574,6 +1604,20 @@ export interface LoansSelect<T extends boolean = true> {
         country?: T;
       };
   time_returned?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "requests_select".
+ */
+export interface RequestsSelect<T extends boolean = true> {
+  name?: T;
+  status?: T;
+  description?: T;
+  tags?: T;
+  requestedBy?: T;
+  referenceImage?: T;
   updatedAt?: T;
   createdAt?: T;
 }
