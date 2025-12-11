@@ -5,6 +5,8 @@ import Link from 'next/link'
 import { cookies } from 'next/headers'
 import type { Item, Media, User, Tag } from '@/payload-types'
 import { DeleteItemButton } from './DeleteItemButton'
+import { RequestToBorrowButton } from './RequestToBorrowButton'
+import { OwnerBorrowActions } from './OwnerBorrowActions'
 import { getClientSideURL } from '@/utilities/getURL'
 
 type Args = {
@@ -56,9 +58,13 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
   const primaryImage = item.primaryImage as Media | null
   const offeredBy = item.offeredBy as User | null
   const tags = item.tags as Tag[] | null
+  const requestedToBorrowBy = item.requestedToBorrowBy as User | null
 
   // Check if current user is the owner
   const isOwner = currentUser && offeredBy && currentUser.id === offeredBy.id
+
+  // Check if current user can request to borrow (logged in, not owner, item is READY)
+  const canRequestToBorrow = currentUser && !isOwner && item.status === 'READY'
 
   return (
     <main className="container">
@@ -131,10 +137,34 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
             </div>
           )}
 
+          {/* Show Request to Borrow button for logged-in non-owners when item is available */}
+          {canRequestToBorrow && (
+            <div className="item-borrow-action" style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+              <RequestToBorrowButton itemId={item.id} itemName={item.name} />
+            </div>
+          )}
+
+          {/* Show login prompt for non-logged-in users viewing available items */}
+          {!currentUser && item.status === 'READY' && (
+            <div className="item-borrow-action" style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
+              <p style={{ color: 'var(--muted-foreground)' }}>
+                <a href="/login" style={{ color: 'var(--primary)' }}>Log in</a> to request this item.
+              </p>
+            </div>
+          )}
+
           {isOwner && (
             <div className="item-actions" style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
               <h3>Owner Actions</h3>
-              <div style={{ marginTop: '0.5rem' }}>
+              <div style={{ marginTop: '0.75rem' }}>
+                <OwnerBorrowActions
+                  itemId={item.id}
+                  itemName={item.name}
+                  currentStatus={item.status || 'READY'}
+                  requesterName={requestedToBorrowBy?.name}
+                />
+              </div>
+              <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
                 <DeleteItemButton itemId={item.id} itemName={item.name} />
               </div>
             </div>

@@ -8,6 +8,7 @@ interface InventoryClientProps {
   user: User
 }
 
+
 const itemStatusOptions = [
   { value: 'READY', label: 'Available' },
   { value: 'BORROWED', label: 'Checked Out' },
@@ -46,6 +47,7 @@ export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
   const [selectedItemStatuses, setSelectedItemStatuses] = useState<string[]>(allItemStatuses)
   const [selectedRequestStatuses, setSelectedRequestStatuses] = useState<string[]>(allRequestStatuses)
   const [isLoading, setIsLoading] = useState(true)
+  const [isFilterOpen, setIsFilterOpen] = useState(false)
 
   useEffect(() => {
     const fetchInventoryData = async () => {
@@ -180,76 +182,98 @@ export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
 
         {/* Filter Section */}
         <div className="filter-section">
-          {activeTab === 'offers' ? (
-            <div className="filter-group">
-              <span className="filter-label">Filter by status:</span>
-              <div className="filter-actions">
-                <button
-                  type="button"
-                  onClick={selectAllItemStatuses}
-                  className="filter-action-btn"
-                >
-                  Select All
-                </button>
-                <button
-                  type="button"
-                  onClick={deselectAllItemStatuses}
-                  className="filter-action-btn"
-                >
-                  Deselect All
-                </button>
+          <div className="filter-dropdown">
+            <button
+              type="button"
+              className="filter-dropdown-trigger"
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              aria-expanded={isFilterOpen}
+              aria-haspopup="true"
+            >
+              <span className="filter-dropdown-label">Status</span>
+              <span className="filter-dropdown-count">
+                {activeTab === 'offers'
+                  ? selectedItemStatuses.length === allItemStatuses.length
+                    ? 'All'
+                    : `${selectedItemStatuses.length}/${allItemStatuses.length}`
+                  : selectedRequestStatuses.length === allRequestStatuses.length
+                    ? 'All'
+                    : `${selectedRequestStatuses.length}/${allRequestStatuses.length}`}
+              </span>
+              <svg
+                className={`filter-dropdown-icon ${isFilterOpen ? 'open' : ''}`}
+                width="12"
+                height="12"
+                viewBox="0 0 12 12"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M2.5 4.5L6 8L9.5 4.5"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+
+            {isFilterOpen && (
+              <div className="filter-dropdown-menu">
+                <div className="filter-dropdown-actions">
+                  <button
+                    type="button"
+                    onClick={activeTab === 'offers' ? selectAllItemStatuses : selectAllRequestStatuses}
+                    className="filter-action-btn"
+                  >
+                    Select All
+                  </button>
+                  <button
+                    type="button"
+                    onClick={activeTab === 'offers' ? deselectAllItemStatuses : deselectAllRequestStatuses}
+                    className="filter-action-btn"
+                  >
+                    Clear
+                  </button>
+                </div>
+                <div className="filter-dropdown-options">
+                  {activeTab === 'offers'
+                    ? itemStatusOptions.map((option) => (
+                        <label key={option.value} className="filter-dropdown-option">
+                          <input
+                            type="checkbox"
+                            checked={selectedItemStatuses.includes(option.value)}
+                            onChange={() => toggleItemStatus(option.value)}
+                            className="filter-checkbox"
+                          />
+                          <span className="filter-checkbox-text">
+                            {option.label}
+                          </span>
+                        </label>
+                      ))
+                    : requestStatusOptions.map((option) => (
+                        <label key={option.value} className="filter-dropdown-option">
+                          <input
+                            type="checkbox"
+                            checked={selectedRequestStatuses.includes(option.value)}
+                            onChange={() => toggleRequestStatus(option.value)}
+                            className="filter-checkbox"
+                          />
+                          <span className="filter-checkbox-text">
+                            {option.label}
+                          </span>
+                        </label>
+                      ))}
+                </div>
               </div>
-              <div className="filter-checkboxes">
-                {itemStatusOptions.map((option) => (
-                  <label key={option.value} className="filter-checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={selectedItemStatuses.includes(option.value)}
-                      onChange={() => toggleItemStatus(option.value)}
-                      className="filter-checkbox"
-                    />
-                    <span className={`filter-checkbox-text ${getItemStatusClass(option.value)}`}>
-                      {option.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="filter-group">
-              <span className="filter-label">Filter by status:</span>
-              <div className="filter-actions">
-                <button
-                  type="button"
-                  onClick={selectAllRequestStatuses}
-                  className="filter-action-btn"
-                >
-                  Select All
-                </button>
-                <button
-                  type="button"
-                  onClick={deselectAllRequestStatuses}
-                  className="filter-action-btn"
-                >
-                  Deselect All
-                </button>
-              </div>
-              <div className="filter-checkboxes">
-                {requestStatusOptions.map((option) => (
-                  <label key={option.value} className="filter-checkbox-label">
-                    <input
-                      type="checkbox"
-                      checked={selectedRequestStatuses.includes(option.value)}
-                      onChange={() => toggleRequestStatus(option.value)}
-                      className="filter-checkbox"
-                    />
-                    <span className={`filter-checkbox-text ${getRequestStatusClass(option.value)}`}>
-                      {option.label}
-                    </span>
-                  </label>
-                ))}
-              </div>
-            </div>
+            )}
+          </div>
+          {/* Click outside to close */}
+          {isFilterOpen && (
+            <div
+              className="filter-dropdown-backdrop"
+              onClick={() => setIsFilterOpen(false)}
+            />
           )}
         </div>
 
@@ -393,26 +417,76 @@ export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
           background: var(--accent);
         }
 
-        .filter-group {
+        .filter-dropdown {
+          position: relative;
+          display: inline-block;
+        }
+
+        .filter-dropdown-trigger {
           display: flex;
-          flex-wrap: wrap;
           align-items: center;
-          gap: 0.75rem;
-        }
-
-        .filter-label {
+          gap: 0.5rem;
+          padding: 0.5rem 0.75rem;
           font-size: 0.9rem;
-          color: var(--muted-foreground);
-          font-weight: 500;
+          border: 1px solid var(--border);
+          border-radius: 6px;
+          background: var(--background);
+          cursor: pointer;
+          transition: all 0.2s;
+          min-width: 140px;
         }
 
-        .filter-actions {
+        .filter-dropdown-trigger:hover {
+          border-color: var(--primary);
+        }
+
+        .filter-dropdown-label {
+          font-weight: 500;
+          color: var(--foreground);
+        }
+
+        .filter-dropdown-count {
+          font-size: 0.8rem;
+          color: var(--muted-foreground);
+          background: var(--accent);
+          padding: 0.1rem 0.4rem;
+          border-radius: 4px;
+        }
+
+        .filter-dropdown-icon {
+          margin-left: auto;
+          transition: transform 0.2s;
+          color: var(--muted-foreground);
+        }
+
+        .filter-dropdown-icon.open {
+          transform: rotate(180deg);
+        }
+
+        .filter-dropdown-menu {
+          position: absolute;
+          top: calc(100% + 4px);
+          left: 0;
+          z-index: 50;
+          min-width: 200px;
+          background-color: white;
+          border: 1px solid var(--border);
+          border-radius: 8px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          overflow: hidden;
+        }
+
+        .filter-dropdown-actions {
           display: flex;
           gap: 0.5rem;
+          padding: 0.75rem;
+          border-bottom: 1px solid var(--border);
+          background: var(--accent);
         }
 
         .filter-action-btn {
-          padding: 0.25rem 0.5rem;
+          flex: 1;
+          padding: 0.35rem 0.5rem;
           font-size: 0.8rem;
           border: 1px solid var(--border);
           border-radius: 4px;
@@ -425,37 +499,41 @@ export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
           background: var(--border);
         }
 
-        .filter-checkboxes {
-          display: flex;
-          flex-wrap: wrap;
-          gap: 0.5rem;
-          margin-left: auto;
+        .filter-dropdown-options {
+          padding: 0.5rem;
+          max-height: 300px;
+          overflow-y: auto;
         }
 
-        .filter-checkbox-label {
+        .filter-dropdown-option {
           display: flex;
           align-items: center;
-          gap: 0.35rem;
+          gap: 0.5rem;
+          padding: 0.5rem 0.5rem;
           cursor: pointer;
-          padding: 0.25rem 0.5rem;
           border-radius: 4px;
-          transition: background-color 0.2s;
+          transition: background-color 0.15s;
         }
 
-        .filter-checkbox-label:hover {
-          background: var(--background);
+        .filter-dropdown-option:hover {
+          background: var(--accent);
         }
 
         .filter-checkbox {
           cursor: pointer;
           width: 1rem;
           height: 1rem;
+          flex-shrink: 0;
         }
 
         .filter-checkbox-text {
           font-size: 0.85rem;
-          padding: 0.15rem 0.4rem;
-          border-radius: 4px;
+        }
+
+        .filter-dropdown-backdrop {
+          position: fixed;
+          inset: 0;
+          z-index: 40;
         }
 
         .inventory-grid {

@@ -77,6 +77,7 @@ export interface Config {
     items: Item;
     loans: Loan;
     requests: Request;
+    'borrow-requests': BorrowRequest;
     distributedLibraries: DistributedLibrary;
     tags: Tag;
     redirects: Redirect;
@@ -99,6 +100,7 @@ export interface Config {
     items: ItemsSelect<false> | ItemsSelect<true>;
     loans: LoansSelect<false> | LoansSelect<true>;
     requests: RequestsSelect<false> | RequestsSelect<true>;
+    'borrow-requests': BorrowRequestsSelect<false> | BorrowRequestsSelect<true>;
     distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -828,6 +830,10 @@ export interface Item {
    * Additional images for this item
    */
   additional_images?: (string | Media)[] | null;
+  /**
+   * User who has requested to borrow this item (pending approval)
+   */
+  requestedToBorrowBy?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -909,6 +915,21 @@ export interface Request {
    * Optional reference image showing what you are looking for
    */
   referenceImage?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "borrow-requests".
+ */
+export interface BorrowRequest {
+  id: string;
+  item: string | Item;
+  requestedBy: string | User;
+  /**
+   * Timestamp of when the borrow request was made
+   */
+  requestedAt: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -1158,6 +1179,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'requests';
         value: string | Request;
+      } | null)
+    | ({
+        relationTo: 'borrow-requests';
+        value: string | BorrowRequest;
       } | null)
     | ({
         relationTo: 'distributedLibraries';
@@ -1579,6 +1604,7 @@ export interface ItemsSelect<T extends boolean = true> {
   offeredBy?: T;
   primaryImage?: T;
   additional_images?: T;
+  requestedToBorrowBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1618,6 +1644,17 @@ export interface RequestsSelect<T extends boolean = true> {
   tags?: T;
   requestedBy?: T;
   referenceImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "borrow-requests_select".
+ */
+export interface BorrowRequestsSelect<T extends boolean = true> {
+  item?: T;
+  requestedBy?: T;
+  requestedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }

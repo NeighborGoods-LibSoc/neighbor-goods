@@ -1,4 +1,5 @@
-import type { CollectionConfig } from 'payload'
+import type { CollectionConfig, Access } from 'payload'
+import type { User } from '@/payload-types'
 
 import { authenticated } from '../access/authenticated'
 import { anyone } from '../access/anyone'
@@ -6,13 +7,40 @@ import { isOwner } from '../access/isOwner'
 import { ThingStatus } from '../domain/valueItems/thingStatus'
 import statusTransitions from '../domain/valueItems/statusTransitions.json'
 
+// 1 hour cooldown in milliseconds
+const BORROW_REQUEST_COOLDOWN_MS = 60 * 60 * 1000
+
+/**
+ * Custom access control for item updates:
+ * - Owner can always update
+ * - Non-owners can update ONLY to request borrowing (READY -> WAITING_FOR_LENDER_APPROVAL_TO_BORROW)
+ */
+const canUpdateItem: Access<User> = async ({ req: { user, payload }, id }) => {
+  if (!user) return false
+  if (!id) return true // Create operation handled separately
+
+  // First check if user is owner - if so, allow all updates
+  const ownerAccess = isOwner('offeredBy')
+  const ownerResult = ownerAccess({ req: { user, payload }, id } as any)
+
+  // If owner check returns a query, we need to verify ownership
+  if (typeof ownerResult === 'object') {
+    // Return the owner query - Payload will handle it
+    // But we also need to allow non-owners for borrow requests
+    // So we return true and handle validation in beforeChange hook
+    return true
+  }
+
+  return ownerResult
+}
+
 export const Items: CollectionConfig = {
   slug: 'items',
   access: {
     create: authenticated,
     delete: isOwner('offeredBy'),
     read: anyone,
-    update: isOwner('offeredBy'),
+    update: canUpdateItem,
   },
   admin: {
     defaultColumns: ['name', 'status', 'offeredBy', 'tags', 'updatedAt'],
@@ -99,6 +127,16 @@ export const Items: CollectionConfig = {
         description: 'Additional images for this item',
       },
     },
+    {
+      name: 'requestedToBorrowBy',
+      type: 'relationship',
+      relationTo: 'users',
+      required: false,
+      admin: {
+        position: 'sidebar',
+        description: 'User who has requested to borrow this item (pending approval)',
+      },
+    },
   ],
   hooks: {
     beforeChange: [
@@ -115,20 +153,108 @@ export const Items: CollectionConfig = {
           return data
         }
 
-        // On update, prevent changing the owner
-        if (originalDoc?.offeredBy) {
-          // Preserve original owner, ignore any attempt to change it
-          const originalOwnerId =
-            typeof originalDoc.offeredBy === 'object'
-              ? originalDoc.offeredBy.id
-              : originalDoc.offeredBy
-          data.offeredBy = originalOwnerId
-        }
+        // Get owner ID for checks
+        const originalOwnerId = originalDoc?.offeredBy
+          ? typeof originalDoc.offeredBy === 'object'
+            ? originalDoc.offeredBy.id
+            : originalDoc.offeredBy
+          : null
 
-        // Validate status transition using shared config
+        const isOwner = req.user && originalOwnerId === req.user.id
         const currentStatus = originalDoc?.status || ThingStatus.READY
         const newStatus = data.status || currentStatus
 
+        // --- Handle borrow request from non-owner ---
+        if (!isOwner && req.user) {
+          // Non-owners can ONLY request to borrow (READY -> WAITING_FOR_LENDER_APPROVAL_TO_BORROW)
+          const isRequestingToBorrow =
+            currentStatus === ThingStatus.READY &&
+            newStatus === ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW
+
+          if (!isRequestingToBorrow) {
+            throw new Error('You can only request to borrow items that are available')
+          }
+
+          // Check cooldown for this user-item combination
+          const existingRequest = await req.payload.find({
+            collection: 'borrow-requests',
+            where: {
+              and: [
+                { item: { equals: originalDoc.id } },
+                { requestedBy: { equals: req.user.id } },
+              ],
+            },
+            limit: 1,
+          })
+
+          const existingRequestDoc = existingRequest.docs[0]
+          if (existingRequestDoc) {
+            const lastRequestTime = new Date(existingRequestDoc.requestedAt).getTime()
+            const timeSinceLastRequest = Date.now() - lastRequestTime
+
+            if (timeSinceLastRequest < BORROW_REQUEST_COOLDOWN_MS) {
+              const minutesRemaining = Math.ceil(
+                (BORROW_REQUEST_COOLDOWN_MS - timeSinceLastRequest) / 60000
+              )
+              throw new Error(
+                `You must wait ${minutesRemaining} minute(s) before requesting to borrow this item again`
+              )
+            }
+
+            // Update the existing request timestamp
+            await req.payload.update({
+              collection: 'borrow-requests',
+              id: existingRequestDoc.id,
+              data: {
+                requestedAt: new Date().toISOString(),
+              },
+            })
+          } else {
+            // Create new borrow request record
+            await req.payload.create({
+              collection: 'borrow-requests',
+              data: {
+                item: originalDoc.id,
+                requestedBy: req.user.id,
+                requestedAt: new Date().toISOString(),
+              },
+            })
+          }
+
+          // Set the requestedToBorrowBy field to the requesting user
+          data.requestedToBorrowBy = req.user.id
+
+          // Ensure non-owner cannot change other fields
+          data.name = originalDoc.name
+          data.description = originalDoc.description
+          data.tags = originalDoc.tags
+          data.rulesForUse = originalDoc.rulesForUse
+          data.borrowingTime = originalDoc.borrowingTime
+          data.offeredBy = originalOwnerId
+          data.primaryImage = originalDoc.primaryImage
+          data.additional_images = originalDoc.additional_images
+
+          return data
+        }
+
+        // --- Owner updates ---
+        // Preserve original owner, ignore any attempt to change it
+        if (originalOwnerId) {
+          data.offeredBy = originalOwnerId
+        }
+
+        // If owner is rejecting a borrow request (WAITING -> READY), clear the requester
+        if (
+          currentStatus === ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW &&
+          newStatus === ThingStatus.READY
+        ) {
+          data.requestedToBorrowBy = null
+        }
+
+        // If owner is approving (WAITING -> RESERVED or BORROWED), keep requester for reference
+        // The requester info can be used later when creating a loan
+
+        // Validate status transition using shared config
         if (currentStatus !== newStatus) {
           const transitions = statusTransitions.thingStatus as Record<string, string[]>
           const validNextStatuses = transitions[currentStatus] || []
