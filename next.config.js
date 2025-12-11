@@ -9,6 +9,7 @@ const NEXT_PUBLIC_SERVER_URL = process.env.VERCEL_PROJECT_PRODUCTION_URL
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   poweredByHeader: false,
+  devIndicators: process.env.NG_ENV === 'development',
   images: {
     remotePatterns: [
       ...[NEXT_PUBLIC_SERVER_URL /* 'https://example.com' */].map((item) => {
@@ -23,6 +24,23 @@ const nextConfig = {
   },
   reactStrictMode: true,
   redirects,
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          // {
+          //   key: 'Strict-Transport-Security',
+          //   value: 'max-age=63072000; includeSubDomains; preload',
+          // },
+        ],
+      },
+    ]
+  },
 }
 
 export default withPayload(nextConfig, { devBundleServerPackages: false })

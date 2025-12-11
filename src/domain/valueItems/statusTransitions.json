@@ -1,0 +1,14 @@
+{
+  "thingStatus": {
+    "READY": ["BORROWED", "RESERVED", "WAITING_FOR_LENDER_APPROVAL_TO_BORROW"],
+    "BORROWED": ["READY", "RESERVED", "DAMAGED"],
+    "RESERVED": ["READY", "BORROWED"],
+    "DAMAGED": ["READY"],
+    "WAITING_FOR_LENDER_APPROVAL_TO_BORROW": ["READY", "RESERVED", "BORROWED"]
+  },
+  "requestStatus": {
+    "OPEN": ["FULFILLED", "CLOSED"],
+    "FULFILLED": [],
+    "CLOSED": ["OPEN"]
+  }
+}

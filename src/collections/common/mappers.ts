@@ -11,7 +11,7 @@ import { ThingTitle } from '@/domain/valueItems/thingTitle'
 export function mapItemToThing(item: any): Thing {
   const thing_id = new ID(String(item?.id || item?._id))
   const title = new ThingTitle({ name: String(item?.name || 'Untitled'), description: item?.description || undefined })
-  const owner_id = new ID(String(item?.contributedBy?.id || item?.contributedBy || 'unknown'))
+  const owner_id = new ID(String(item?.offeredBy?.id || item?.offeredBy || 'unknown'))
   const storage_location = new PhysicalLocation({
     latitude: null,
     longitude: null,

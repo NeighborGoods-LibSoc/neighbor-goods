@@ -1,12 +1,20 @@
-import { redirect } from 'next/navigation'
 import { getMeUser } from '@/utilities/getMeUser'
 import { DashboardClient } from './page.client'
 
-export default async function DashboardPage() {
+type Args = {
+  searchParams: Promise<{
+    deleted?: string
+  }>
+}
+
+export default async function DashboardPage({ searchParams: searchParamsPromise }: Args) {
+  const { deleted } = await searchParamsPromise
+  const showDeletedMessage = deleted === 'true'
+
   // Redirect to login if not authenticated
   const { user } = await getMeUser({
     nullUserRedirect: '/login',
   })
 
-  return <DashboardClient user={user} />
+  return <DashboardClient user={user} showDeletedMessage={showDeletedMessage} />
 }
