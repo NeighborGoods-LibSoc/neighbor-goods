@@ -16,3 +16,4 @@ public/sitemap*.xml
 .idea/
 
 .tool-versions
+coverage/

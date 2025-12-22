@@ -20,6 +20,9 @@ export default defineConfig({
         singleFork: true,
       },
     },
+    // Vitest 4: pool options are now top-level
+    isolate: false,
+    fileParallelism: false,
   },
   resolve: {
     alias: {
