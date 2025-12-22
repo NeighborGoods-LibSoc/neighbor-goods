@@ -24,8 +24,13 @@ export async function getTestPayload(): Promise<Payload> {
 
 export async function cleanupPayload(): Promise<void> {
   if (payloadInstance) {
+    // In Vitest with singleFork: true, we might want to keep the payload instance
+    // alive between test files to avoid re-initialization overhead and
+    // potential connection issues.
+    // If we really want to destroy it, we must ensure it's not reused.
+
+    /*
     try {
-      // db may not always be present / typed, so guard it
       const anyPayload = payloadInstance as any;
       if (anyPayload.db && typeof anyPayload.db.destroy === 'function') {
         await anyPayload.db.destroy();
@@ -34,6 +39,7 @@ export async function cleanupPayload(): Promise<void> {
       console.warn('Error destroying payload instance:', e);
     }
     payloadInstance = null;
+    */
   }
 }
 
