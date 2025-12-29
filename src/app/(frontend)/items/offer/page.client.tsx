@@ -1,18 +1,33 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Label } from '@/components/ui/label'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Card } from '@/components/ui/card'
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog'
 
-interface ContributeClientProps {
+interface OfferClientProps {
   user: any
 }
 
-export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
+interface Tag {
+  id: string
+  name: string
+}
+
+export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
+  const router = useRouter()
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -22,12 +37,32 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
   })
   const [imageFile, setImageFile] = useState<File | null>(null)
   const [imagePreview, setImagePreview] = useState<string>('')
-  const [tags, setTags] = useState<string>('')
+  const [availableTags, setAvailableTags] = useState<Tag[]>([])
+  const [selectedTags, setSelectedTags] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [submitMessage, setSubmitMessage] = useState<{
+  const [modalState, setModalState] = useState<{
+    open: boolean
     type: 'success' | 'error'
     message: string
-  } | null>(null)
+    itemId?: string
+    itemName?: string
+  }>({ open: false, type: 'success', message: '' })
+
+  // Fetch available tags on mount
+  useEffect(() => {
+    const fetchTags = async () => {
+      try {
+        const response = await fetch('/api/tags')
+        if (response.ok) {
+          const data = await response.json()
+          setAvailableTags(data.docs || [])
+        }
+      } catch (error) {
+        console.error('Error fetching tags:', error)
+      }
+    }
+    fetchTags()
+  }, [])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -56,10 +91,33 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
     }))
   }
 
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      description: '',
+      rulesForUse: '',
+      borrowingTime: '',
+      agreeToTerms: false,
+    })
+    setImageFile(null)
+    setImagePreview('')
+    setSelectedTags([])
+  }
+
+  const handleGoToItem = () => {
+    if (modalState.itemId) {
+      router.push(`/items/${modalState.itemId}?created=true`)
+    }
+  }
+
+  const handleOfferAnother = () => {
+    setModalState({ open: false, type: 'success', message: '' })
+    resetForm()
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsSubmitting(true)
-    setSubmitMessage(null)
 
     try {
       // Validation
@@ -75,9 +133,9 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
       if (!imageFile) {
         throw new Error('Image is required')
       }
-
-      // Create FormData for multipart/form-data submission
-      const submitFormData = new FormData()
+      if (!formData.agreeToTerms) {
+        throw new Error('You must agree to the terms and conditions')
+      }
 
       // First upload the image to get media ID
       const mediaFormData = new FormData()
@@ -102,11 +160,8 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
         rulesForUse: formData.rulesForUse,
         borrowingTime: Number(formData.borrowingTime),
         primaryImage: mediaId,
-        contributedBy: user.id,
-        tags: tags
-          .split(',')
-          .map((tag) => tag.trim())
-          .filter((tag) => tag.length > 0),
+        offeredBy: user.id,
+        tags: selectedTags,
       }
 
       // Submit item
@@ -122,24 +177,18 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
         throw new Error('Failed to create item')
       }
 
-      setSubmitMessage({
-        type: 'success',
-        message: 'Item successfully contributed!',
-      })
+      const itemResult = await itemResponse.json()
 
-      // Reset form
-      setFormData({
-        name: '',
-        description: '',
-        rulesForUse: '',
-        borrowingTime: '',
-        agreeToTerms: false,
+      setModalState({
+        open: true,
+        type: 'success',
+        message: 'Your item has been successfully added!',
+        itemId: itemResult.doc.id,
+        itemName: formData.name,
       })
-      setImageFile(null)
-      setImagePreview('')
-      setTags('')
     } catch (error) {
-      setSubmitMessage({
+      setModalState({
+        open: true,
         type: 'error',
         message: error instanceof Error ? error.message : 'Failed to submit item',
       })
@@ -150,20 +199,48 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
 
   return (
     <div className="container mx-auto max-w-2xl px-4 py-8">
-      <Card className="p-6">
-        <h1 className="mb-6 text-3xl font-bold">Contribute an Item</h1>
+      <Dialog open={modalState.open} onOpenChange={(open) => setModalState((prev) => ({ ...prev, open }))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle className={modalState.type === 'success' ? 'text-green-700' : 'text-red-700'}>
+              {modalState.type === 'success' ? 'Item Created Successfully!' : 'Error'}
+            </DialogTitle>
+            <DialogDescription className="pt-2">
+              {modalState.type === 'success' ? (
+                <>
+                  <span className="block text-base">{modalState.message}</span>
+                  {modalState.itemName && (
+                    <span className="mt-2 block font-medium text-foreground">
+                      &quot;{modalState.itemName}&quot; is now available for your neighbors to borrow.
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-red-600">{modalState.message}</span>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="gap-2 sm:gap-0">
+            {modalState.type === 'success' ? (
+              <>
+                <Button variant="outline" onClick={handleOfferAnother}>
+                  Offer Another Item
+                </Button>
+                <Button onClick={handleGoToItem}>
+                  View Item
+                </Button>
+              </>
+            ) : (
+              <Button onClick={() => setModalState((prev) => ({ ...prev, open: false }))}>
+                Try Again
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
-        {submitMessage && (
-          <div
-            className={`mb-4 rounded p-4 ${
-              submitMessage.type === 'success'
-                ? 'bg-green-100 text-green-800'
-                : 'bg-red-100 text-red-800'
-            }`}
-          >
-            {submitMessage.message}
-          </div>
-        )}
+      <Card className="p-6">
+        <h1 className="mb-6 text-3xl font-bold">Offer an Item</h1>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Name */}
@@ -221,16 +298,37 @@ export const ContributeClient: React.FC<ContributeClientProps> = ({ user }) => {
 
           {/* Tags (Optional) */}
           <div className="space-y-2">
-            <Label htmlFor="tags">Tags</Label>
-            <Input
-              id="tags"
-              name="tags"
-              type="text"
-              value={tags}
-              onChange={(e) => setTags(e.target.value)}
-              placeholder="Enter tags separated by commas (optional)"
-            />
-            <p className="text-sm text-muted-foreground">Example: tools, gardening, outdoor</p>
+            <Label>Tags</Label>
+            {availableTags.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {availableTags.map((tag) => (
+                  <label
+                    key={tag.id}
+                    className={`cursor-pointer rounded-full border px-3 py-1 text-sm transition-colors ${
+                      selectedTags.includes(tag.id)
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-input bg-background hover:bg-accent'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={selectedTags.includes(tag.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedTags([...selectedTags, tag.id])
+                        } else {
+                          setSelectedTags(selectedTags.filter((id) => id !== tag.id))
+                        }
+                      }}
+                    />
+                    {tag.name}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground">No tags available</p>
+            )}
           </div>
 
           {/* Rules for Use */}
