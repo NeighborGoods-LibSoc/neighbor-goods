@@ -231,7 +231,7 @@ Admin Panel: User management, dispute resolution, settings (admin user only)
 Things organized by user generated tags, by popularity, and by date added
 Skills categorized by tags with availability indicators
 Events organized chronologically with resource needs highlighted
-Requests tracked by status (pending, active, completed)
+ThingRequests tracked by status (pending, active, completed)
 
 ## Key User Flows
 ### User Registration & Onboarding

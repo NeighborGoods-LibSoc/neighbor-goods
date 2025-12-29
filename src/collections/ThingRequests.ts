@@ -6,7 +6,7 @@ import { isOwner } from '../access/isOwner'
 import { RequestStatus } from '../domain/valueItems/requestStatus'
 import statusTransitions from '../domain/valueItems/statusTransitions.json'
 
-export const Requests: CollectionConfig = {
+export const ThingRequests: CollectionConfig = {
   slug: 'requests',
   access: {
     create: authenticated,

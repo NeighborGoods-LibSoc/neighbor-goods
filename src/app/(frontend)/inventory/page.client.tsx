@@ -343,7 +343,7 @@ export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
           )}
         </div>
 
-        {/* Requests Tab Content */}
+        {/* ThingRequests Tab Content */}
         <div className={`tab-content ${activeTab === 'requests' ? 'active' : ''}`}>
           {filteredRequests.length > 0 ? (
             <div className="inventory-grid">
