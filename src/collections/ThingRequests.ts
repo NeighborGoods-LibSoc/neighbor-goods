@@ -3,11 +3,11 @@ import type { CollectionConfig } from 'payload'
 import { authenticated } from '../access/authenticated'
 import { anyone } from '../access/anyone'
 import { isOwner } from '../access/isOwner'
-import { RequestStatus } from '../domain/valueItems/requestStatus'
+import { ThingRequestStatus } from '../domain/valueItems/thingRequestStatus'
 import statusTransitions from '../domain/valueItems/statusTransitions.json'
 
 export const ThingRequests: CollectionConfig = {
-  slug: 'requests',
+  slug: 'thing-requests',
   access: {
     create: authenticated,
     delete: isOwner('requestedBy'),
@@ -28,11 +28,11 @@ export const ThingRequests: CollectionConfig = {
       name: 'status',
       type: 'select',
       required: true,
-      defaultValue: RequestStatus.OPEN,
+      defaultValue: ThingRequestStatus.OPEN,
       options: [
-        { label: 'Open', value: RequestStatus.OPEN },
-        { label: 'Fulfilled', value: RequestStatus.FULFILLED },
-        { label: 'Closed', value: RequestStatus.CLOSED },
+        { label: 'Open', value: ThingRequestStatus.OPEN },
+        { label: 'Fulfilled', value: ThingRequestStatus.FULFILLED },
+        { label: 'Closed', value: ThingRequestStatus.CLOSED },
       ],
       admin: {
         position: 'sidebar',
@@ -99,7 +99,7 @@ export const ThingRequests: CollectionConfig = {
         }
 
         // Validate status transition using shared config
-        const currentStatus = originalDoc?.status || RequestStatus.OPEN
+        const currentStatus = originalDoc?.status || ThingRequestStatus.OPEN
         const newStatus = data.status || currentStatus
 
         if (currentStatus !== newStatus) {

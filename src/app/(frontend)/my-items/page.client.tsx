@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import type { User, Item, Request, Loan, Media, Tag } from '@/payload-types'
+import type { User, Item, ThingRequest, Loan, Media, Tag } from '@/payload-types'
 
 interface MyItemsClientProps {
   user: User
@@ -33,7 +33,7 @@ const loanStatusLabels: Record<string, string> = {
 
 export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
   const [offeredItems, setOfferedItems] = useState<Item[]>([])
-  const [requests, setRequests] = useState<Request[]>([])
+  const [requests, setRequests] = useState<ThingRequest[]>([])
   const [borrowedLoans, setBorrowedLoans] = useState<Loan[]>([])
   const [activeTab, setActiveTab] = useState<'offering' | 'requesting' | 'borrowing'>('offering')
   const [isLoading, setIsLoading] = useState(true)
@@ -49,7 +49,7 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
         }
 
         // Fetch user's requests
-        const requestsResponse = await fetch(`/api/requests?where[requestedBy][equals]=${user.id}&depth=1&limit=100`)
+        const requestsResponse = await fetch(`/api/thing-requests?where[requestedBy][equals]=${user.id}&depth=1&limit=100`)
         if (requestsResponse.ok) {
           const requestsData = await requestsResponse.json()
           setRequests(requestsData.docs || [])
@@ -274,7 +274,7 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
                         </div>
                       )}
                       <div className="my-items-card-footer">
-                        <Link href={`/requests/${request.id}`} className="btn btn-secondary btn-sm">
+                        <Link href={`/thing-requests/${request.id}`} className="btn btn-secondary btn-sm">
                           View / Edit
                         </Link>
                       </div>

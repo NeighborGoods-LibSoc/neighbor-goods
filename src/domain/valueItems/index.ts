@@ -3,7 +3,7 @@ export * from "./feeStatus";
 export * from "./loanStatus";
 export * from "./reservationStatus";
 export * from "./thingStatus";
-export * from "./requestStatus";
+export * from "./thingRequestStatus";
 export * from "./id";
 export * from "./money";
 export * from "./emailAddress";

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import type { User, Item, Request, Media, Tag } from '@/payload-types'
+import type { User, Item, ThingRequest, Media, Tag } from '@/payload-types'
 
 interface InventoryClientProps {
   user: User
@@ -42,7 +42,7 @@ const requestStatusLabels: Record<string, string> = {
 
 export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
   const [items, setItems] = useState<Item[]>([])
-  const [requests, setRequests] = useState<Request[]>([])
+  const [requests, setRequests] = useState<ThingRequest[]>([])
   const [activeTab, setActiveTab] = useState<'offers' | 'requests'>('offers')
   const [selectedItemStatuses, setSelectedItemStatuses] = useState<string[]>(allItemStatuses)
   const [selectedRequestStatuses, setSelectedRequestStatuses] = useState<string[]>(allRequestStatuses)
@@ -60,7 +60,7 @@ export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
         }
 
         // Fetch all requests
-        const requestsResponse = await fetch('/api/requests?depth=1&limit=100')
+        const requestsResponse = await fetch('/api/thing-requests?depth=1&limit=100')
         if (requestsResponse.ok) {
           const requestsData = await requestsResponse.json()
           setRequests(requestsData.docs || [])
@@ -384,7 +384,7 @@ export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
                       )}
                       <div className="inventory-card-footer">
                         <span className="inventory-card-owner">by {requesterName}</span>
-                        <Link href={`/requests/${request.id}`} className="btn btn-secondary btn-sm">
+                        <Link href={`/thing-requests/${request.id}`} className="btn btn-secondary btn-sm">
                           View
                         </Link>
                       </div>

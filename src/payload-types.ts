@@ -76,7 +76,7 @@ export interface Config {
     admins: Admin;
     items: Item;
     loans: Loan;
-    requests: Request;
+    'thing-requests': ThingRequest;
     'borrow-requests': BorrowRequest;
     distributedLibraries: DistributedLibrary;
     tags: Tag;
@@ -99,7 +99,7 @@ export interface Config {
     admins: AdminsSelect<false> | AdminsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     loans: LoansSelect<false> | LoansSelect<true>;
-    requests: RequestsSelect<false> | RequestsSelect<true>;
+    'thing-requests': ThingRequestsSelect<false> | ThingRequestsSelect<true>;
     'borrow-requests': BorrowRequestsSelect<false> | BorrowRequestsSelect<true>;
     distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
@@ -896,9 +896,9 @@ export interface Loan {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "requests".
+ * via the `definition` "thing-requests".
  */
-export interface Request {
+export interface ThingRequest {
   id: string;
   name: string;
   /**
@@ -1177,8 +1177,8 @@ export interface PayloadLockedDocument {
         value: string | Loan;
       } | null)
     | ({
-        relationTo: 'requests';
-        value: string | Request;
+        relationTo: 'thing-requests';
+        value: string | ThingRequest;
       } | null)
     | ({
         relationTo: 'borrow-requests';
@@ -1635,9 +1635,9 @@ export interface LoansSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "requests_select".
+ * via the `definition` "thing-requests_select".
  */
-export interface RequestsSelect<T extends boolean = true> {
+export interface ThingRequestsSelect<T extends boolean = true> {
   name?: T;
   status?: T;
   description?: T;

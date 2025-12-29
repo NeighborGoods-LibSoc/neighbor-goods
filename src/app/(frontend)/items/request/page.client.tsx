@@ -102,7 +102,7 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
 
   const handleGoToRequest = () => {
     if (modalState.requestId) {
-      router.push(`/requests/${modalState.requestId}?created=true`)
+      router.push(`/thing-requests/${modalState.requestId}?created=true`)
     }
   }
 
@@ -157,7 +157,7 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
       }
 
       // Submit request
-      const requestResponse = await fetch('/api/requests', {
+      const requestResponse = await fetch('/api/thing-requests', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
