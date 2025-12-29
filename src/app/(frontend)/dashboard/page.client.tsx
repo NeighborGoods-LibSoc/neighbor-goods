@@ -170,7 +170,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
           </Link>
         </div>
 
-        {/* Items Tabs */}
+        {/* Things Tabs */}
         <div className="card">
           <div className="tabs">
             <div

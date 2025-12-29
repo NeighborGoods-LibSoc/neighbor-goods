@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url'
 import { openapi, swaggerUI } from 'payload-oapi'
 
 import { Categories } from './collections/Categories'
-import { Items } from './collections/Items'
+import { Things } from './collections/Things'
 import { Media } from './collections/Media'
 import { Pages } from './collections/Pages'
 import { Posts } from './collections/Posts'
@@ -71,7 +71,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Admins, Items, Loans, Requests, BorrowRequests, DistributedLibraries, Tags],
+  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, Requests, BorrowRequests, DistributedLibraries, Tags],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [

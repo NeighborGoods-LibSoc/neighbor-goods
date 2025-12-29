@@ -132,7 +132,7 @@ The following are the available pages to interact with the application:
 3. SignUp - self explanatory
 4. FAQ/About/Community Agreement - pages offering more in depth information about the platform, and the node being viewed.
 5. Inventory - a collection of all open offers and requests listed on the node, along with search tools to find what a user needs.
-6. Item Management View - the page displays a single item in full. Items are borrowed from this page.
+6. Item Management View - the page displays a single item in full. Things are borrowed from this page.
 7. Item Offerings - allows for the offering of new items to the network.
 8. User Profile - the main page for users to manage their own profiles. Includes their own stats and history of actions involving them, along with outstanding commitments.
 9. Dashboard - AKA home page. The starting page for users who have logged in.
@@ -228,7 +228,7 @@ My Account: Profile, edit profile, my shared items, borrowing history, calendar
 Admin Panel: User management, dispute resolution, settings (admin user only)
 
 ### Content Organization
-Items organized by user generated tags, by popularity, and by date added
+Things organized by user generated tags, by popularity, and by date added
 Skills categorized by tags with availability indicators
 Events organized chronologically with resource needs highlighted
 Requests tracked by status (pending, active, completed)
