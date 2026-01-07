@@ -1,7 +1,10 @@
 import { Thing } from '@/domain/entities/thing'
-import { ID } from '@/domain/valueItems'
+import { ID, PersonName, EmailAddress, Money, Currency } from '@/domain/valueItems'
 import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
 import { ThingTitle } from '@/domain/valueItems/thingTitle'
+import { Person } from '@/domain/entities/people/person'
+import { MOPServer } from '@/domain/entities/mopServer'
+import { URL } from '@/domain/valueItems/url'
 
 export function mapItemToThing(item: any): Thing {
   const thing_id = new ID(String(item?.id || item?._id))
@@ -39,5 +42,35 @@ export function mapReturnLocation(loc: any) {
     state: String(loc.state || ''),
     zipCode: String(loc.zip_code || ''),
     country: String(loc.country || ''),
+  })
+}
+
+export function mapUserToPerson(user: any): Person {
+  if (!user) throw new Error('User is required to map to Person')
+  const personID = new ID(String(user.id || user._id))
+  const nameParts = String(user.name || '').split(' ')
+  const firstName = nameParts[0] || 'Unknown'
+  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : 'Unknown'
+
+  return new Person({
+    personID,
+    name: new PersonName({ firstName, lastName }),
+    emails: [new EmailAddress(user.email)],
+  })
+}
+
+export function mapDataToMoney(data: any): Money {
+  if (!data) return new Money({ amount: 0, currency: Currency.USD })
+  return new Money({
+    amount: data.amount || 0,
+    currency: (data.currency as Currency) || Currency.USD,
+  })
+}
+
+export function mapDataToMopServer(data: any): MOPServer {
+  if (!data) return MOPServer.localhost()
+  return new MOPServer({
+    url: URL.parse(data.url || 'https://localhost'),
+    version: data.version || '0.0.0',
   })
 }

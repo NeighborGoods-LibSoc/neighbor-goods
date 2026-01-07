@@ -77,6 +77,7 @@ export interface Config {
     items: Item;
     loans: Loan;
     tags: Tag;
+    libraries: Library;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -97,6 +98,7 @@ export interface Config {
     items: ItemsSelect<false> | ItemsSelect<true>;
     loans: LoansSelect<false> | LoansSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    libraries: LibrariesSelect<false> | LibrariesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -879,6 +881,55 @@ export interface Loan {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "libraries".
+ */
+export interface Library {
+  id: string;
+  name: string;
+  /**
+   * UUID for the library (domain ID)
+   */
+  library_id: string;
+  location?: {
+    latitude?: number | null;
+    longitude?: number | null;
+    street_address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip_code?: string | null;
+    country?: string | null;
+  };
+  administrators: (string | User)[];
+  waitingListType: 'NONE' | 'QUADRATIC_WAITING_LIST' | 'FIRST_COME_FIRST_SERVE';
+  maxFinesBeforeSuspension: {
+    amount: number;
+    currency: 'USD' | 'EUR' | 'HOUR';
+  };
+  feeSchedule: {
+    feeForOverdueItem: {
+      amount: number;
+      currency: 'USD' | 'EUR' | 'HOUR';
+    };
+    feeForDamagedItem: {
+      amount: number;
+      currency: 'USD' | 'EUR' | 'HOUR';
+    };
+  };
+  /**
+   * Default loan time in days
+   */
+  defaultLoanTime: number;
+  mopServer: {
+    url: string;
+    version: string;
+  };
+  publicURL?: string | null;
+  items?: (string | Item)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "redirects".
  */
 export interface Redirect {
@@ -1085,6 +1136,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: string | Tag;
+      } | null)
+    | ({
+        relationTo: 'libraries';
+        value: string | Library;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1533,6 +1588,60 @@ export interface TagsSelect<T extends boolean = true> {
   name?: T;
   description?: T;
   color?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "libraries_select".
+ */
+export interface LibrariesSelect<T extends boolean = true> {
+  name?: T;
+  library_id?: T;
+  location?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+        street_address?: T;
+        city?: T;
+        state?: T;
+        zip_code?: T;
+        country?: T;
+      };
+  administrators?: T;
+  waitingListType?: T;
+  maxFinesBeforeSuspension?:
+    | T
+    | {
+        amount?: T;
+        currency?: T;
+      };
+  feeSchedule?:
+    | T
+    | {
+        feeForOverdueItem?:
+          | T
+          | {
+              amount?: T;
+              currency?: T;
+            };
+        feeForDamagedItem?:
+          | T
+          | {
+              amount?: T;
+              currency?: T;
+            };
+      };
+  defaultLoanTime?: T;
+  mopServer?:
+    | T
+    | {
+        url?: T;
+        version?: T;
+      };
+  publicURL?: T;
+  items?: T;
   updatedAt?: T;
   createdAt?: T;
 }

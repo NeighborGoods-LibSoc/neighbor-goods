@@ -72,13 +72,13 @@ describe("Full Borrow Happy Path Integration Test", () => {
             expect(loginResult.user.id).toBe(adminUser.id);
               });
 
-              it('2. create a library with the admin user as admin', async () => {
-                // TODO: Implementation for: create library, verify in listings
-              });
+      it('2. create a library with the admin user as admin', async () => {
+        // TODO: Implementation for: create library, verify in listings
+      });
 
-          it('3. create a lender user and join library', async () => {
-            // Implementation for: create lender, join the library, list members
-          });
+      it('3. create a lender user and join library', async () => {
+        // Implementation for: create lender, join the library, list members
+      });
 
       it('4. create an item belonging to lender user', async () => {
         // Implementation for: create item, add to the library, check status AVAILABLE
