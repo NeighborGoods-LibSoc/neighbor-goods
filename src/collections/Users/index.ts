@@ -66,6 +66,22 @@ export const Users: CollectionConfig = {
       }
     },
   },
+  hooks: {
+    afterError: [
+      ({ error, result, req }) => {
+        // Only mask errors on login endpoint to prevent user enumeration
+        if (req.url?.includes('/login')) {
+          return {
+            response: {
+              ...result,
+              errors: [{ message: 'Invalid credentials' }],
+            },
+          }
+        }
+        return { response: result }
+      },
+    ],
+  },
   fields: [
     {
       name: 'name',
