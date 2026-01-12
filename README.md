@@ -80,12 +80,12 @@ These are for real-time, localized communication. They work like the map markers
 
  - [ ] User makes a pin, marks their location on the map, along with a duration. Anyone in the immediate area can respond until the pin expires?
 
-## Contribution and Gamification (Future Priority)
-To help align individual incentives with pro-social actions, contributions are tracked for all users, along with how their contributions are used. These values are put into a score "leaky bucket" or moving average, so that continuous contribution towards the other network members (and by extension the network itself) is encouraged.
- - [ ] Like a micro reputation economy? Top contributors get a high score, encouraging preferential treatment on competing borrows and the like?
+## Offerings and Gamification (Future Priority)
+To help align individual incentives with pro-social actions, offerings are tracked for all users, along with how their offerings are used. These values are put into a score "leaky bucket" or moving average, so that continuous offerings towards the other network members (and by extension the network itself) is encouraged.
+ - [ ] Like a micro reputation economy? Top offerings count gets a high score, encouraging preferential treatment on competing borrows and the like?
 
 ## The Community Currency Exchange (Future Priority)
-To facilitate Contribution and Gamification, and also allow for interfacing with the world at large, the application supports a complementary currency system, based off of the [ROCS paradigm](https://transaction.net/money/rocs/).
+To facilitate Offerings and Gamification, and also allow for interfacing with the world at large, the application supports a complementary currency system, based off of the [ROCS paradigm](https://transaction.net/money/rocs/).
 
 ## Collective Action (Future Priority)
 Users will sometimes need to solve a problem collectively, such as establishing a new cert for their node, or organizing community project. For NeighborGoods, the problem is solved using a procedure similar to crowdfunding.
@@ -132,8 +132,8 @@ The following are the available pages to interact with the application:
 3. SignUp - self explanatory
 4. FAQ/About/Community Agreement - pages offering more in depth information about the platform, and the node being viewed.
 5. Inventory - a collection of all open offers and requests listed on the node, along with search tools to find what a user needs.
-6. Item Management View - the page displays a single item in full. Items are borrowed from this page.
-7. Item Contribution - allows for the contribution of new items to the network.
+6. Item Management View - the page displays a single item in full. Things are borrowed from this page.
+7. Item Offerings - allows for the offering of new items to the network.
 8. User Profile - the main page for users to manage their own profiles. Includes their own stats and history of actions involving them, along with outstanding commitments.
 9. Dashboard - AKA home page. The starting page for users who have logged in.
 
@@ -228,10 +228,10 @@ My Account: Profile, edit profile, my shared items, borrowing history, calendar
 Admin Panel: User management, dispute resolution, settings (admin user only)
 
 ### Content Organization
-Items organized by user generated tags, by popularity, and by date added
+Things organized by user generated tags, by popularity, and by date added
 Skills categorized by tags with availability indicators
 Events organized chronologically with resource needs highlighted
-Requests tracked by status (pending, active, completed)
+ThingRequests tracked by status (pending, active, completed)
 
 ## Key User Flows
 ### User Registration & Onboarding
@@ -256,7 +256,7 @@ Organizer lists needed resources (items, skills, volunteers), system automatical
 Community members can commit resources or volunteer time
 System tracks commitments and outstanding needs
 Organizer communicates with participants off-platform
-Event execution with check-in of contributed items
+Event execution with check-in of offered items
 Return process for borrowed items after event
 
 ### Dispute Resolution
@@ -364,22 +364,3 @@ Phase 5: Ratings, reviews, and enhanced trust mechanisms
  - Admin - A User with additional responsibilities of hosting a node,
    moderating it, adding new Users, watching for problems and requesting
    additional features from developers.
-
-
-# Developer Setup
-## PNPM
-We use [PNPM](https://pnpm.io/) for package management.
-
-## Mailpit
-For integration testing, we use [Mailpit](https://mailpit.axllent.org/) to mock an SMTP server
-
-You can just launch it with docker using
-```bash
-docker run -d \
---restart unless-stopped \
---name=mailpit \
--p 8025:8025 \
--p 1025:1025 \
-axllent/mailpit
-```
-

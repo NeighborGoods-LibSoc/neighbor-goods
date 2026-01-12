@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 import { authenticated } from '../access/authenticated'
 import { anyone } from '../access/anyone'
+import { uuidField } from '@/fields/uuid'
 
 export const Loans: CollectionConfig = {
   slug: 'loans',
@@ -16,20 +17,7 @@ export const Loans: CollectionConfig = {
     useAsTitle: 'loan_id',
   },
   fields: [
-    {
-      name: 'loan_id',
-      type: 'text',
-      required: true,
-      admin: {
-        description: 'UUID for the loan (domain ID)',
-      },
-      validate: (val: unknown) => {
-        if (typeof val !== 'string') return 'Must be a string'
-        // simple UUID v4 format check (relaxed)
-        const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
-        return uuidRegex.test(val) || 'Must be a valid UUID'
-      },
-    },
+    uuidField({ name: 'loan_id', description: 'UUID for the loan (domain ID)' }),
     {
       name: 'item',
       type: 'relationship',

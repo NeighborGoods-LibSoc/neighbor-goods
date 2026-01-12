@@ -76,6 +76,9 @@ export interface Config {
     admins: Admin;
     items: Item;
     loans: Loan;
+    'thing-requests': ThingRequest;
+    'borrow-requests': BorrowRequest;
+    distributedLibraries: DistributedLibrary;
     tags: Tag;
     libraries: Library;
     redirects: Redirect;
@@ -97,6 +100,9 @@ export interface Config {
     admins: AdminsSelect<false> | AdminsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     loans: LoansSelect<false> | LoansSelect<true>;
+    'thing-requests': ThingRequestsSelect<false> | ThingRequestsSelect<true>;
+    'borrow-requests': BorrowRequestsSelect<false> | BorrowRequestsSelect<true>;
+    distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
     libraries: LibrariesSelect<false> | LibrariesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
@@ -800,6 +806,10 @@ export interface Admin {
 export interface Item {
   id: string;
   name: string;
+  /**
+   * Current availability status of this item
+   */
+  status: 'READY' | 'WAITING_FOR_LENDER_APPROVAL_TO_BORROW' | 'BORROWED' | 'DAMAGED' | 'RESERVED';
   description?: string | null;
   /**
    * Select tags to categorize this item
@@ -813,12 +823,19 @@ export interface Item {
    * Maximum borrowing time in days
    */
   borrowingTime: number;
-  contributedBy: string | User;
-  primaryImage?: (string | null) | Media;
+  offeredBy: string | User;
+  /**
+   * Primary image used as thumbnail
+   */
+  primaryImage: string | Media;
   /**
    * Additional images for this item
    */
   additional_images?: (string | Media)[] | null;
+  /**
+   * User who has requested to borrow this item (pending approval)
+   */
+  requestedToBorrowBy?: (string | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -925,6 +942,83 @@ export interface Library {
   };
   publicURL?: string | null;
   items?: (string | Item)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "thing-requests".
+ */
+export interface ThingRequest {
+  id: string;
+  name: string;
+  /**
+   * Current status of this request
+   */
+  status: 'OPEN' | 'FULFILLED' | 'CLOSED';
+  description?: string | null;
+  /**
+   * Select tags to categorize this request
+   */
+  tags?: (string | Tag)[] | null;
+  requestedBy: string | User;
+  /**
+   * Optional reference image showing what you are looking for
+   */
+  referenceImage?: (string | null) | Media;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "borrow-requests".
+ */
+export interface BorrowRequest {
+  id: string;
+  item: string | Item;
+  requestedBy: string | User;
+  /**
+   * Timestamp of when the borrow request was made
+   */
+  requestedAt: string;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "distributedLibraries".
+ */
+export interface DistributedLibrary {
+  id: string;
+  /**
+   * UUID for the library (domain ID)
+   */
+  library_id: string;
+  name: string;
+  /**
+   * Public URL for this distributed library
+   */
+  public_url?: string | null;
+  administrators?: (string | User)[] | null;
+  /**
+   * Default loan time in days
+   */
+  default_loan_time_days: number;
+  /**
+   * Geographic service area
+   */
+  area: {
+    center_point?: {
+      latitude?: number | null;
+      longitude?: number | null;
+      street_address?: string | null;
+      city?: string | null;
+      state?: string | null;
+      zip_code?: string | null;
+      country?: string | null;
+    };
+    radius_kilometers: number;
+  };
   updatedAt: string;
   createdAt: string;
 }
@@ -1132,6 +1226,18 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'loans';
         value: string | Loan;
+      } | null)
+    | ({
+        relationTo: 'thing-requests';
+        value: string | ThingRequest;
+      } | null)
+    | ({
+        relationTo: 'borrow-requests';
+        value: string | BorrowRequest;
+      } | null)
+    | ({
+        relationTo: 'distributedLibraries';
+        value: string | DistributedLibrary;
       } | null)
     | ({
         relationTo: 'tags';
@@ -1545,13 +1651,15 @@ export interface AdminsSelect<T extends boolean = true> {
  */
 export interface ItemsSelect<T extends boolean = true> {
   name?: T;
+  status?: T;
   description?: T;
   tags?: T;
   rulesForUse?: T;
   borrowingTime?: T;
-  contributedBy?: T;
+  offeredBy?: T;
   primaryImage?: T;
   additional_images?: T;
+  requestedToBorrowBy?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1577,6 +1685,60 @@ export interface LoansSelect<T extends boolean = true> {
         country?: T;
       };
   time_returned?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "thing-requests_select".
+ */
+export interface ThingRequestsSelect<T extends boolean = true> {
+  name?: T;
+  status?: T;
+  description?: T;
+  tags?: T;
+  requestedBy?: T;
+  referenceImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "borrow-requests_select".
+ */
+export interface BorrowRequestsSelect<T extends boolean = true> {
+  item?: T;
+  requestedBy?: T;
+  requestedAt?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "distributedLibraries_select".
+ */
+export interface DistributedLibrariesSelect<T extends boolean = true> {
+  library_id?: T;
+  name?: T;
+  public_url?: T;
+  administrators?: T;
+  default_loan_time_days?: T;
+  area?:
+    | T
+    | {
+        center_point?:
+          | T
+          | {
+              latitude?: T;
+              longitude?: T;
+              street_address?: T;
+              city?: T;
+              state?: T;
+              zip_code?: T;
+              country?: T;
+            };
+        radius_kilometers?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }

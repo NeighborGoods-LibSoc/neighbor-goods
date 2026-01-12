@@ -23,6 +23,9 @@ import { Users } from './collections/Users'
 import { Admins } from './collections/Admins'
 import { Loans } from './collections/Loans'
 import { Libraries } from './collections/Libraries'
+import { ThingRequests } from './collections/ThingRequests'
+import { BorrowRequests } from './collections/BorrowRequests'
+import { DistributedLibraries } from './collections/DistributedLibraries'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -74,7 +77,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Admins, Items, Loans, Tags, Libraries],
+  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, ThingRequests, BorrowRequests, DistributedLibraries, Tags],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
@@ -103,22 +106,17 @@ export default buildConfig({
     },
     tasks: [],
   },
-  email: disableEmailForTests
-    ? undefined
-    : {
-        transportOptions: {
-          host: process.env.SMTP_HOST || '127.0.0.1',
-          port: Number(process.env.SMTP_PORT || 587),
-          secure: false,
-          auth:
-            process.env.SMTP_USER && process.env.SMTP_PASS
-              ? {
-                  user: process.env.SMTP_USER,
-                  pass: process.env.SMTP_PASS,
-                }
-              : undefined,
-        },
-        fromName: process.env.SMTP_FROM_NAME || 'NeighborGoods',
-        fromAddress: process.env.SMTP_FROM_ADDRESS || 'no-reply@example.com',
+  email: nodemailerAdapter({
+    defaultFromAddress: 'info@neighborgoods.com',
+    defaultFromName: 'NeighborGoods',
+    // Nodemailer transportOptions
+    transportOptions: {
+      host: process.env.SMTP_SERVER,
+      port: 587,
+      auth: {
+        user: process.env.SMTP_USER,
+        pass: process.env.SMTP_PASSWORD,
       },
+    },
+  }),
 })

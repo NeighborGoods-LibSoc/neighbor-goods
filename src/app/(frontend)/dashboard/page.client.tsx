@@ -6,6 +6,7 @@ import type { User } from '@/payload-types'
 
 interface DashboardClientProps {
   user: User
+  showDeletedMessage?: boolean
 }
 
 interface Item {
@@ -22,7 +23,7 @@ interface Event {
   location: string
 }
 
-export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
+export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDeletedMessage }) => {
   const [borrowedItems, setBorrowedItems] = useState<Item[]>([])
   const [offeredItems, setOfferedItems] = useState<Item[]>([])
   const [events, setEvents] = useState<Event[]>([])
@@ -34,7 +35,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
     const fetchDashboardData = async () => {
       try {
         // Fetch user's offered items
-        const itemsResponse = await fetch('/api/items?where[contributed_by][equals]=' + user.id)
+        const itemsResponse = await fetch('/api/items?where[offeredBy][equals]=' + user.id)
         if (itemsResponse.ok) {
           const itemsData = await itemsResponse.json()
           setOfferedItems(itemsData.docs || [])
@@ -77,13 +78,22 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
 
   return (
     <main className="container">
+      {showDeletedMessage && (
+        <div
+          className="mb-4 rounded-lg border border-green-200 bg-green-50 p-4 text-green-800"
+          role="alert"
+        >
+          <strong>Success!</strong> Your item has been removed.
+        </div>
+      )}
+
       <div className="page-header">
         <div>
           <h1>Dashboard</h1>
         </div>
         <div>
-          <Link href="/items/contribute" className="btn btn-primary">
-            Contribute New Item
+          <Link href="/items/offer" className="btn btn-primary">
+            Offer New Item
           </Link>
         </div>
       </div>
@@ -114,14 +124,14 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
         <div className="card">
           <h2>Quick Actions</h2>
           <ul className="quick-actions-grid">
-            <Link href="#" className="btn btn-secondary">
+            <Link href="/items/request" className="btn btn-secondary">
               Request
             </Link>
-            <Link href="/items/contribute" className="btn btn-secondary">
+            <Link href="/items/offer" className="btn btn-secondary">
               Offer
             </Link>
-            <Link href="/items/transfers" className="btn btn-secondary">
-              Manage Items
+            <Link href="/my-items" className="btn btn-secondary">
+              My Items
             </Link>
             <Link href="#" className="btn btn-secondary">
               Plan Event
@@ -160,7 +170,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user }) => {
           </Link>
         </div>
 
-        {/* Items Tabs */}
+        {/* Things Tabs */}
         <div className="card">
           <div className="tabs">
             <div

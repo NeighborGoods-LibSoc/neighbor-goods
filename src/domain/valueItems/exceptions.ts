@@ -83,3 +83,15 @@ export class InvalidLibraryConfigurationError extends Error {
     this.name = "InvalidLibraryConfigurationError";
   }
 }
+
+export class BorrowCooldownError extends Error {
+  public readonly minutesRemaining: number;
+
+  constructor(minutesRemaining: number) {
+    super(
+      `You must wait ${minutesRemaining} minute(s) before requesting to borrow this item again`,
+    );
+    this.name = "BorrowCooldownError";
+    this.minutesRemaining = minutesRemaining;
+  }
+}
