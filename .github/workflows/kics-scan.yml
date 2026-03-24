@@ -23,7 +23,7 @@ jobs:
           fetch-depth: 0
 
       - name: Run KICS IaC Scan
-        uses: checkmarx/kics-github-action@v2
+        uses: checkmarx/kics-github-action@b974e53df1e3a2cd22ea90f0ec01882394feede4
         continue-on-error: true
         with:
           path: '.'
