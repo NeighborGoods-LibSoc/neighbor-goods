@@ -80,8 +80,12 @@ describe('Libraries API Integration Tests', () => {
     expect(doc.waitingListType).toBe('FIRST_COME_FIRST_SERVE');
     expect(doc.defaultLoanTime).toBe(21);
     expect(doc.location.city).toBe('Booktown');
-    expect(doc.administrators).toContain(testAdmin.id);
-    expect(doc.items).toContain(testItem.id);
+
+    const adminIds = doc.administrators.map((a: any) => typeof a === 'object' ? a.id : a);
+    expect(adminIds).toContain(testAdmin.id);
+
+    const itemIds = doc.items.map((i: any) => typeof i === 'object' ? i.id : i);
+    expect(itemIds).toContain(testItem.id);
   });
 
   it('should generate library_id if not provided (though required, hook should handle it)', async () => {

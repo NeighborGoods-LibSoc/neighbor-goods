@@ -50,9 +50,9 @@ describe('Loans API Integration Tests', () => {
     expect(testItem.name).toBe('Test Ladder');
     expect(testItem.description).toBe('A ladder for testing');
 
-    const itemId = typeof testItem.contributedBy === 'object'
-      ? testItem.contributedBy.id
-      : testItem.contributedBy;
+    const itemId = typeof testItem.offeredBy === 'object'
+      ? testItem.offeredBy.id
+      : testItem.offeredBy;
     expect(itemId).toBe(testAdmin.id);
   });
 
@@ -60,7 +60,7 @@ describe('Loans API Integration Tests', () => {
     const { docs } = await payload.find({
       collection: 'items',
       where: {
-        contributedBy: {
+        offeredBy: {
           equals: testAdmin.id,
         },
       },
@@ -68,7 +68,7 @@ describe('Loans API Integration Tests', () => {
 
     expect(docs.length).toBeGreaterThan(0);
     const contributorIds = docs.map((item: any) =>
-      typeof item.contributedBy === 'object' ? item.contributedBy.id : item.contributedBy,
+      typeof item.offeredBy === 'object' ? item.offeredBy.id : item.offeredBy,
     );
     expect(contributorIds.every(id => id === testAdmin.id)).toBe(true);
   });

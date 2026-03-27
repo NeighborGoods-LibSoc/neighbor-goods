@@ -76,11 +76,11 @@ export interface Config {
     admins: Admin;
     items: Item;
     loans: Loan;
+    libraries: Library;
     'thing-requests': ThingRequest;
     'borrow-requests': BorrowRequest;
     distributedLibraries: DistributedLibrary;
     tags: Tag;
-    libraries: Library;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -100,11 +100,11 @@ export interface Config {
     admins: AdminsSelect<false> | AdminsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     loans: LoansSelect<false> | LoansSelect<true>;
+    libraries: LibrariesSelect<false> | LibrariesSelect<true>;
     'thing-requests': ThingRequestsSelect<false> | ThingRequestsSelect<true>;
     'borrow-requests': BorrowRequestsSelect<false> | BorrowRequestsSelect<true>;
     distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
-    libraries: LibrariesSelect<false> | LibrariesSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -1228,6 +1228,10 @@ export interface PayloadLockedDocument {
         value: string | Loan;
       } | null)
     | ({
+        relationTo: 'libraries';
+        value: string | Library;
+      } | null)
+    | ({
         relationTo: 'thing-requests';
         value: string | ThingRequest;
       } | null)
@@ -1242,10 +1246,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: string | Tag;
-      } | null)
-    | ({
-        relationTo: 'libraries';
-        value: string | Library;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1690,6 +1690,60 @@ export interface LoansSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "libraries_select".
+ */
+export interface LibrariesSelect<T extends boolean = true> {
+  name?: T;
+  library_id?: T;
+  location?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+        street_address?: T;
+        city?: T;
+        state?: T;
+        zip_code?: T;
+        country?: T;
+      };
+  administrators?: T;
+  waitingListType?: T;
+  maxFinesBeforeSuspension?:
+    | T
+    | {
+        amount?: T;
+        currency?: T;
+      };
+  feeSchedule?:
+    | T
+    | {
+        feeForOverdueItem?:
+          | T
+          | {
+              amount?: T;
+              currency?: T;
+            };
+        feeForDamagedItem?:
+          | T
+          | {
+              amount?: T;
+              currency?: T;
+            };
+      };
+  defaultLoanTime?: T;
+  mopServer?:
+    | T
+    | {
+        url?: T;
+        version?: T;
+      };
+  publicURL?: T;
+  items?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "thing-requests_select".
  */
 export interface ThingRequestsSelect<T extends boolean = true> {
@@ -1750,60 +1804,6 @@ export interface TagsSelect<T extends boolean = true> {
   name?: T;
   description?: T;
   color?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "libraries_select".
- */
-export interface LibrariesSelect<T extends boolean = true> {
-  name?: T;
-  library_id?: T;
-  location?:
-    | T
-    | {
-        latitude?: T;
-        longitude?: T;
-        street_address?: T;
-        city?: T;
-        state?: T;
-        zip_code?: T;
-        country?: T;
-      };
-  administrators?: T;
-  waitingListType?: T;
-  maxFinesBeforeSuspension?:
-    | T
-    | {
-        amount?: T;
-        currency?: T;
-      };
-  feeSchedule?:
-    | T
-    | {
-        feeForOverdueItem?:
-          | T
-          | {
-              amount?: T;
-              currency?: T;
-            };
-        feeForDamagedItem?:
-          | T
-          | {
-              amount?: T;
-              currency?: T;
-            };
-      };
-  defaultLoanTime?: T;
-  mopServer?:
-    | T
-    | {
-        url?: T;
-        version?: T;
-      };
-  publicURL?: T;
-  items?: T;
   updatedAt?: T;
   createdAt?: T;
 }
