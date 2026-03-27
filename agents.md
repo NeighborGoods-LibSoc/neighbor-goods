@@ -31,6 +31,7 @@ NeighborGoods is a Federated Library of Things based on the principles of **Libr
 - `src/blocks/`: Payload block components for page building.
 - `src/utilities/`: Helper functions and utilities.
 - `src/domain/`: Core business logic and entities (if applicable).
+- `.agents/skills/`: Detailed AI agent skills for specific project domains.
 
 ## 4. Key Data Models
 
