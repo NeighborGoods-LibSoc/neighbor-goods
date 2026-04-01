@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { getTestPayload, cleanupPayload } from '../setup/integration.setup';
-import { createTestUser, createTestItem, cleanupTestData, createTestLibrary } from '../helpers/testData';
+import { createTestUser, cleanupTestData, createTestLibrary } from '../helpers/testData';
 import type { Payload } from 'payload';
 
 /**
@@ -37,9 +37,6 @@ describe("Full Borrow Happy Path Integration Test", () => {
       let payload: Payload;
       let adminUser: any;
       let library: any;
-      let lender: any;
-      let borrower: any;
-      let item: any;
 
       beforeAll(async () => {
         payload = await getTestPayload();
