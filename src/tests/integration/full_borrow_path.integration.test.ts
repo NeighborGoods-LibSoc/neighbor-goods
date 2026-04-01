@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import { getTestPayload, cleanupPayload } from '../setup/integration.setup';
-import { createTestUser, createTestItem, cleanupTestData } from '../helpers/testData';
+import { createTestUser, createTestItem, cleanupTestData, createTestLibrary } from '../helpers/testData';
 import type { Payload } from 'payload';
 
 /**
@@ -73,7 +73,27 @@ describe("Full Borrow Happy Path Integration Test", () => {
               });
 
       it('2. create a library with the admin user as admin', async () => {
-        // TODO: Implementation for: create library, verify in listings
+        library = await createTestLibrary(payload, adminUser.id, {
+          name: 'Integration Test Library',
+        });
+
+        expect(library.id).toBeDefined();
+        expect(library.name).toBe('Integration Test Library');
+
+        // In Payload, relationship fields can be an array of IDs or objects.
+        // When creating, we passed [adminUser.id], so it should be there.
+        const adminIds = library.administrators.map((admin: any) =>
+          typeof admin === 'object' ? admin.id : admin
+        );
+        expect(adminIds).toContain(adminUser.id);
+
+        const listResult = await payload.find({
+          collection: 'distributedLibraries',
+        });
+
+        const found = listResult.docs.find(doc => doc.id === library.id);
+        expect(found).toBeDefined();
+        expect(found?.name).toBe('Integration Test Library');
       });
 
       it('3. create a lender user and join library', async () => {

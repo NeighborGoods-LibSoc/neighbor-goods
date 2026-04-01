@@ -106,7 +106,7 @@ export default buildConfig({
     },
     tasks: [],
   },
-  email: nodemailerAdapter({
+  email: !disableEmailForTests ? nodemailerAdapter({
     defaultFromAddress: 'info@neighborgoods.com',
     defaultFromName: 'NeighborGoods',
     // Nodemailer transportOptions
@@ -118,5 +118,5 @@ export default buildConfig({
         pass: process.env.SMTP_PASSWORD,
       },
     },
-  }),
+  }) : undefined,
 })

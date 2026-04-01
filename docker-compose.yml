@@ -16,7 +16,7 @@ services:
       - .env
 
   mongo:
-    image: mongo:latest
+    image: mongo:6
     # Exposes DB publicly. Disable for production
     ports:
       - '27017:27017'

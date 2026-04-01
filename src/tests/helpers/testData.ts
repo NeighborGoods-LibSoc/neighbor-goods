@@ -5,9 +5,26 @@ export async function createTestUser(payload: Payload, overrides: any = {}) {
   return await payload.create({
     collection: 'users',
     data: {
-      email: overrides.email || `test-${ID.generate()}@example.com`,
+      email: overrides.email || `test-${ID.generate().toString()}@example.com`,
       password: overrides.password || 'testPassword123!',
       name: overrides.name || 'Test User',
+      ...overrides,
+    },
+  });
+}
+
+export async function createTestLibrary(payload: Payload, adminId: string, overrides: any = {}) {
+  return await payload.create({
+    collection: 'distributedLibraries',
+    data: {
+      library_id: ID.generate().toString(),
+      name: overrides.name || 'Test Library',
+      administrators: [adminId],
+      default_loan_time_days: overrides.default_loan_time_days || 14,
+      area: {
+        radius_kilometers: 10,
+        ...overrides.area,
+      },
       ...overrides,
     },
   });
@@ -52,7 +69,7 @@ export async function createTestItem(payload: Payload, ownerId: string, override
 
 export async function cleanupTestData(
   payload: Payload | null | undefined,
-  collections: string[] = ['users', 'items', 'loans'],
+  collections: string[] = ['users', 'items', 'loans', 'distributedLibraries'],
 ) {
   if (!payload) {
     console.warn('Payload instance not available for cleanup');
