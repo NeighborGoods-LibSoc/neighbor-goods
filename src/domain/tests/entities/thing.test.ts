@@ -29,10 +29,14 @@ describe("Thing", () => {
     thing.status = ThingStatus.BORROWED;
     expect(thing.status).toBe(ThingStatus.BORROWED);
 
-    // Invalid: BORROWED -> READY is valid, but BORROWED -> DAMAGED is allowed too; test invalid by going DAMAGED -> READY
+    // Invalid: DAMAGED -> BORROWED is not allowed
     thing.status = ThingStatus.DAMAGED;
     expect(() => {
-      thing.status = ThingStatus.READY;
+      thing.status = ThingStatus.BORROWED;
     }).toThrowError();
+
+    // Valid: DAMAGED -> READY is allowed
+    thing.status = ThingStatus.READY;
+    expect(thing.status).toBe(ThingStatus.READY);
   });
 });

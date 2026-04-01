@@ -4,7 +4,7 @@ import { authenticated } from '../access/authenticated'
 import { anyone } from '../access/anyone'
 import { isOwner } from '../access/isOwner'
 import { ThingRequestStatus } from '../domain/valueItems/thingRequestStatus'
-import statusTransitions from '../domain/valueItems/statusTransitions.json'
+import { requestStatusTransitions } from '../domain/valueItems/statusTransitions'
 
 export const ThingRequests: CollectionConfig = {
   slug: 'thing-requests',
@@ -103,8 +103,7 @@ export const ThingRequests: CollectionConfig = {
         const newStatus = data.status || currentStatus
 
         if (currentStatus !== newStatus) {
-          const transitions = statusTransitions.requestStatus as Record<string, string[]>
-          const validNextStatuses = transitions[currentStatus] || []
+          const validNextStatuses = requestStatusTransitions[currentStatus] || []
 
           if (!validNextStatuses.includes(newStatus)) {
             throw new Error(

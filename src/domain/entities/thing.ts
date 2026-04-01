@@ -7,7 +7,7 @@ import {
   ThingStatus,
   ThingTitle,
 } from '../valueItems'
-import statusTransitions from '../valueItems/statusTransitions.json'
+import { thingStatusTransitions } from '../valueItems/statusTransitions'
 
 export class Thing extends Entity {
   thing_id: ID
@@ -53,8 +53,7 @@ export class Thing extends Entity {
 
   set status(value: ThingStatus) {
     if (value !== this._status) {
-      const transitions = statusTransitions.thingStatus as Record<string, string[]>
-      const validNextStatuses = (transitions[this._status] || []) as ThingStatus[]
+      const validNextStatuses = (thingStatusTransitions[this._status] || []) as ThingStatus[]
 
       if (!validNextStatuses.includes(value)) {
         throw new InvalidThingStateTransitionError(this._status, value)
