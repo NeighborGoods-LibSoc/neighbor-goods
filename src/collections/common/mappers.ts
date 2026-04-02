@@ -86,7 +86,7 @@ class ZeroFeeSchedule implements FeeSchedule {
   feeForDamagedItem() { return new Money({ amount: 0, currency: Currency.USD }) }
 }
 
-export function buildDomainDistributedLibraryFromData(data: any): DomainDistributedLibrary {
+export async function buildDomainDistributedLibraryFromData(data: any, req?: any): Promise<DomainDistributedLibrary> {
   const libraryID = new ID(String(data.library_id))
   const name = String(data.name || '')
   if (!name) throw new Error('Name is required')
@@ -96,10 +96,29 @@ export function buildDomainDistributedLibraryFromData(data: any): DomainDistribu
     ? data.public_url.trim()
     : null
 
+  const resolveUsers = async (userIds: any[]) => {
+    const people: Person[] = []
+    for (const item of (userIds || [])) {
+      if (typeof item === 'object') {
+        if (item.id || item._id) people.push(mapUserToPerson(item))
+      } else if (req) {
+        try {
+          const userDoc = await req.payload.findByID({ collection: 'users', id: String(item) })
+          if (userDoc) people.push(mapUserToPerson(userDoc))
+        } catch {}
+      }
+    }
+    return people
+  }
+
+  const administrators = await resolveUsers(data.administrators)
+  const members = await resolveUsers(data.members)
+
   const dl = new DomainDistributedLibrary({
     libraryID,
     name,
-    administrators: [],
+    administrators,
+    members,
     waitingListType: WaitingListType.FIRST_COME_FIRST_SERVE,
     maxFinesBeforeSuspension: new Money({ amount: 100, currency: Currency.USD }),
     feeSchedule: new ZeroFeeSchedule(),

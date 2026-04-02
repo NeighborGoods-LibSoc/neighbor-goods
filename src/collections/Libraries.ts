@@ -65,6 +65,13 @@ export const Libraries: CollectionConfig = {
       required: true,
     },
     {
+      name: 'members',
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: true,
+      required: false,
+    },
+    {
       name: 'waitingListType',
       type: 'select',
       defaultValue: 'NONE',
@@ -204,6 +211,14 @@ async function buildDomainLibraryFromData(data: any, req: any): Promise<SimpleLi
     administrators.push(mapUserToPerson(userDoc))
   }
 
+  const memberIds = Array.isArray(data.members) ? data.members : [data.members].filter(Boolean)
+  const members: any[] = []
+  for (const memberId of memberIds) {
+    const id = typeof memberId === 'object' ? memberId?.id || memberId?.value : memberId
+    const userDoc = await req.payload.findByID({ collection: 'users', id: String(id) })
+    members.push(mapUserToPerson(userDoc))
+  }
+
   const mopServer = mapDataToMopServer(data.mopServer)
   const maxFinesBeforeSuspension = mapDataToMoney(data.maxFinesBeforeSuspension)
 
@@ -217,6 +232,7 @@ async function buildDomainLibraryFromData(data: any, req: any): Promise<SimpleLi
     libraryID,
     name: data.name || 'Unnamed Library',
     administrators,
+    members,
     waitingListType: (data.waitingListType as WaitingListType) || WaitingListType.NONE,
     maxFinesBeforeSuspension,
     feeSchedule: feeSchedule as any,

@@ -36,6 +36,7 @@ pseudocode of the full path
 describe("Full Borrow Happy Path Integration Test", () => {
       let payload: Payload;
       let adminUser: any;
+      let lenderUser: any;
       let library: any;
 
       beforeAll(async () => {
@@ -94,11 +95,38 @@ describe("Full Borrow Happy Path Integration Test", () => {
       });
 
       it('3. create a lender user and join library', async () => {
-        // Implementation for: create lender, join the library, list members
+        lenderUser = await createTestUser(payload, {
+          email: 'lender@example.com',
+          password: 'lenderPassword123!',
+          name: 'Lender User',
+        });
+
+        expect(lenderUser.id).toBeDefined();
+
+        // Lender joins the library
+        // Since we are using Payload, we update the library's members field
+        await payload.update({
+          collection: 'distributedLibraries',
+          id: library.id,
+          data: {
+            members: [lenderUser.id],
+          },
+        });
+
+        // Verify the lender is in the members list
+        const updatedLibrary = await payload.findByID({
+          collection: 'distributedLibraries',
+          id: library.id,
+        });
+
+        const memberIds = (updatedLibrary.members || []).map((m: any) =>
+          typeof m === 'object' ? m.id : m
+        );
+        expect(memberIds).toContain(lenderUser.id);
       });
 
       it('4. create an item belonging to lender user', async () => {
-        // Implementation for: create item, add to the library, check status AVAILABLE
+        // Implementation for: create an item, add to the library, check status AVAILABLE
       });
 
       it('5. create a borrower user and join library', async () => {

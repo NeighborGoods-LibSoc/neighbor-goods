@@ -917,6 +917,7 @@ export interface Library {
     country?: string | null;
   };
   administrators: (string | User)[];
+  members?: (string | User)[] | null;
   waitingListType: 'NONE' | 'QUADRATIC_WAITING_LIST' | 'FIRST_COME_FIRST_SERVE';
   maxFinesBeforeSuspension: {
     amount: number;
@@ -1000,6 +1001,7 @@ export interface DistributedLibrary {
    */
   public_url?: string | null;
   administrators?: (string | User)[] | null;
+  members?: (string | User)[] | null;
   /**
    * Default loan time in days
    */
@@ -1707,6 +1709,7 @@ export interface LibrariesSelect<T extends boolean = true> {
         country?: T;
       };
   administrators?: T;
+  members?: T;
   waitingListType?: T;
   maxFinesBeforeSuspension?:
     | T
@@ -1776,6 +1779,7 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
   name?: T;
   public_url?: T;
   administrators?: T;
+  members?: T;
   default_loan_time_days?: T;
   area?:
     | T
