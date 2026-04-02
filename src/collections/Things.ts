@@ -1,14 +1,14 @@
 import type { CollectionConfig, Access } from 'payload'
 import type { User } from '@/payload-types'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
-import { isOwner } from '../access/isOwner'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
+import { isOwner } from '@/access/isOwner'
 import { uuidField } from '@/fields/uuid'
-import { ThingStatus } from '../domain/valueItems/thingStatus'
-import { ID } from '../domain/valueItems'
-import { ThingService } from '../domain/services/ThingService'
-import { PayloadBorrowRequestRepository } from '../infrastructure/repositories/PayloadBorrowRequestRepository'
+import { ThingStatus } from '@/domain'
+import { ID } from '@/domain'
+import { ThingService } from '@/domain'
+import { PayloadBorrowRequestRepository } from '@/infrastructure/repositories/PayloadBorrowRequestRepository'
 import { buildDomainThingFromData, thingToPayloadData } from './common/mappers'
 
 /**

@@ -17,7 +17,7 @@ export class PayloadBorrowRequestRepository implements IBorrowRequestRepository 
       limit: 1,
     })
 
-    const internalId = itemDocs.length > 0 ? itemDocs[0].id : thingId.toString()
+    const internalId = itemDocs && itemDocs.length > 0 && itemDocs[0] ? itemDocs[0].id : thingId.toString()
 
     const { totalDocs } = await this.payload.find({
       collection: 'borrow-requests',
@@ -58,7 +58,7 @@ export class PayloadBorrowRequestRepository implements IBorrowRequestRepository 
       limit: 1,
     })
 
-    const internalId = docs.length > 0 ? docs[0].id : thingId.toString()
+    const internalId = docs.length > 0 && docs[0] ? docs[0].id : thingId.toString()
 
     await this.payload.create({
       collection: 'borrow-requests',

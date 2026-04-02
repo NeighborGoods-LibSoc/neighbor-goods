@@ -1,15 +1,14 @@
 import { Thing } from '@/domain/entities/thing'
 import { DistributedLibrary as DomainDistributedLibrary } from '@/domain/entities/libraries/distributedLibrary'
 import { MOPServer } from '@/domain/entities/mopServer'
-import { ID, WaitingListType, Money, Currency, ThingStatus } from '@/domain/valueItems'
+import { WaitingListType, Money, Currency, ThingStatus } from '@/domain/valueItems'
 import type { FeeSchedule } from '@/domain/valueItems'
-import { ID, PersonName, EmailAddress, Money, Currency } from '@/domain/valueItems'
+import { ID, PersonName, EmailAddress } from '@/domain/valueItems'
 import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
 import { PhysicalArea } from '@/domain/valueItems/location/physicalArea'
 import { Distance } from '@/domain/valueItems/location/distance'
 import { ThingTitle } from '@/domain/valueItems/thingTitle'
 import { Person } from '@/domain/entities/people/person'
-import { MOPServer } from '@/domain/entities/mopServer'
 import { URL } from '@/domain/valueItems/url'
 
 export function mapItemToThing(item: any): Thing {
