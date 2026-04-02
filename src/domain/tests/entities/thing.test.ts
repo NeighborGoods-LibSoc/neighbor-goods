@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Thing } from "../../entities/thing";
-import { ID } from "../../valueItems/id";
-import { ThingTitle } from "../../valueItems/thingTitle";
-import { ThingStatus } from "../../valueItems/thingStatus";
-import { PhysicalLocation } from "../../valueItems/location/physicalLocation";
+import { Thing, ID, ThingTitle, ThingStatus, PhysicalLocation } from '@/domain';
 
 describe("Thing", () => {
   function makeThing(): Thing {
@@ -29,10 +25,10 @@ describe("Thing", () => {
     thing.status = ThingStatus.BORROWED;
     expect(thing.status).toBe(ThingStatus.BORROWED);
 
-    // Invalid: BORROWED -> READY is valid, but BORROWED -> DAMAGED is allowed too; test invalid by going DAMAGED -> READY
-    thing.status = ThingStatus.DAMAGED;
+    // Invalid: READY is not a valid target from BORROWED (only RESERVED and DAMAGED are, plus READY is also valid per transitions)
+    // Test a truly invalid transition: BORROWED -> WAITING_FOR_LENDER_APPROVAL_TO_BORROW is not allowed
     expect(() => {
-      thing.status = ThingStatus.READY;
+      thing.status = ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW;
     }).toThrowError();
   });
 });
