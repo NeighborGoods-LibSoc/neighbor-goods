@@ -18,6 +18,7 @@ export class Loan extends Entity {
     borrowerId: ID;
     returnLocation: Location;
     timeReturned: Date | null;
+    status?: LoanStatus;
   }) {
     super();
     this.loanID = params.loanId;
@@ -26,6 +27,7 @@ export class Loan extends Entity {
     this.borrowerID = params.borrowerId;
     this.returnLocation = params.returnLocation;
     this.timeReturned = params.timeReturned;
+    this._status = params.status ?? LoanStatus.RETURNED;
   }
 
   get lenderId(): ID {

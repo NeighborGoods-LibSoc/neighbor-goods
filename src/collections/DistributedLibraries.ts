@@ -77,6 +77,12 @@ export const DistributedLibraries: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'items',
+      type: 'relationship',
+      relationTo: 'items',
+      hasMany: true,
+    },
   ],
   hooks: {
     beforeValidate: [

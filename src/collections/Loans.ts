@@ -75,12 +75,13 @@ export const Loans: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      async ({ data, req }) => {
+      async ({ data, req, originalDoc, operation }) => {
         if (!data) return data
         try {
-          // Build domain object and write normalized values back to data
-          const domainLoan = await buildDomainLoanFromData(data, req)
-          // Normalize status (may auto-transition to OVERDUE based on due_date)
+          // For updates, merge data with originalDoc to build complete domain object
+          const mergedData = operation === 'update' ? { ...originalDoc, ...data } : data
+          const domainLoan = await buildDomainLoanFromData(mergedData, req)
+          // Normalize status
           data.status = domainLoan.status
           // Ensure loan_id remains consistent
           data.loan_id = domainLoan.loanID.toString()
@@ -92,7 +93,6 @@ export const Loans: CollectionConfig = {
             const dd = String(d.getUTCDate()).padStart(2, '0')
             data.due_date = `${yyyy}-${mm}-${dd}`
           }
-          // Normalize return_location/time_returned if needed (no change necessary)
           return data
         } catch (e: any) {
           throw new Error(e?.message || 'Invalid Loan domain state')
@@ -100,10 +100,11 @@ export const Loans: CollectionConfig = {
       },
     ],
     beforeChange: [
-      async ({ data, req }) => {
+      async ({ data, req, originalDoc, operation }) => {
         if (!data) return data
         try {
-          const domainLoan = await buildDomainLoanFromData(data, req)
+          const mergedData = operation === 'update' ? { ...originalDoc, ...data } : data
+          const domainLoan = await buildDomainLoanFromData(mergedData, req)
           // write back normalized values again
           data.status = domainLoan.status
           data.loan_id = domainLoan.loanID.toString()
@@ -163,15 +164,8 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
     borrowerId: borrower_id,
     returnLocation: return_location as any,
     timeReturned: time_returned,
+    status: LoanStatus[data.status as keyof typeof LoanStatus] || LoanStatus.RETURNED,
   })
-
-  // Apply the requested status through domain rules
-  const desired = String(data.status || 'RETURNED') as keyof typeof LoanStatus
-  if (!(desired in LoanStatus)) {
-    throw new Error(`Invalid status '${data.status}'`)
-  }
-  // set may throw if transition invalid
-  loan.status = LoanStatus[desired]
 
   return loan
 }

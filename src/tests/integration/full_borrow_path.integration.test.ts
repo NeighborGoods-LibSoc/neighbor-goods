@@ -37,7 +37,10 @@ describe("Full Borrow Happy Path Integration Test", () => {
       let payload: Payload;
       let adminUser: any;
       let lenderUser: any;
+      let borrowerUser: any;
       let library: any;
+      let drillItem: any;
+      let activeLoan: any;
 
       beforeAll(async () => {
         payload = await getTestPayload();
@@ -126,18 +129,183 @@ describe("Full Borrow Happy Path Integration Test", () => {
       });
 
       it('4. create an item belonging to lender user', async () => {
-        // Implementation for: create an item, add to the library, check status AVAILABLE
+        // 4a. Lender creates an item
+        drillItem = await (await import('../helpers/testData')).createTestItem(payload, lenderUser.id, {
+          name: 'Lender Drill',
+          description: 'A heavy-duty drill for integration testing',
+          borrowingTime: 5,
+        })
+
+        expect(drillItem.id).toBeDefined()
+        expect(drillItem.offeredBy).toBeDefined()
+
+        // 4b. Add the item to the distributed library
+        await payload.update({
+          collection: 'distributedLibraries',
+          id: library.id,
+          data: {
+            items: [drillItem.id],
+          },
+        })
+
+        // 4c. Verify the library now includes the item
+        const libWithItems = await payload.findByID({
+          collection: 'distributedLibraries',
+          id: library.id,
+        })
+
+        const itemIds = (libWithItems.items || []).map((it: any) =>
+          typeof it === 'object' ? it.id : it
+        )
+        expect(itemIds).toContain(drillItem.id)
+
+        // 4d. Verify item status is AVAILABLE (READY in domain/enum terms)
+        const itemDoc = await payload.findByID({ collection: 'items', id: drillItem.id })
+        expect(itemDoc.status).toBe('READY')
       });
 
       it('5. create a borrower user and join library', async () => {
-        // Implementation for: create borrower, join the library, list members (verify both)
+        borrowerUser = await createTestUser(payload, {
+          email: 'borrower@example.com',
+          password: 'borrowerPassword123!',
+          name: 'Borrower User',
+        });
+
+        expect(borrowerUser.id).toBeDefined();
+
+        // Borrower joins the library (add to members list)
+        // We already have lenderUser.id in the members list from test #3
+        // So we need to add borrowerUser.id to the existing list
+        const currentLibrary = await payload.findByID({
+          collection: 'distributedLibraries',
+          id: library.id,
+        });
+
+        const existingMemberIds = (currentLibrary.members || []).map((m: any) =>
+          typeof m === 'object' ? m.id : m
+        );
+
+        await payload.update({
+          collection: 'distributedLibraries',
+          id: library.id,
+          data: {
+            members: [...existingMemberIds, borrowerUser.id],
+          },
+        });
+
+        // Verify both lender and borrower are in the members list
+        const updatedLibrary = await payload.findByID({
+          collection: 'distributedLibraries',
+          id: library.id,
+        });
+
+        const memberIds = (updatedLibrary.members || []).map((m: any) =>
+          typeof m === 'object' ? m.id : m
+        );
+        expect(memberIds).toContain(lenderUser.id);
+        expect(memberIds).toContain(borrowerUser.id);
       });
 
       it('6. borrower gets item', async () => {
-        // Implementation for: search, borrow request, lender approval
+        // 6a. Borrower searches for the item
+        const searchResult = await payload.find({
+          collection: 'items',
+          where: {
+            name: { equals: 'Lender Drill' },
+          },
+        })
+        expect(searchResult.totalDocs).toBe(1)
+        const foundItem = searchResult.docs[0]
+        expect(foundItem).toBeDefined()
+        expect(foundItem!.id).toBe(drillItem.id)
+
+        // 6b. Borrower starts borrowing item
+        // Note: we must pass the user in req to trigger the borrower-specific logic in hooks
+        await payload.update({
+          collection: 'items',
+          id: drillItem.id,
+          data: {
+            status: 'WAITING_FOR_LENDER_APPROVAL_TO_BORROW',
+          },
+          req: { user: borrowerUser } as any,
+        })
+
+        // Verify status is now WAITING_FOR_LENDER_APPROVAL_TO_BORROW
+        let itemAfterRequest = await payload.findByID({ collection: 'items', id: drillItem.id })
+        expect(itemAfterRequest.status).toBe('WAITING_FOR_LENDER_APPROVAL_TO_BORROW')
+        expect(itemAfterRequest.requestedToBorrowBy).toBeDefined()
+
+        // 6c. Lender approves the loan
+        await payload.update({
+          collection: 'items',
+          id: drillItem.id,
+          data: {
+            status: 'BORROWED',
+          },
+          req: { user: lenderUser } as any,
+        })
+
+        // Verify status is now BORROWED
+        let itemAfterApproval = await payload.findByID({ collection: 'items', id: drillItem.id })
+        expect(itemAfterApproval.status).toBe('BORROWED')
+
+        // 6d. Manually create the Loan record since it's not automated yet
+        activeLoan = await payload.create({
+          collection: 'loans',
+          data: {
+            loan_id: (await import('../../domain/valueItems')).ID.generate().toString(),
+            item: drillItem.id,
+            borrower: borrowerUser.id,
+            status: 'BORROWED',
+            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          },
+        })
+        expect(activeLoan.id).toBeDefined()
       });
 
       it('7. borrower returns item', async () => {
-        // Implementation for: start return, approve return, search (verify available)
+        // 7a. Borrower starts to return
+        await payload.update({
+          collection: 'loans',
+          id: activeLoan.id,
+          data: {
+            status: 'RETURN_STARTED',
+          },
+          req: { user: borrowerUser } as any,
+        })
+
+        // 7b. Lender approves return
+        await payload.update({
+          collection: 'loans',
+          id: activeLoan.id,
+          data: {
+            status: 'RETURNED',
+          },
+          req: { user: lenderUser } as any,
+        })
+
+        // Also update the item status to READY since it's not automated yet
+        await payload.update({
+          collection: 'items',
+          id: drillItem.id,
+          data: {
+            status: 'READY',
+          },
+          req: { user: lenderUser } as any,
+        })
+
+        // 7c. Borrower searches for the item
+        const searchResult = await payload.find({
+          collection: 'items',
+          where: {
+            name: { equals: 'Lender Drill' },
+          },
+        })
+
+        // 7d. Item is listed as available again (READY)
+        expect(searchResult.totalDocs).toBe(1)
+        const returnedItem = searchResult.docs[0]
+        expect(returnedItem).toBeDefined()
+        expect(returnedItem!.status).toBe('READY')
       });
     });

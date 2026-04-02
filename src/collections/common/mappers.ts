@@ -13,7 +13,7 @@ import { MOPServer } from '@/domain/entities/mopServer'
 import { URL } from '@/domain/valueItems/url'
 
 export function mapItemToThing(item: any): Thing {
-  const thing_id = new ID(String(item?.id || item?._id))
+  const thing_id = item?.item_id ? ID.parse(String(item.item_id)) : new ID(String(item?.id || item?._id))
   const title = new ThingTitle({ name: String(item?.name || 'Untitled'), description: item?.description || undefined })
   const owner_id = new ID(String(item?.offeredBy?.id || item?.offeredBy || 'unknown'))
   const storage_location = new PhysicalLocation({
@@ -33,6 +33,8 @@ export function mapItemToThing(item: any): Thing {
     storage_location,
     image_urls: [],
     purchase_cost: null,
+    status: (item?.status as ThingStatus) || ThingStatus.READY,
+    requestedToBorrowBy: item?.requestedToBorrowBy ? new ID(String(item.requestedToBorrowBy?.id || item.requestedToBorrowBy)) : null,
   })
 }
 
@@ -202,18 +204,18 @@ export function buildDomainThingFromData(doc: any): Thing {
   })
 
   return new Thing({
-    thing_id: ID.parse(doc.id),
+    thing_id: doc.item_id ? ID.parse(doc.item_id) : new ID(doc.id),
     title: new ThingTitle({
       name: String(doc.name || 'Untitled'),
       description: doc.description || undefined,
     }),
     description: doc.description || null,
-    owner_id: ID.parse(ownerId),
+    owner_id: new ID(ownerId),
     storage_location,
     image_urls: [],
     purchase_cost: null,
     status: (doc.status as ThingStatus) || ThingStatus.READY,
-    requestedToBorrowBy: requestedById ? ID.parse(requestedById) : null,
+    requestedToBorrowBy: requestedById ? new ID(requestedById) : null,
   })
 }
 
@@ -224,6 +226,7 @@ export function buildDomainThingFromData(doc: any): Thing {
 export function thingToPayloadData(thing: Thing, originalDoc: any): any {
   return {
     ...originalDoc,
+    item_id: thing.thing_id.toString(),
     status: thing.status,
     requestedToBorrowBy: thing.requestedToBorrowBy?.toString() || null,
     offeredBy: thing.owner_id.toString(),

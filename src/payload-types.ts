@@ -805,6 +805,10 @@ export interface Admin {
  */
 export interface Item {
   id: string;
+  /**
+   * UUID for the item (domain ID)
+   */
+  item_id: string;
   name: string;
   /**
    * Current availability status of this item
@@ -1021,6 +1025,7 @@ export interface DistributedLibrary {
     };
     radius_kilometers: number;
   };
+  items?: (string | Item)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1652,6 +1657,7 @@ export interface AdminsSelect<T extends boolean = true> {
  * via the `definition` "items_select".
  */
 export interface ItemsSelect<T extends boolean = true> {
+  item_id?: T;
   name?: T;
   status?: T;
   description?: T;
@@ -1797,6 +1803,7 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
             };
         radius_kilometers?: T;
       };
+  items?: T;
   updatedAt?: T;
   createdAt?: T;
 }
