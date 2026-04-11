@@ -4,6 +4,7 @@ export * from "./loanStatus";
 export * from "./reservationStatus";
 export * from "./thingStatus";
 export * from "./thingRequestStatus";
+export * from "./statusTransitions";
 export * from "./id";
 export * from "./money";
 export * from "./emailAddress";
