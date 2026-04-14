@@ -1,3 +1,4 @@
+// noinspection ES6PreferShortImport -- intentional: relative imports to avoid circular dependency through index barrel
 import { ReservationStatus } from './reservationStatus';
 import { ThingStatus } from './thingStatus';
 import { ThingRequestStatus } from './thingRequestStatus';
