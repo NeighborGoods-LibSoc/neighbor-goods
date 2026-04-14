@@ -4,7 +4,7 @@ import { authenticated } from '@/access/authenticated'
 import { anyone } from '@/access/anyone'
 import { isOwner } from '@/access/isOwner'
 import { ThingRequestStatus } from '@/domain'
-import { buildDomainThingRequestFromData, thingRequestToPayloadData } from './common/mappers'
+import { requestStatusTransitions } from '@/domain/valueItems/statusTransitions'
 
 export const ThingRequests: CollectionConfig = {
   slug: 'thing-requests',
@@ -78,28 +78,40 @@ export const ThingRequests: CollectionConfig = {
       async ({ data, originalDoc, operation, req }) => {
         if (!data) return data
 
-        // CREATE: Set owner to authenticated user
+        // On create, force requestedBy to be the authenticated user (prevent spoofing)
         if (operation === 'create') {
           if (!req.user) {
             throw new Error('You must be logged in to create a request')
           }
+          // Always set requestedBy to the authenticated user, ignoring client input
           data.requestedBy = req.user.id
           return data
         }
 
-        // UPDATE: Use domain layer
-        const thingRequest = buildDomainThingRequestFromData(originalDoc)
-
-        // Owner immutability: domain object preserves the original requestedBy
-        data.requestedBy = thingRequest.requestedBy.toString()
-
-        // Apply status transition through the domain entity (validates the transition)
-        const newStatus = data.status || thingRequest.status
-        if (newStatus !== thingRequest.status) {
-          thingRequest.status = newStatus
+        // On update, prevent changing the owner
+        if (originalDoc?.requestedBy) {
+          // Preserve original owner, ignore any attempt to change it
+          data.requestedBy =
+            typeof originalDoc.requestedBy === 'object'
+              ? originalDoc.requestedBy.id
+              : originalDoc.requestedBy
         }
 
-        return thingRequestToPayloadData(thingRequest, data)
+        // Validate status transition using shared config
+        const currentStatus = originalDoc?.status || ThingRequestStatus.OPEN
+        const newStatus = data.status || currentStatus
+
+        if (currentStatus !== newStatus) {
+          const validNextStatuses = requestStatusTransitions[currentStatus] || []
+
+          if (!validNextStatuses.includes(newStatus)) {
+            throw new Error(
+              `Invalid status transition from '${currentStatus}' to '${newStatus}'. Valid transitions: ${validNextStatuses.join(', ') || 'none'}`,
+            )
+          }
+        }
+
+        return data
       },
     ],
   },

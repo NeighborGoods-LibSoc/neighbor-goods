@@ -25,10 +25,14 @@ describe("Thing", () => {
     thing.status = ThingStatus.BORROWED;
     expect(thing.status).toBe(ThingStatus.BORROWED);
 
-    // Invalid: READY is not a valid target from BORROWED (only RESERVED and DAMAGED are, plus READY is also valid per transitions)
-    // Test a truly invalid transition: BORROWED -> WAITING_FOR_LENDER_APPROVAL_TO_BORROW is not allowed
+    // Invalid: DAMAGED -> BORROWED is not allowed
+    thing.status = ThingStatus.DAMAGED;
     expect(() => {
-      thing.status = ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW;
+      thing.status = ThingStatus.BORROWED;
     }).toThrowError();
+
+    // Valid: DAMAGED -> READY is allowed
+    thing.status = ThingStatus.READY;
+    expect(thing.status).toBe(ThingStatus.READY);
   });
 });
