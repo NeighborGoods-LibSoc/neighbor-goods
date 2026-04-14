@@ -1,10 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
-import { isOwner } from '../access/isOwner'
-import { ThingRequestStatus } from '../domain/valueItems/thingRequestStatus'
-import statusTransitions from '../domain/valueItems/statusTransitions.json'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
+import { isOwner } from '@/access/isOwner'
+import { ThingRequestStatus } from '@/domain'
+import { buildDomainThingRequestFromData, thingRequestToPayloadData } from './common/mappers'
 
 export const ThingRequests: CollectionConfig = {
   slug: 'thing-requests',
@@ -78,42 +78,28 @@ export const ThingRequests: CollectionConfig = {
       async ({ data, originalDoc, operation, req }) => {
         if (!data) return data
 
-        // On create, force requestedBy to be the authenticated user (prevent spoofing)
+        // CREATE: Set owner to authenticated user
         if (operation === 'create') {
           if (!req.user) {
             throw new Error('You must be logged in to create a request')
           }
-          // Always set requestedBy to the authenticated user, ignoring client input
           data.requestedBy = req.user.id
           return data
         }
 
-        // On update, prevent changing the owner
-        if (originalDoc?.requestedBy) {
-          // Preserve original owner, ignore any attempt to change it
-          const originalOwnerId =
-            typeof originalDoc.requestedBy === 'object'
-              ? originalDoc.requestedBy.id
-              : originalDoc.requestedBy
-          data.requestedBy = originalOwnerId
+        // UPDATE: Use domain layer
+        const thingRequest = buildDomainThingRequestFromData(originalDoc)
+
+        // Owner immutability: domain object preserves the original requestedBy
+        data.requestedBy = thingRequest.requestedBy.toString()
+
+        // Apply status transition through the domain entity (validates the transition)
+        const newStatus = data.status || thingRequest.status
+        if (newStatus !== thingRequest.status) {
+          thingRequest.status = newStatus
         }
 
-        // Validate status transition using shared config
-        const currentStatus = originalDoc?.status || ThingRequestStatus.OPEN
-        const newStatus = data.status || currentStatus
-
-        if (currentStatus !== newStatus) {
-          const transitions = statusTransitions.requestStatus as Record<string, string[]>
-          const validNextStatuses = transitions[currentStatus] || []
-
-          if (!validNextStatuses.includes(newStatus)) {
-            throw new Error(
-              `Invalid status transition from '${currentStatus}' to '${newStatus}'. Valid transitions: ${validNextStatuses.join(', ') || 'none'}`,
-            )
-          }
-        }
-
-        return data
+        return thingRequestToPayloadData(thingRequest, data)
       },
     ],
   },

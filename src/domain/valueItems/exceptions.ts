@@ -1,5 +1,6 @@
-import { ReservationStatus } from "./reservationStatus";
-import { ThingStatus } from "./thingStatus";
+import { ReservationStatus } from '@/domain';
+import { ThingStatus } from '@/domain';
+import { ThingRequestStatus } from '@/domain';
 
 export class CurrencyMismatchException extends Error {
   constructor(message?: string) {
@@ -81,6 +82,18 @@ export class InvalidLibraryConfigurationError extends Error {
   constructor(message?: string) {
     super(message ?? "Invalid library configuration");
     this.name = "InvalidLibraryConfigurationError";
+  }
+}
+
+export class InvalidThingRequestStateTransitionError extends Error {
+  public readonly current_status: ThingRequestStatus;
+  public readonly new_status: ThingRequestStatus;
+  constructor(current_status: ThingRequestStatus, new_status: ThingRequestStatus) {
+    const message = `Invalid thing request state transition. Current status: ${current_status}, New status: ${new_status}`;
+    super(message);
+    this.name = "InvalidThingRequestStateTransitionError";
+    this.current_status = current_status;
+    this.new_status = new_status;
   }
 }
 

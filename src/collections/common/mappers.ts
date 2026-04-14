@@ -1,7 +1,8 @@
 import { Thing } from '@/domain/entities/thing'
+import { ThingRequest } from '@/domain/entities/thingRequest'
 import { DistributedLibrary as DomainDistributedLibrary } from '@/domain/entities/libraries/distributedLibrary'
 import { MOPServer } from '@/domain/entities/mopServer'
-import { WaitingListType, Money, Currency, ThingStatus } from '@/domain/valueItems'
+import { WaitingListType, Money, Currency, ThingStatus, ThingRequestStatus } from '@/domain/valueItems'
 import type { FeeSchedule } from '@/domain/valueItems'
 import { ID, PersonName, EmailAddress } from '@/domain/valueItems'
 import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
@@ -229,5 +230,38 @@ export function thingToPayloadData(thing: Thing, originalDoc: any): any {
     status: thing.status,
     requestedToBorrowBy: thing.requestedToBorrowBy?.toString() || null,
     offeredBy: thing.owner_id.toString(),
+  }
+}
+
+/**
+ * Build a domain ThingRequest from Payload document data.
+ * Used by ThingRequests collection hooks for domain-driven validation.
+ */
+export function buildDomainThingRequestFromData(doc: any): ThingRequest {
+  if (!doc) {
+    throw new Error('Cannot build ThingRequest from null document')
+  }
+
+  const requestedById =
+    typeof doc.requestedBy === 'object' ? doc.requestedBy.id : doc.requestedBy
+
+  return new ThingRequest({
+    thingRequestID: doc.id ? new ID(doc.id) : ID.generate(),
+    name: String(doc.name || ''),
+    description: doc.description || null,
+    status: (doc.status as ThingRequestStatus) || ThingRequestStatus.OPEN,
+    requestedBy: new ID(requestedById),
+  })
+}
+
+/**
+ * Convert a domain ThingRequest back to Payload data format.
+ * Preserves fields that shouldn't change through domain operations.
+ */
+export function thingRequestToPayloadData(thingRequest: ThingRequest, originalDoc: any): any {
+  return {
+    ...originalDoc,
+    status: thingRequest.status,
+    requestedBy: thingRequest.requestedBy.toString(),
   }
 }
