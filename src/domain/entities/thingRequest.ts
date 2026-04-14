@@ -4,7 +4,7 @@ import {
   InvalidThingRequestStateTransitionError,
   ThingRequestStatus,
 } from '@/domain'
-import statusTransitions from '../valueItems/statusTransitions.json'
+import { requestStatusTransitions } from '@/domain'
 
 export class ThingRequest extends Entity {
   thingRequestID: ID
@@ -38,8 +38,7 @@ export class ThingRequest extends Entity {
 
   set status(value: ThingRequestStatus) {
     if (value !== this._status) {
-      const transitions = statusTransitions.requestStatus as Record<string, string[]>
-      const validNextStatuses = (transitions[this._status] || []) as ThingRequestStatus[]
+      const validNextStatuses = (requestStatusTransitions[this._status] || []) as ThingRequestStatus[]
 
       if (!validNextStatuses.includes(value)) {
         throw new InvalidThingRequestStateTransitionError(this._status, value)
