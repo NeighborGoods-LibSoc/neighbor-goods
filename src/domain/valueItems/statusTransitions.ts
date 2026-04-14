@@ -1,5 +1,5 @@
-import { ThingStatus } from '@/domain'
-import { ThingRequestStatus } from '@/domain'
+import { ThingStatus } from './thingStatus'
+import { ThingRequestStatus } from './thingRequestStatus'
 
 export const thingStatusTransitions: Record<ThingStatus, ThingStatus[]> = {
   [ThingStatus.READY]: [

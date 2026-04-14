@@ -1,6 +1,6 @@
-import { ReservationStatus } from '@/domain';
-import { ThingStatus } from '@/domain';
-import { ThingRequestStatus } from '@/domain';
+import { ReservationStatus } from './reservationStatus';
+import { ThingStatus } from './thingStatus';
+import { ThingRequestStatus } from './thingRequestStatus';
 
 export class CurrencyMismatchException extends Error {
   constructor(message?: string) {
