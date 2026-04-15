@@ -1,70 +1,54 @@
 import { Payload } from 'payload'
 import { ID } from '../../domain/valueItems'
-import { IBorrowRequestRepository } from '../../domain/services/ThingService'
+import {
+  BorrowRequest,
+  BorrowRequestRepository,
+} from '../../domain/repositories/BorrowRequestRepository'
 
-export class PayloadBorrowRequestRepository implements IBorrowRequestRepository {
+export class PayloadBorrowRequestRepository implements BorrowRequestRepository {
   constructor(private payload: Payload) {}
 
-  async hasActiveRequest(thingId: ID, userId: ID): Promise<boolean> {
-    // We need the internal Payload ID for the relationship field
-    const { docs: itemDocs } = await this.payload.find({
-      collection: 'items',
-      where: {
-        item_id: {
-          equals: thingId.toString(),
-        },
-      },
-      limit: 1,
-    })
-
-    const internalId = itemDocs && itemDocs.length > 0 && itemDocs[0] ? itemDocs[0].id : thingId.toString()
-
-    const { totalDocs } = await this.payload.find({
+  async findLastRequest(itemId: ID, requesterId: ID): Promise<BorrowRequest | null> {
+    const result = await this.payload.find({
       collection: 'borrow-requests',
       where: {
         and: [
-          {
-            item: {
-              equals: internalId,
-            },
-          },
-          {
-            requestedBy: {
-              equals: userId.toString(),
-            },
-          },
-          {
-            requestedAt: {
-              // Within the last hour
-              greater_than: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
-            },
-          },
+          { item: { equals: itemId.toString() } },
+          { requestedBy: { equals: requesterId.toString() } },
         ],
-      },
-    })
-
-    return totalDocs > 0
-  }
-
-  async createRequest(thingId: ID, userId: ID): Promise<void> {
-    // We need the internal Payload ID for the relationship field
-    const { docs } = await this.payload.find({
-      collection: 'items',
-      where: {
-        item_id: {
-          equals: thingId.toString(),
-        },
       },
       limit: 1,
     })
 
-    const internalId = docs.length > 0 && docs[0] ? docs[0].id : thingId.toString()
+    const doc = result.docs[0]
+    if (!doc) return null
 
+    return {
+      id: doc.id,
+      itemId: ID.parse(typeof doc.item === 'object' ? doc.item.id : doc.item),
+      requesterId: ID.parse(
+        typeof doc.requestedBy === 'object' ? doc.requestedBy.id : doc.requestedBy,
+      ),
+      requestedAt: new Date(doc.requestedAt),
+    }
+  }
+
+  async recordRequest(itemId: ID, requesterId: ID): Promise<void> {
     await this.payload.create({
       collection: 'borrow-requests',
       data: {
-        item: internalId,
-        requestedBy: userId.toString(),
+        item: itemId.toString(),
+        requestedBy: requesterId.toString(),
+        requestedAt: new Date().toISOString(),
+      },
+    })
+  }
+
+  async updateRequestTime(requestId: string): Promise<void> {
+    await this.payload.update({
+      collection: 'borrow-requests',
+      id: requestId,
+      data: {
         requestedAt: new Date().toISOString(),
       },
     })
