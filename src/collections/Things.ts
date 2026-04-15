@@ -48,7 +48,10 @@ export const Things: CollectionConfig = {
       defaultValue: ThingStatus.READY,
       options: [
         { label: 'Ready', value: ThingStatus.READY },
-        { label: 'Waiting for Lender Approval', value: ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW },
+        {
+          label: 'Waiting for Lender Approval',
+          value: ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW,
+        },
         { label: 'Borrowed', value: ThingStatus.BORROWED },
         { label: 'Damaged', value: ThingStatus.DAMAGED },
         { label: 'Reserved', value: ThingStatus.RESERVED },
@@ -129,7 +132,7 @@ export const Things: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      async ({ data, req, operation }) => {
+      async ({ data, operation }) => {
         if (!data) return data
         if (operation === 'create' && !data.item_id) {
           data.item_id = ID.generate().toString()
@@ -167,7 +170,7 @@ export const Things: CollectionConfig = {
 
           const borrowRequestRepo = new PayloadBorrowRequestRepository(req.payload)
           const thingService = new ThingService(borrowRequestRepo)
-          await thingService.requestBorrow(thing, userId)
+          await thingService.requestBorrow(thing, userId, new ID(originalDoc.id))
 
           return thingToPayloadData(thing, originalDoc)
         }
