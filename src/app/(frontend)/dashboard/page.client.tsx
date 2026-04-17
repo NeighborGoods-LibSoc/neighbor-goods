@@ -133,8 +133,8 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
             <Link href="/my-items" className="btn btn-secondary">
               My Items
             </Link>
-            <Link href="#" className="btn btn-secondary">
-              Plan Event
+            <Link href="/libraries/create" className="btn btn-secondary">
+              Start a Library
             </Link>
           </ul>
         </div>
