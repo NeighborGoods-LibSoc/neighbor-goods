@@ -66,21 +66,29 @@ export const CreateLibraryClient: React.FC<CreateLibraryClientProps> = ({ user }
     e.preventDefault()
     setIsSubmitting(true)
 
+    const showError = (message: string) => {
+      setModalState({ open: true, type: 'error', message })
+      setIsSubmitting(false)
+    }
+
+    if (!formData.name.trim()) {
+      showError('Library name is required')
+      return
+    }
+
+    const loanDays = Number(formData.defaultLoanTimeDays)
+    if (!loanDays || loanDays < 1) {
+      showError('Default loan time must be at least 1 day')
+      return
+    }
+
+    const radiusKm = Number(formData.radiusKilometers)
+    if (!radiusKm || radiusKm <= 0) {
+      showError('Service area radius must be greater than 0')
+      return
+    }
+
     try {
-      if (!formData.name.trim()) {
-        throw new Error('Library name is required')
-      }
-
-      const loanDays = Number(formData.defaultLoanTimeDays)
-      if (!loanDays || loanDays < 1) {
-        throw new Error('Default loan time must be at least 1 day')
-      }
-
-      const radiusKm = Number(formData.radiusKilometers)
-      if (!radiusKm || radiusKm <= 0) {
-        throw new Error('Service area radius must be greater than 0')
-      }
-
       const libraryData: Record<string, any> = {
         name: formData.name,
         administrators: [user.id],
@@ -112,9 +120,8 @@ export const CreateLibraryClient: React.FC<CreateLibraryClientProps> = ({ user }
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null)
-        throw new Error(
-          errorData?.errors?.[0]?.message || errorData?.message || 'Failed to create library',
-        )
+        showError(errorData?.errors?.[0]?.message || errorData?.message || 'Failed to create library')
+        return
       }
 
       setModalState({
@@ -124,11 +131,7 @@ export const CreateLibraryClient: React.FC<CreateLibraryClientProps> = ({ user }
         libraryName: formData.name,
       })
     } catch (error) {
-      setModalState({
-        open: true,
-        type: 'error',
-        message: error instanceof Error ? error.message : 'Failed to create library',
-      })
+      showError(error instanceof Error ? error.message : 'Failed to create library')
     } finally {
       setIsSubmitting(false)
     }
