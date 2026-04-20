@@ -142,6 +142,9 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
         <div className="card">
           <h2>Quick Actions</h2>
           <ul className="quick-actions-grid">
+            <Link href="/browse" className="btn btn-secondary">
+              Browse Items
+            </Link>
             <Link href="/items/request" className="btn btn-secondary">
               Request
             </Link>
