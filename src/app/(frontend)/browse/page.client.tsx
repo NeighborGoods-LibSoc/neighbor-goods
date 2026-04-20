@@ -11,20 +11,20 @@ import type { User } from '@/payload-types'
 interface Tag {
   id: string
   name: string
-  color?: string
+  color?: string | null
 }
 
 interface ItemResult {
   id: string
   name: string
-  description?: string
+  description?: string | null
   status: string
-  tags?: (string | Tag)[]
-  offeredBy?: string | { id: string; name?: string }
-  primaryImage?: string | { url?: string; filename?: string }
-  borrowingTime?: number
-  libraryId?: string
-  libraryName?: string
+  tags: Tag[]
+  offeredBy?: { id: string; name?: string } | null
+  primaryImage?: { url?: string; filename?: string } | null
+  borrowingTime?: number | null
+  libraryId?: string | null
+  libraryName?: string | null
 }
 
 interface LibraryOption {
@@ -32,11 +32,11 @@ interface LibraryOption {
   name: string
   area?: {
     center_point?: {
-      city?: string
-      state?: string
-    }
-    radius_kilometers?: number
-  }
+      city?: string | null
+      state?: string | null
+    } | null
+    radius_kilometers?: number | null
+  } | null
 }
 
 interface BrowseClientProps {
@@ -67,6 +67,8 @@ const STATUS_COLORS: Record<string, string> = {
   RESERVED: 'bg-purple-100 text-purple-800',
 }
 
+const ITEMS_PER_PAGE = 12
+
 export const BrowseClient: React.FC<BrowseClientProps> = ({ user }) => {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedTags, setSelectedTags] = useState<string[]>([])
@@ -77,44 +79,21 @@ export const BrowseClient: React.FC<BrowseClientProps> = ({ user }) => {
   const [items, setItems] = useState<ItemResult[]>([])
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const [libraries, setLibraries] = useState<LibraryOption[]>([])
-  const [libraryItemMap, setLibraryItemMap] = useState<Record<string, { id: string; name: string }>>({})
 
   const [isLoading, setIsLoading] = useState(true)
   const [totalResults, setTotalResults] = useState(0)
   const [page, setPage] = useState(1)
   const [hasMore, setHasMore] = useState(false)
 
-  const ITEMS_PER_PAGE = 12
-
   // Fetch tags and libraries on mount
   useEffect(() => {
     const fetchFilters = async () => {
       try {
-        const [tagsRes, librariesRes] = await Promise.all([
-          fetch('/api/tags?limit=100'),
-          fetch('/api/distributedLibraries?limit=100&depth=0'),
-        ])
-
-        if (tagsRes.ok) {
-          const tagsData = await tagsRes.json()
-          setAvailableTags(tagsData.docs || [])
-        }
-
-        if (librariesRes.ok) {
-          const librariesData = await librariesRes.json()
-          setLibraries(librariesData.docs || [])
-
-          // Build a map: itemId -> { libraryId, libraryName }
-          const itemMap: Record<string, { id: string; name: string }> = {}
-          for (const lib of librariesData.docs || []) {
-            if (lib.items && Array.isArray(lib.items)) {
-              for (const item of lib.items) {
-                const itemId = typeof item === 'string' ? item : item.id
-                itemMap[itemId] = { id: lib.id, name: lib.name }
-              }
-            }
-          }
-          setLibraryItemMap(itemMap)
+        const response = await fetch('/api/browse?action=filters')
+        if (response.ok) {
+          const data = await response.json()
+          setAvailableTags(data.tags || [])
+          setLibraries(data.libraries || [])
         }
       } catch (error) {
         console.error('Error fetching filter data:', error)
@@ -131,57 +110,29 @@ export const BrowseClient: React.FC<BrowseClientProps> = ({ user }) => {
         const params = new URLSearchParams()
         params.set('limit', String(ITEMS_PER_PAGE))
         params.set('page', String(pageNum))
-        params.set('depth', '1')
-        params.set('sort', '-createdAt')
-
-        // Build where clauses
-        const whereClauses: string[] = []
 
         if (searchQuery.trim()) {
-          // Search by name or description using 'like' operator
-          whereClauses.push(`where[or][0][name][like]=${encodeURIComponent(searchQuery.trim())}`)
-          whereClauses.push(
-            `where[or][1][description][like]=${encodeURIComponent(searchQuery.trim())}`,
-          )
+          params.set('q', searchQuery.trim())
         }
 
         if (selectedStatus) {
-          whereClauses.push(`where[status][equals]=${encodeURIComponent(selectedStatus)}`)
+          params.set('status', selectedStatus)
         }
 
-        if (selectedTags.length > 0) {
-          selectedTags.forEach((tagId, index) => {
-            whereClauses.push(`where[tags][in]=${encodeURIComponent(tagId)}`)
-          })
+        if (selectedLibrary) {
+          params.set('library', selectedLibrary)
         }
 
-        let url = `/api/items?${params.toString()}`
-        if (whereClauses.length > 0) {
-          url += '&' + whereClauses.join('&')
+        for (const tagId of selectedTags) {
+          params.append('tag', tagId)
         }
 
-        const response = await fetch(url)
+        const response = await fetch(`/api/browse?${params.toString()}`)
         if (response.ok) {
           const data = await response.json()
-          let docs: ItemResult[] = data.docs || []
-
-          // Enrich items with library info from the map
-          docs = docs.map((item) => {
-            const libInfo = libraryItemMap[item.id]
-            if (libInfo) {
-              return { ...item, libraryId: libInfo.id, libraryName: libInfo.name }
-            }
-            return item
-          })
-
-          // Client-side library filter
-          if (selectedLibrary) {
-            docs = docs.filter((item) => item.libraryId === selectedLibrary)
-          }
-
-          setItems(docs)
-          setTotalResults(selectedLibrary ? docs.length : data.totalDocs || 0)
-          setHasMore(selectedLibrary ? false : data.hasNextPage || false)
+          setItems(data.items || [])
+          setTotalResults(data.totalItems || 0)
+          setHasMore(data.hasNextPage || false)
         }
       } catch (error) {
         console.error('Error fetching items:', error)
@@ -189,7 +140,7 @@ export const BrowseClient: React.FC<BrowseClientProps> = ({ user }) => {
         setIsLoading(false)
       }
     },
-    [searchQuery, selectedStatus, selectedTags, selectedLibrary, libraryItemMap],
+    [searchQuery, selectedStatus, selectedTags, selectedLibrary],
   )
 
   // Fetch items when filters change
@@ -227,23 +178,11 @@ export const BrowseClient: React.FC<BrowseClientProps> = ({ user }) => {
 
   const getImageUrl = (item: ItemResult): string | null => {
     if (!item.primaryImage) return null
-    if (typeof item.primaryImage === 'string') return null
     return item.primaryImage.url || null
   }
 
-  const getTagName = (tag: string | Tag): string => {
-    if (typeof tag === 'string') return tag
-    return tag.name
-  }
-
-  const getTagColor = (tag: string | Tag): string | undefined => {
-    if (typeof tag === 'string') return undefined
-    return tag.color || undefined
-  }
-
-  const getOfferedByName = (offeredBy: string | { id: string; name?: string } | undefined): string => {
-    if (!offeredBy) return 'Unknown'
-    if (typeof offeredBy === 'string') return 'A neighbor'
+  const getOfferedByName = (offeredBy: { id: string; name?: string } | null | undefined): string => {
+    if (!offeredBy) return 'A neighbor'
     return offeredBy.name || 'A neighbor'
   }
 
@@ -422,12 +361,12 @@ export const BrowseClient: React.FC<BrowseClientProps> = ({ user }) => {
                             key={index}
                             className="rounded-full border px-2 py-0.5 text-xs"
                             style={
-                              getTagColor(tag)
-                                ? { borderColor: getTagColor(tag), color: getTagColor(tag) }
+                              tag.color
+                                ? { borderColor: tag.color, color: tag.color }
                                 : undefined
                             }
                           >
-                            {getTagName(tag)}
+                            {tag.name}
                           </span>
                         ))}
                       </div>
