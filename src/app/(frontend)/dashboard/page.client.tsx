@@ -15,6 +15,11 @@ interface Item {
   description: string
 }
 
+interface LibrarySummary {
+  id: string
+  name: string
+}
+
 interface Event {
   id: string
   title: string
@@ -27,6 +32,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
   const [borrowedItems, setBorrowedItems] = useState<Item[]>([])
   const [offeredItems, setOfferedItems] = useState<Item[]>([])
   const [events, setEvents] = useState<Event[]>([])
+  const [adminLibraries, setAdminLibraries] = useState<LibrarySummary[]>([])
   const [activeTab, setActiveTab] = useState<'borrowing' | 'offering'>('borrowing')
   const [isLoading, setIsLoading] = useState(true)
 
@@ -46,6 +52,13 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
 
         // TODO: Fetch events when events functionality is implemented
         setEvents([])
+
+        // Fetch libraries where user is an administrator
+        const librariesResponse = await fetch('/api/distributedLibraries?where[administrators][contains]=' + user.id + '&depth=0')
+        if (librariesResponse.ok) {
+          const librariesData = await librariesResponse.json()
+          setAdminLibraries((librariesData.docs || []).map((lib: any) => ({ id: lib.id, name: lib.name })))
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error)
       } finally {
@@ -91,7 +104,12 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
         <div>
           <h1>Dashboard</h1>
         </div>
-        <div>
+        <div className="flex gap-2">
+          {adminLibraries.length > 0 && (
+            <Link href={`/libraries/${adminLibraries[0].id}/moderate`} className="btn btn-secondary">
+              Moderator Dashboard
+            </Link>
+          )}
           <Link href="/items/offer" className="btn btn-primary">
             Offer New Item
           </Link>
@@ -133,10 +151,24 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
             <Link href="/my-items" className="btn btn-secondary">
               My Items
             </Link>
-            <Link href="/libraries/create" className="btn btn-secondary">
-              Start a Library
+            <Link href="/libraries" className="btn btn-secondary">
+              View Libraries
             </Link>
           </ul>
+          {adminLibraries.length > 0 && (
+            <div className="mt-4">
+              <h3 className="mb-2 text-sm font-medium">Your Libraries</h3>
+              <ul className="space-y-1">
+                {adminLibraries.map((lib) => (
+                  <li key={lib.id}>
+                    <Link href={`/libraries/${lib.id}/moderate`} className="btn btn-secondary block text-center">
+                      Manage {lib.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
 
         {/* Notifications */}
