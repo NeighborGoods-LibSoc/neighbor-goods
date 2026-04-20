@@ -102,7 +102,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
 
       <div className="page-header">
         <div>
-          <h1>Dashboard</h1>
+          <h1>User Dashboard</h1>
         </div>
         <div className="flex gap-2">
           {adminLibraries.length > 0 && (

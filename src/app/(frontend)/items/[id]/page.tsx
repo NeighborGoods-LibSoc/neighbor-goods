@@ -79,7 +79,7 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
 
       <div className="page-header">
         <Link href="/dashboard" className="btn btn-secondary">
-          &larr; Back to Dashboard
+          &larr; Back to User Dashboard
         </Link>
       </div>
 

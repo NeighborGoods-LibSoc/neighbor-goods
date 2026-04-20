@@ -151,7 +151,7 @@ describe('CreateLibraryClient', () => {
     expect(body.area.radius_kilometers).toBe(10)
   })
 
-  it('navigates to dashboard when clicking "Go to Dashboard" after success', async () => {
+  it('navigates to dashboard when clicking "Go to User Dashboard" after success', async () => {
     const user = userEvent.setup()
     fetchMock.mockResolvedValueOnce({
       ok: true,
@@ -167,7 +167,7 @@ describe('CreateLibraryClient', () => {
       expect(screen.getByText('Library Created!')).toBeInTheDocument()
     })
 
-    await user.click(screen.getByRole('button', { name: /Go to Dashboard/i }))
+    await user.click(screen.getByRole('button', { name: /Go to User Dashboard/i }))
     expect(pushMock).toHaveBeenCalledWith('/dashboard')
   })
 

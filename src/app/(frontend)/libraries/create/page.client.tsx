@@ -168,7 +168,7 @@ export const CreateLibraryClient: React.FC<CreateLibraryClientProps> = ({ user }
                 <Button variant="outline" onClick={() => { setModalState((prev) => ({ ...prev, open: false })); resetForm() }}>
                   Create Another
                 </Button>
-                <Button onClick={() => router.push('/dashboard')}>Go to Dashboard</Button>
+                <Button onClick={() => router.push('/dashboard')}>Go to User Dashboard</Button>
               </>
             ) : (
               <Button onClick={() => setModalState((prev) => ({ ...prev, open: false }))}>

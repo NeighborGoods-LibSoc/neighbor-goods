@@ -25,8 +25,7 @@ type ItemsTab = 'all' | 'available' | 'borrowed' | 'damaged'
 
 export const ModerateLibraryClient: React.FC<ModerateLibraryClientProps> = ({
   library,
-  user,
-  token,
+                                                                              token,
 }) => {
   const [items, setItems] = useState<Item[]>([])
   const [loans, setLoans] = useState<Loan[]>([])
@@ -147,12 +146,6 @@ export const ModerateLibraryClient: React.FC<ModerateLibraryClientProps> = ({
     ].filter(Boolean)
     return parts.length > 0 ? parts.join(', ') : 'No location set'
   }
-
-  const formatCurrency = (amount: number, currency: string) => {
-    if (currency === 'HOUR') return `${amount} labor hour${amount !== 1 ? 's' : ''}`
-    return new Intl.NumberFormat('en-US', { style: 'currency', currency }).format(amount)
-  }
-
   const getStatusBadge = (status: string) => {
     const styles: Record<string, string> = {
       READY: 'bg-green-100 text-green-800',
@@ -202,7 +195,7 @@ export const ModerateLibraryClient: React.FC<ModerateLibraryClientProps> = ({
           <p className="mt-1 text-muted-foreground">Library Moderator View</p>
         </div>
         <Link href="/dashboard">
-          <Button variant="outline">Back to Dashboard</Button>
+          <Button variant="outline">Back to User Dashboard</Button>
         </Link>
       </div>
 
