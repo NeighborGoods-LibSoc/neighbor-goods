@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -317,10 +318,13 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
             </p>
             {imagePreview && (
               <div className="mt-2">
-                <img
+                <Image
                   src={imagePreview}
                   alt="Preview"
-                  className="h-48 w-auto rounded border object-cover"
+                  width={200}
+                  height={192}
+                  className="rounded border object-cover"
+                  unoptimized
                 />
               </div>
             )}

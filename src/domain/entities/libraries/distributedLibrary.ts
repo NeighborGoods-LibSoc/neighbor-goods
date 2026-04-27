@@ -1,15 +1,6 @@
-import { Library } from "./library";
-import { Borrower } from "../borrower";
-import { Loan } from "../loan";
-import { Thing } from "../thing";
-import { Lender } from "../lenders/lender";
-import {
-  ID,
-  DueDate,
-  LoanStatus,
-  PhysicalArea,
-  ThingStatus,
-} from "../../valueItems";
+import { Library } from '@/domain'
+import { Borrower, Loan, Thing, Lender } from '..'
+import { ID, DueDate, LoanStatus, PhysicalArea, ThingStatus } from '@/domain'
 
 export class DistributedLibrary extends Library {
   area!: PhysicalArea
@@ -38,7 +29,7 @@ export class DistributedLibrary extends Library {
     throw new Error(`Cannot find an owner for ${item.title.name}`)
   }
 
-  override async startBorrow(thing: Thing, borrower: Borrower): Promise<Thing> {
+  override async startBorrow(thing: Thing, _borrower: Borrower): Promise<Thing> {
     thing.status = ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW
     return thing;
   }

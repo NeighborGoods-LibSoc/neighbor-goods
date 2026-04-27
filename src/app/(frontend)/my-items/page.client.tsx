@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { User, Item, ThingRequest, Loan, Media, Tag } from '@/payload-types'
 
 interface MyItemsClientProps {
@@ -189,7 +190,7 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
                   <div key={item.id} className="my-items-card">
                     {imageUrl && (
                       <div className="my-items-card-image">
-                        <img src={imageUrl} alt={item.name} />
+                        <Image src={imageUrl} alt={item.name} width={400} height={300} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                       </div>
                     )}
                     <div className="my-items-card-content">
@@ -247,7 +248,7 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
                   <div key={request.id} className="my-items-card">
                     {imageUrl && (
                       <div className="my-items-card-image">
-                        <img src={imageUrl} alt={request.name} />
+                        <Image src={imageUrl} alt={request.name} width={400} height={300} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                       </div>
                     )}
                     <div className="my-items-card-content">
@@ -305,7 +306,7 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
                   <div key={loan.id} className="my-items-card">
                     {imageUrl && (
                       <div className="my-items-card-image">
-                        <img src={imageUrl} alt={item?.name || 'Item'} />
+                        <Image src={imageUrl} alt={item?.name || 'Item'} width={400} height={300} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                       </div>
                     )}
                     <div className="my-items-card-content">

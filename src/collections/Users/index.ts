@@ -1,6 +1,6 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
+import { uuidField } from '@/fields'
 
 export const Users: CollectionConfig = {
   slug: 'users',
@@ -68,7 +68,7 @@ export const Users: CollectionConfig = {
   },
   hooks: {
     afterError: [
-      ({ error, result, req }) => {
+      ({ error: _error, result, req }) => {
         // Only mask errors on login endpoint to prevent user enumeration
         if (req.url?.includes('/login')) {
           return {
@@ -83,9 +83,33 @@ export const Users: CollectionConfig = {
     ],
   },
   fields: [
+    uuidField({ name: 'id', label: 'ID', description: 'UUID for this user' }),
     {
       name: 'name',
       type: 'text',
+    },
+    {
+      name: 'verificationFlags',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'Email', value: 'EMAIL' },
+        { label: 'Phone Number', value: 'PHONE_NUMBER' },
+        { label: 'ID', value: 'ID' },
+        { label: 'Deposit', value: 'DEPOSIT' },
+        { label: 'In-person', value: 'IN_PERSON' },
+      ],
+      admin: {
+        description: 'Verification methods this user has completed.',
+      },
+    },
+    {
+      name: 'escrowBalance',
+      type: 'number',
+      defaultValue: 0,
+      admin: {
+        description: 'Amount of money this user has in escrow for deposits.',
+      },
     },
     // The email field is automatically added by Payload when auth is enabled
     // But you can customize it if needed:

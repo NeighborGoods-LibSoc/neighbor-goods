@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+import Link from 'next/link'
 import { useSearchParams, useRouter } from 'next/navigation'
 
 export default function ResetPasswordPage() {
@@ -157,9 +158,9 @@ export default function ResetPasswordPage() {
         <div className="form-container">
           <h2>Invalid Reset Link</h2>
           <p>{error || 'This password reset link is invalid or has expired.'}</p>
-          <a href="/forgot-password" style={{ color: '#007cba', textDecoration: 'underline' }}>
+          <Link href="/forgot-password" style={{ color: '#007cba', textDecoration: 'underline' }}>
             Request a new password reset link
-          </a>
+          </Link>
         </div>
       </main>
     )

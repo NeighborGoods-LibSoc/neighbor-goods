@@ -1,6 +1,6 @@
-import { Thing } from '../entities/thing'
-import { ID, BorrowCooldownError } from '../valueItems'
-import { BorrowRequestRepository } from '../repositories/BorrowRequestRepository'
+import { Thing } from '@/domain'
+import { ID, BorrowCooldownError } from '@/domain'
+import { BorrowRequestRepository } from '@/domain'
 
 const BORROW_REQUEST_COOLDOWN_MS = 60 * 60 * 1000 // 1 hour
 

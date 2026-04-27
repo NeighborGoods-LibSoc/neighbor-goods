@@ -2,8 +2,9 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cookies } from 'next/headers'
-import type { Item, Media, User, Tag } from '@/payload-types'
+import type { Media, User, Tag } from '@/payload-types'
 import { DeleteItemButton } from './DeleteItemButton'
 import { RequestToBorrowButton } from './RequestToBorrowButton'
 import { OwnerBorrowActions } from './OwnerBorrowActions'
@@ -66,6 +67,13 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
   // Check if current user can request to borrow (logged in, not owner, item is READY)
   const canRequestToBorrow = currentUser && !isOwner && item.status === 'READY'
 
+  const userFlags = (currentUser?.verificationFlags as string[]) || []
+  const itemFlags = (item.borrowerVerification as string[]) || []
+  const missingFlags = itemFlags.filter((flag) => !userFlags.includes(flag))
+  const insufficientEscrow =
+    itemFlags.includes('DEPOSIT') &&
+    Number(currentUser?.escrowBalance || 0) < Number(item.depositAmount || 0)
+
   return (
     <main className="container">
       {isNewlyCreated && (
@@ -93,9 +101,11 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
           </div>
           {primaryImage?.url && (
             <div className="item-image">
-              <img
+              <Image
                 src={primaryImage.url}
                 alt={primaryImage.alt || item.name}
+                width={primaryImage.width || 800}
+                height={primaryImage.height || 600}
                 style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }}
               />
             </div>
@@ -124,9 +134,16 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
             </p>
           </div>
 
-          <div className="item-rules" style={{ marginTop: '1rem' }}>
-            <h3>Rules for Use</h3>
-            <p style={{ whiteSpace: 'pre-wrap' }}>{item.rulesForUse}</p>
+          <div className="item-verification" style={{ marginTop: '1rem' }}>
+            <h3>Borrower Verification Needed</h3>
+            <ul className="list-disc pl-5" style={{ marginTop: '0.5rem' }}>
+              {(item.borrowerVerification as string[] || []).map((v) => (
+                <li key={v} className="capitalize">
+                  {v.toLowerCase().replace('_', ' ')}
+                  {v === 'DEPOSIT' && item.depositAmount && ` ($${item.depositAmount})`}
+                </li>
+              ))}
+            </ul>
           </div>
 
           {offeredBy && (
@@ -139,8 +156,37 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
 
           {/* Show Request to Borrow button for logged-in non-owners when item is available */}
           {canRequestToBorrow && (
-            <div className="item-borrow-action" style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-              <RequestToBorrowButton itemId={item.id} itemName={item.name} />
+            <div
+              className="item-borrow-action"
+              style={{
+                marginTop: '2rem',
+                paddingTop: '1rem',
+                borderTop: '1px solid var(--border)',
+              }}
+            >
+              {(missingFlags.length > 0 || insufficientEscrow) ? (
+                <div className="rounded border border-yellow-200 bg-yellow-50 p-4 text-yellow-800">
+                  <p className="font-bold">Requirements missing:</p>
+                  <ul className="list-disc pl-5">
+                    {missingFlags.map((flag) => (
+                      <li key={flag} className="capitalize">
+                        {flag.toLowerCase().replace('_', ' ')} verification needed
+                      </li>
+                    ))}
+                    {insufficientEscrow && (
+                      <li>
+                        Insufficient escrow balance for deposit (Required: $
+                        {item.depositAmount}, Your balance: ${currentUser?.escrowBalance || 0})
+                      </li>
+                    )}
+                  </ul>
+                  <p className="mt-2 text-sm">
+                    Please update your profile or add funds to your escrow to request this item.
+                  </p>
+                </div>
+              ) : (
+                <RequestToBorrowButton itemId={item.id} itemName={item.name} />
+              )}
             </div>
           )}
 
@@ -148,7 +194,7 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
           {!currentUser && item.status === 'READY' && (
             <div className="item-borrow-action" style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
               <p style={{ color: 'var(--muted-foreground)' }}>
-                <a href="/login" style={{ color: 'var(--primary)' }}>Log in</a> to request this item.
+                <Link href="/login" style={{ color: 'var(--primary)' }}>Log in</Link> to request this item.
               </p>
             </div>
           )}
@@ -177,10 +223,12 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
                 {(item.additional_images as Media[]).map(
                   (img) =>
                     img.url && (
-                      <img
+                      <Image
                         key={img.id}
                         src={img.url}
                         alt={img.alt || item.name}
+                        width={img.width || 200}
+                        height={img.height || 200}
                         style={{ maxWidth: '200px', height: 'auto', borderRadius: '8px' }}
                       />
                     ),

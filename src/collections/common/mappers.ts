@@ -1,17 +1,25 @@
-import { Thing } from '@/domain/entities/thing'
-import { DistributedLibrary as DomainDistributedLibrary } from '@/domain/entities/libraries/distributedLibrary'
-import { MOPServer } from '@/domain/entities/mopServer'
-import { ID, WaitingListType, Money, Currency, ThingStatus } from '@/domain/valueItems'
-import type { FeeSchedule } from '@/domain/valueItems'
-import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
-import { PhysicalArea } from '@/domain/valueItems/location/physicalArea'
-import { Distance } from '@/domain/valueItems/location/distance'
-import { ThingTitle } from '@/domain/valueItems/thingTitle'
+import {
+  Thing,
+  DistributedLibrary as DomainDistributedLibrary,
+  MOPServer,
+  ID,
+  WaitingListType,
+  Money,
+  Currency,
+  ThingStatus,
+  type FeeSchedule,
+  PhysicalLocation,
+  PhysicalArea,
+  Distance,
+  ThingTitle,
+} from '@/domain'
 
 export function mapItemToThing(item: any): Thing {
   const thing_id = new ID(String(item?.id || item?._id))
   const title = new ThingTitle({ name: String(item?.name || 'Untitled'), description: item?.description || undefined })
-  const owner_id = new ID(String(item?.offeredBy?.id || item?.offeredBy || 'unknown'))
+  const owner_id = item?.offeredBy?.id || item?.offeredBy
+    ? ID.parse(String(item?.offeredBy?.id || item?.offeredBy))
+    : ID.generate() // fallback if no owner specified during mapping
   const storage_location = new PhysicalLocation({
     latitude: null,
     longitude: null,
@@ -70,6 +78,7 @@ export function buildDomainDistributedLibraryFromData(data: any): DomainDistribu
     maxFinesBeforeSuspension: new Money({ amount: 100, currency: Currency.USD }),
     feeSchedule: new ZeroFeeSchedule(),
     defaultLoanTime: { days: defaultDays },
+    defaultBorrowerVerification: data.defaultBorrowerVerification || [],
     mopServer: MOPServer.localhost(),
     publicURL: publicURL,
   })
@@ -159,6 +168,11 @@ export function buildDomainThingFromData(doc: any): Thing {
     storage_location,
     image_urls: [],
     purchase_cost: null,
+    borrowerVerification: doc.borrowerVerification || [],
+    depositAmount:
+      doc.depositAmount !== undefined && doc.depositAmount !== null
+        ? new Money({ amount: doc.depositAmount, currency: Currency.USD })
+        : null,
     status: (doc.status as ThingStatus) || ThingStatus.READY,
     requestedToBorrowBy: requestedById ? ID.parse(requestedById) : null,
   })
@@ -174,5 +188,7 @@ export function thingToPayloadData(thing: Thing, originalDoc: any): any {
     status: thing.status,
     requestedToBorrowBy: thing.requestedToBorrowBy?.toString() || null,
     offeredBy: thing.owner_id.toString(),
+    borrowerVerification: thing.borrowerVerification,
+    depositAmount: thing.depositAmount ? thing.depositAmount.amount.toNumber() : null,
   }
 }

@@ -1,6 +1,5 @@
-import { WaitingList, Reservation } from "./waitingList";
-import { Borrower } from "../borrower";
-import { WaitingListType } from '../../valueItems/waitingListTypes'
+import { WaitingList, Reservation, WaitingListType } from '@/domain';
+import { Borrower } from "..";
 
 export class NullWaitingList extends WaitingList {
   override waitingListType: WaitingListType = WaitingListType.NONE

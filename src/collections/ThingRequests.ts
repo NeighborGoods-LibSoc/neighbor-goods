@@ -1,10 +1,8 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
-import { isOwner } from '../access/isOwner'
-import { ThingRequestStatus } from '../domain/valueItems/thingRequestStatus'
-import { requestStatusTransitions } from '../domain/valueItems/statusTransitions'
+import { authenticated, anyone, isOwner } from '@/access'
+import { uuidField } from '@/fields'
+import { ThingRequestStatus, requestStatusTransitions } from '@/domain'
 
 export const ThingRequests: CollectionConfig = {
   slug: 'thing-requests',
@@ -19,6 +17,7 @@ export const ThingRequests: CollectionConfig = {
     useAsTitle: 'name',
   },
   fields: [
+    uuidField({ name: 'id', label: 'ID', description: 'UUID for this request' }),
     {
       name: 'name',
       type: 'text',

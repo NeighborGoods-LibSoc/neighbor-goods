@@ -1,8 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
-import { uuidField } from '@/fields/uuid'
+import { authenticated, anyone } from '@/access'
+import { uuidField } from '@/fields'
 
 export const Loans: CollectionConfig = {
   slug: 'loans',
@@ -17,6 +16,7 @@ export const Loans: CollectionConfig = {
     useAsTitle: 'loan_id',
   },
   fields: [
+    uuidField({ name: 'id', label: 'ID', description: 'UUID for this loan' }),
     uuidField({ name: 'loan_id', description: 'UUID for the loan (domain ID)' }),
     {
       name: 'item',
@@ -131,11 +131,7 @@ export const Loans: CollectionConfig = {
 }
 
 // --- Domain mapping helpers ---
-import { Loan } from '@/domain/entities/loan'
-import { Thing } from '@/domain/entities/thing'
-import { ID, DueDate, LoanStatus } from '@/domain/valueItems'
-import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
-import { ThingTitle } from '@/domain/valueItems/thingTitle'
+import { Loan, ID, DueDate, LoanStatus } from '@/domain'
 import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
 
 async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {

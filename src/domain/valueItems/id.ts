@@ -4,13 +4,13 @@ export class ID {
   public readonly id: string;
 
   constructor(id: string) {
+    if (!uuidValidate(id)) {
+      throw new Error("Invalid UUID: " + id);
+    }
     this.id = id;
   }
 
   static parse(value: string): ID {
-    if (!uuidValidate(value)) {
-      throw new Error("Invalid UUID");
-    }
     return new ID(value);
   }
 

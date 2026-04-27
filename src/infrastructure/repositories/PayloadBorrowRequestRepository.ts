@@ -1,9 +1,5 @@
 import { Payload } from 'payload'
-import { ID } from '../../domain/valueItems'
-import {
-  BorrowRequest,
-  BorrowRequestRepository,
-} from '../../domain/repositories/BorrowRequestRepository'
+import { ID, BorrowRequest, BorrowRequestRepository } from '@/domain'
 
 export class PayloadBorrowRequestRepository implements BorrowRequestRepository {
   constructor(private payload: Payload) {}

@@ -17,4 +17,4 @@ public/sitemap*.xml
 
 .tool-versions
 
-coverage/.tmp/
+coverage/

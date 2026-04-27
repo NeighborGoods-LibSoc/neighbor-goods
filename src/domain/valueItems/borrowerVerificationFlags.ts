@@ -1,6 +1,7 @@
 export enum BorrowerVerificationFlags {
   PHONE_NUMBER = "PHONE_NUMBER",
   EMAIL = "EMAIL",
-  ID_SCANNED = "ID_SCANNED",
+  ID = "ID",
   DEPOSIT = "DEPOSIT",
+  IN_PERSON = "IN_PERSON",
 }

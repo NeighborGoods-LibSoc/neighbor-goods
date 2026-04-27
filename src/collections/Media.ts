@@ -8,8 +8,8 @@ import {
 import path from 'path'
 import { fileURLToPath } from 'url'
 
-import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
+import { anyone, authenticated } from '@/access'
+import { uuidField } from '@/fields'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -23,6 +23,7 @@ export const Media: CollectionConfig = {
     update: authenticated,
   },
   fields: [
+    uuidField({ name: 'id', label: 'ID', description: 'UUID for this media' }),
     {
       name: 'alt',
       type: 'text',

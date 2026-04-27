@@ -33,7 +33,7 @@ export default function LoginPage() {
             router.push('/dashboard')
           }
         }
-      } catch (error) {
+      } catch (_error) {
         // Not logged in, stay on login page
       }
     }
@@ -64,7 +64,7 @@ export default function LoginPage() {
         const data = await response.json()
         setError(data.errors?.[0]?.message || 'Invalid email or password')
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)
@@ -130,7 +130,7 @@ export default function LoginPage() {
 
         <div className="signup-link">
           <p>
-            Don't have an account? <Link href="/signup">Sign up</Link>
+            Don&apos;t have an account? <Link href="/signup">Sign up</Link>
           </p>
         </div>
         <div className="forgot-password">

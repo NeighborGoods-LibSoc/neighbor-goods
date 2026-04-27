@@ -1,6 +1,5 @@
-import { WaitingList, Reservation } from "./waitingList";
-import { Borrower } from "../borrower";
-import { ReservationStatus, WaitingListType } from '../../valueItems'
+import { Borrower } from "..";
+import { ReservationStatus, WaitingListType, WaitingList, Reservation } from '@/domain';
 
 export class FirstComeFirstServeWaitingList extends WaitingList {
   members: Borrower[] = [];

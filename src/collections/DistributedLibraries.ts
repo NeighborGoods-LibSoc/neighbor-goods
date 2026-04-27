@@ -1,8 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
-import { uuidField } from '@/fields/uuid'
+import { authenticated, anyone } from '@/access'
+import { uuidField } from '@/fields'
 import { buildDomainDistributedLibraryFromData, serializeArea } from '@/collections/common/mappers'
 
 export const DistributedLibraries: CollectionConfig = {
@@ -18,6 +17,7 @@ export const DistributedLibraries: CollectionConfig = {
     useAsTitle: 'name',
   },
   fields: [
+    uuidField({ name: 'id', label: 'ID', description: 'UUID for this library' }),
     uuidField({ name: 'library_id', description: 'UUID for the library (domain ID)' }),
     {
       name: 'name',
@@ -43,6 +43,21 @@ export const DistributedLibraries: CollectionConfig = {
       required: true,
       defaultValue: 14,
       admin: { description: 'Default loan time in days' },
+    },
+    {
+      name: 'defaultBorrowerVerification',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'Email', value: 'EMAIL' },
+        { label: 'Phone Number', value: 'PHONE_NUMBER' },
+        { label: 'ID', value: 'ID' },
+        { label: 'Deposit', value: 'DEPOSIT' },
+        { label: 'In-person', value: 'IN_PERSON' },
+      ],
+      admin: {
+        description: 'Default verification methods required for borrowers in this library.',
+      },
     },
     {
       name: 'area',
@@ -73,7 +88,7 @@ export const DistributedLibraries: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      async ({ data, req }) => {
+      async ({ data, req: _req }) => {
         if (!data) return data
         try {
           const domainDL = buildDomainDistributedLibraryFromData(data)
@@ -93,7 +108,7 @@ export const DistributedLibraries: CollectionConfig = {
       },
     ],
     beforeChange: [
-      async ({ data, req }) => {
+      async ({ data, req: _req }) => {
         if (!data) return data
         try {
           const domainDL = buildDomainDistributedLibraryFromData(data)

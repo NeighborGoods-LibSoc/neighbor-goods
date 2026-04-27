@@ -1,13 +1,14 @@
-import { Entity } from '../entity'
-import { Borrower } from '../borrower'
-import { LibraryFee } from './libraryFee'
-import { Loan } from '../loan'
-import { MOPServer } from '../mopServer'
-import { Person } from '../people/person'
-import { Thing } from '../thing'
-import { WaitingList } from '../waiting_lists/waitingList'
-import { MoneyFactory, WaitingListFactory } from '../../factories'
 import {
+  Entity,
+  Borrower,
+  LibraryFee,
+  Loan,
+  Person,
+  Thing,
+  WaitingList,
+} from '..'
+import {
+  MOPServer,
   DueDate,
   FeeSchedule,
   FeeStatus,
@@ -17,7 +18,9 @@ import {
   ThingStatus,
   ThingTitle,
   WaitingListType,
-} from '../../valueItems'
+  BorrowerVerificationFlags,
+} from '@/domain'
+import { MoneyFactory, WaitingListFactory } from '@/domain'
 
 export abstract class Library extends Entity {
   libraryID: ID
@@ -29,6 +32,7 @@ export abstract class Library extends Entity {
   feeSchedule: FeeSchedule
   moneyFactory: MoneyFactory = new MoneyFactory()
   defaultLoanTime: { days: number }
+  defaultBorrowerVerification: BorrowerVerificationFlags[]
   mopServer: MOPServer
   publicURL?: string | null
 
@@ -43,6 +47,7 @@ export abstract class Library extends Entity {
     maxFinesBeforeSuspension: Money
     feeSchedule: FeeSchedule
     defaultLoanTime: { days: number }
+    defaultBorrowerVerification?: BorrowerVerificationFlags[]
     mopServer: MOPServer
     publicURL?: string | null
   }) {
@@ -54,6 +59,7 @@ export abstract class Library extends Entity {
     this.maxFinesBeforeSuspension = params.maxFinesBeforeSuspension
     this.feeSchedule = params.feeSchedule
     this.defaultLoanTime = params.defaultLoanTime
+    this.defaultBorrowerVerification = params.defaultBorrowerVerification ?? []
     this.mopServer = params.mopServer
     this.publicURL = params.publicURL ?? null
   }
@@ -122,7 +128,7 @@ export abstract class Library extends Entity {
 
   abstract startBorrow(thing: Thing, borrower: Borrower): Promise<Thing>
 
-  async rejectBorrow(thing: Thing, borrower: Borrower, reason: string): Promise<Thing>{
+  async rejectBorrow(thing: Thing, _borrower: Borrower, _reason: string): Promise<Thing>{
     thing.status = ThingStatus.READY
 
     // TODO store this reason somehow
@@ -133,13 +139,13 @@ export abstract class Library extends Entity {
 
   abstract startReturn(loan: Loan): Promise<Loan>
 
-  async rejectReturn(loan: Loan, reason: string): Promise<Loan> {
+  async rejectReturn(loan: Loan, _reason: string): Promise<Loan> {
     loan.status = LoanStatus.RETURNED_DAMAGED;
 
     return loan;
   }
 
-  async finishLibraryReturn(loan: Loan, borrower: Borrower): Promise<Loan> {
+  async finishLibraryReturn(loan: Loan, _borrower: Borrower): Promise<Loan> {
     if (loan.status !== LoanStatus.WAITING_ON_LENDER_ACCEPTANCE || !loan.timeReturned) {
       throw new Error('ReturnNotStartedError')
     }
@@ -162,14 +168,14 @@ export abstract class Library extends Entity {
     if (loan.item.status === ThingStatus.DAMAGED) {
       // prefer camelCase per FeeSchedule interface; fall back if implementation uses snake_case
       const calculator =
-        (this.feeSchedule as any).feeForDamagedItem ??
-        (this.feeSchedule as any).fee_for_damaged_item
+        this.feeSchedule.feeForDamagedItem ??
+        this.feeSchedule.fee_for_damaged_item
       if (calculator) fee_amount = calculator.call(this.feeSchedule, loan)
     }
     if (loan.status === LoanStatus.OVERDUE) {
       const calculator =
-        (this.feeSchedule as any).feeForOverdueItem ??
-        (this.feeSchedule as any).fee_for_overdue_item
+        this.feeSchedule.feeForOverdueItem ??
+        this.feeSchedule.fee_for_overdue_item
       if (calculator) fee_amount = calculator.call(this.feeSchedule, loan)
     }
 

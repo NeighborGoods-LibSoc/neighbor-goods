@@ -1,4 +1,4 @@
-import { VirtualLocation } from "./location/virtualLocation";
+import { VirtualLocation } from '@/domain';
 import { URL } from "./url";
 
 export class MOPServer extends VirtualLocation {

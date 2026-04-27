@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -31,7 +32,8 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    rulesForUse: '',
+    borrowerVerification: [] as string[],
+    depositAmount: '',
     borrowingTime: '',
     agreeToTerms: false,
   })
@@ -95,7 +97,8 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
     setFormData({
       name: '',
       description: '',
-      rulesForUse: '',
+      borrowerVerification: [],
+      depositAmount: '',
       borrowingTime: '',
       agreeToTerms: false,
     })
@@ -124,8 +127,11 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
       if (!formData.name.trim()) {
         throw new Error('Name is required')
       }
-      if (!formData.rulesForUse.trim()) {
-        throw new Error('Rules for use are required')
+      if (formData.borrowerVerification.length === 0) {
+        throw new Error('At least one verification method is required')
+      }
+      if (formData.borrowerVerification.includes('DEPOSIT') && !formData.depositAmount) {
+        throw new Error('Deposit amount is required when deposit verification is selected')
       }
       if (!formData.borrowingTime || Number(formData.borrowingTime) <= 0) {
         throw new Error('Valid borrowing time is required')
@@ -157,7 +163,8 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
       const itemData = {
         name: formData.name,
         description: formData.description || '',
-        rulesForUse: formData.rulesForUse,
+        borrowerVerification: formData.borrowerVerification,
+        depositAmount: formData.borrowerVerification.includes('DEPOSIT') ? Number(formData.depositAmount) : null,
         borrowingTime: Number(formData.borrowingTime),
         primaryImage: mediaId,
         offeredBy: user.id,
@@ -274,10 +281,13 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
             />
             {imagePreview && (
               <div className="mt-2">
-                <img
+                <Image
                   src={imagePreview}
                   alt="Preview"
-                  className="h-48 w-auto rounded border object-cover"
+                  width={200}
+                  height={192}
+                  className="rounded border object-cover"
+                  unoptimized
                 />
               </div>
             )}
@@ -331,21 +341,67 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
             )}
           </div>
 
-          {/* Rules for Use */}
+          {/* Borrower Verification */}
           <div className="space-y-2">
-            <Label htmlFor="rulesForUse">
-              Rules for Use <span className="text-red-500">*</span>
+            <Label>
+              Borrower Verification Needed <span className="text-red-500">*</span>
             </Label>
-            <Textarea
-              id="rulesForUse"
-              name="rulesForUse"
-              value={formData.rulesForUse}
-              onChange={handleInputChange}
-              placeholder="Enter rules and guidelines for using this item"
-              rows={4}
-              required
-            />
+            <div className="space-y-2">
+              {[
+                { id: 'EMAIL', label: 'Email' },
+                { id: 'PHONE_NUMBER', label: 'Phone Number' },
+                { id: 'ID', label: 'ID' },
+                { id: 'DEPOSIT', label: 'Deposit' },
+                { id: 'IN_PERSON', label: 'In-person' },
+              ].map((type) => (
+                <div key={type.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`verification-${type.id}`}
+                    checked={formData.borrowerVerification.includes(type.id)}
+                    onCheckedChange={(checked) => {
+                      if (checked) {
+                        setFormData((prev) => ({
+                          ...prev,
+                          borrowerVerification: [...prev.borrowerVerification, type.id],
+                        }))
+                      } else {
+                        setFormData((prev) => ({
+                          ...prev,
+                          borrowerVerification: prev.borrowerVerification.filter((id) => id !== type.id),
+                        }))
+                      }
+                    }}
+                  />
+                  <Label
+                    htmlFor={`verification-${type.id}`}
+                    className="cursor-pointer text-sm font-normal"
+                  >
+                    {type.label}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
+
+          {/* Deposit Amount (Conditional) */}
+          {formData.borrowerVerification.includes('DEPOSIT') && (
+            <div className="space-y-2">
+              <Label htmlFor="depositAmount">
+                Deposit Amount ($) <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="depositAmount"
+                name="depositAmount"
+                type="number"
+                min="0"
+                step="0.01"
+                value={formData.depositAmount}
+                onChange={handleInputChange}
+                placeholder="Enter deposit amount"
+                required
+              />
+            </div>
+          )}
 
           {/* Borrowing Time */}
           <div className="space-y-2">
