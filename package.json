@@ -20,7 +20,9 @@
     "test": "vitest",
     "test:unit": "vitest --config vitest.config.ts",
     "test:integration": "cross-env NODE_OPTIONS=--no-deprecation NODE_ENV=test vitest --config vitest.integration.config.ts",
-    "test:integration:run": "cross-env NODE_OPTIONS=--no-deprecation NODE_ENV=test vitest run --config vitest.integration.config.ts"
+    "test:integration:run": "cross-env NODE_OPTIONS=--no-deprecation NODE_ENV=test vitest run --config vitest.integration.config.ts",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
     "@payloadcms/admin-bar": "3.82.1",
@@ -59,10 +61,11 @@
     "sharp": "0.32.6",
     "tailwind-merge": "^2.6.1",
     "tailwindcss-animate": "^1.0.7",
-    "uuid": "^13.0.0"
+    "uuid": "^14.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.5",
+    "@playwright/test": "^1.59.1",
     "@tailwindcss/typography": "^0.5.19",
     "@types/escape-html": "^1.0.4",
     "@types/node": "22.5.4",
@@ -71,12 +74,12 @@
     "@vitest/coverage-v8": "^4.1.4",
     "autoprefixer": "^10.4.27",
     "copyfiles": "^2.4.1",
+    "dotenv": "^17.2.3",
     "eslint": "^9.39.4",
     "eslint-config-next": "^15.5.15",
-    "postcss": "^8.5.9",
+    "postcss": "^8.5.12",
     "prettier": "^3.8.2",
     "tailwindcss": "^3.4.19",
-    "dotenv": "^17.2.3",
     "typescript": "5.7.3",
     "vitest": "^3.2.4"
   },
