@@ -1,10 +1,10 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
-import { isOwner } from '../access/isOwner'
-import { ThingRequestStatus } from '../domain/valueItems/thingRequestStatus'
-import { requestStatusTransitions } from '../domain/valueItems/statusTransitions'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
+import { isOwner } from '@/access/isOwner'
+import { ThingRequestStatus } from '@/domain'
+import { requestStatusTransitions } from '@/domain/valueItems/statusTransitions'
 
 export const ThingRequests: CollectionConfig = {
   slug: 'thing-requests',
@@ -91,11 +91,10 @@ export const ThingRequests: CollectionConfig = {
         // On update, prevent changing the owner
         if (originalDoc?.requestedBy) {
           // Preserve original owner, ignore any attempt to change it
-          const originalOwnerId =
+          data.requestedBy =
             typeof originalDoc.requestedBy === 'object'
               ? originalDoc.requestedBy.id
               : originalDoc.requestedBy
-          data.requestedBy = originalOwnerId
         }
 
         // Validate status transition using shared config

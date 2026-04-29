@@ -23,6 +23,7 @@ export abstract class Library extends Entity {
   libraryID: ID
   name: string
   administrators: Person[]
+  members: Person[] = []
   waitingListType: WaitingListType
   waitingListsByItemId: Map<string, WaitingList> = new Map()
   maxFinesBeforeSuspension: Money
@@ -39,6 +40,7 @@ export abstract class Library extends Entity {
     libraryID: ID
     name: string
     administrators: Person[]
+    members?: Person[]
     waitingListType: WaitingListType
     maxFinesBeforeSuspension: Money
     feeSchedule: FeeSchedule
@@ -50,6 +52,7 @@ export abstract class Library extends Entity {
     this.libraryID = params.libraryID
     this.name = params.name
     this.administrators = params.administrators
+    this.members = params.members ?? []
     this.waitingListType = params.waitingListType
     this.maxFinesBeforeSuspension = params.maxFinesBeforeSuspension
     this.feeSchedule = params.feeSchedule

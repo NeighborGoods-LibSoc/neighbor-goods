@@ -1,16 +1,18 @@
-import { Thing } from '../entities/thing'
-import { ID, BorrowCooldownError } from '../valueItems'
-import { BorrowRequestRepository } from '../repositories/BorrowRequestRepository'
+import { Thing } from '@/domain'
+import { ID, BorrowCooldownError } from '@/domain'
+import { BorrowRequestRepository } from '@/domain/repositories'
 
 const BORROW_REQUEST_COOLDOWN_MS = 60 * 60 * 1000 // 1 hour
 
 export class ThingService {
   constructor(private borrowRequestRepo: BorrowRequestRepository) {}
 
-  async requestBorrow(thing: Thing, requesterId: ID): Promise<void> {
+  async requestBorrow(thing: Thing, requesterId: ID, itemPayloadId?: ID): Promise<void> {
+    const itemId = itemPayloadId ?? thing.thing_id
+
     // Check cooldown for this specific user-item combination
     const lastRequest = await this.borrowRequestRepo.findLastRequest(
-      thing.thing_id,
+      itemId,
       requesterId,
     )
 
@@ -28,7 +30,7 @@ export class ThingService {
       await this.borrowRequestRepo.updateRequestTime(lastRequest.id)
     } else {
       // Create new request record
-      await this.borrowRequestRepo.recordRequest(thing.thing_id, requesterId)
+      await this.borrowRequestRepo.recordRequest(itemId, requesterId)
     }
 
     // Domain entity handles state change and validation

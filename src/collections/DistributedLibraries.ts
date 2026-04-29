@@ -38,6 +38,13 @@ export const DistributedLibraries: CollectionConfig = {
       required: false,
     },
     {
+      name: 'members',
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: true,
+      required: false,
+    },
+    {
       name: 'default_loan_time_days',
       type: 'number',
       required: true,
@@ -70,13 +77,19 @@ export const DistributedLibraries: CollectionConfig = {
         },
       ],
     },
+    {
+      name: 'items',
+      type: 'relationship',
+      relationTo: 'items',
+      hasMany: true,
+    },
   ],
   hooks: {
     beforeValidate: [
       async ({ data, req }) => {
         if (!data) return data
         try {
-          const domainDL = buildDomainDistributedLibraryFromData(data)
+          const domainDL = await buildDomainDistributedLibraryFromData(data, req)
           // write back normalized values
           data.library_id = domainDL.libraryID.toString()
           data.name = String(domainDL.name)
@@ -96,7 +109,7 @@ export const DistributedLibraries: CollectionConfig = {
       async ({ data, req }) => {
         if (!data) return data
         try {
-          const domainDL = buildDomainDistributedLibraryFromData(data)
+          const domainDL = await buildDomainDistributedLibraryFromData(data, req)
           // write back normalized values again
           data.library_id = domainDL.libraryID.toString()
           data.name = String(domainDL.name)
@@ -112,9 +125,9 @@ export const DistributedLibraries: CollectionConfig = {
       },
     ],
     afterRead: [
-      async ({ doc }) => {
+      async ({ doc, req }) => {
         try {
-          const domainDL = buildDomainDistributedLibraryFromData(doc)
+          const domainDL = await buildDomainDistributedLibraryFromData(doc, req)
           // reflect any normalization
           if (doc.library_id !== domainDL.libraryID.toString()) doc.library_id = domainDL.libraryID.toString()
           if (doc.name !== domainDL.name) doc.name = domainDL.name

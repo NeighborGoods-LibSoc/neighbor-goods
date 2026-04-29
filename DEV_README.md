@@ -93,3 +93,9 @@ We are using GitHub issues to track what needs to be done. If you are unsure whe
 - `src/components/` - Reusable React components
 - `src/blocks/` - Payload block components for page building
 - `src/utilities/` - Helper functions and utilities
+
+### Integration tests
+To run the integration tests, you must first run the server locally.
+```bash
+docker compose up
+```

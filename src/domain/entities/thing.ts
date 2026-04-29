@@ -6,7 +6,7 @@ import {
   Money,
   ThingStatus,
   ThingTitle,
-} from '../valueItems'
+} from '@/domain'
 import { thingStatusTransitions } from '../valueItems/statusTransitions'
 
 export class Thing extends Entity {
