@@ -21,6 +21,7 @@ coverage/.tmp/
 coverage/
 
 # Playwright
+.next-e2e/
 /test-results/
 /playwright-report/
 /blob-report/
