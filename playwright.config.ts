@@ -20,7 +20,7 @@ export default defineConfig({
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
   webServer: {
-    command: `./node_modules/.bin/cross-env NODE_OPTIONS=--no-deprecation NEXT_DIST_DIR=.next-e2e ./node_modules/.bin/next dev --port ${E2E_PORT}`,
+    command: `./node_modules/.bin/cross-env NODE_OPTIONS=--no-deprecation NEXT_DIST_DIR=.next-e2e DATABASE_URI=mongodb://localhost:27017/neighbor-goods ./node_modules/.bin/next dev --port ${E2E_PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
   },
