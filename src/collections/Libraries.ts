@@ -1,9 +1,8 @@
 import type { CollectionConfig } from 'payload'
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
 import { SimpleLibrary } from '@/domain/entities/libraries/simpleLibrary'
-import { ID, Money, Currency, WaitingListType } from '@/domain/valueItems'
-import { MOPServer } from '@/domain/entities/mopServer'
+import { ID, WaitingListType } from '@/domain/valueItems'
 import { URL } from '@/domain/valueItems/url'
 import {
   mapReturnLocation,
@@ -238,7 +237,7 @@ async function buildDomainLibraryFromData(data: any, req: any): Promise<SimpleLi
     feeSchedule: feeSchedule as any,
     defaultLoanTime: { days: Number(data.defaultLoanTime || 14) },
     mopServer,
-    publicURL: data.publicURL ? URL.parse(data.publicURL) : null,
+    publicURL: data.publicURL ? URL.parse(data.publicURL)?.toString() ?? null : null,
   })
 
   if (data.location) {
