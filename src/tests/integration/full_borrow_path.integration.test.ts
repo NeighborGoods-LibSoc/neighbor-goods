@@ -231,7 +231,7 @@ describe("Full Borrow Happy Path Integration Test", () => {
         })
 
         // Verify status is now WAITING_FOR_LENDER_APPROVAL_TO_BORROW
-        let itemAfterRequest = await payload.findByID({ collection: 'items', id: drillItem.id })
+        const itemAfterRequest = await payload.findByID({ collection: 'items', id: drillItem.id })
         expect(itemAfterRequest.status).toBe('WAITING_FOR_LENDER_APPROVAL_TO_BORROW')
         expect(itemAfterRequest.requestedToBorrowBy).toBeDefined()
 
@@ -246,7 +246,7 @@ describe("Full Borrow Happy Path Integration Test", () => {
         })
 
         // Verify status is now BORROWED
-        let itemAfterApproval = await payload.findByID({ collection: 'items', id: drillItem.id })
+        const itemAfterApproval = await payload.findByID({ collection: 'items', id: drillItem.id })
         expect(itemAfterApproval.status).toBe('BORROWED')
 
         // 6d. Manually create the Loan record since it's not automated yet

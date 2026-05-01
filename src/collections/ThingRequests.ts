@@ -98,8 +98,8 @@ export const ThingRequests: CollectionConfig = {
         }
 
         // Validate status transition using shared config
-        const currentStatus = originalDoc?.status || ThingRequestStatus.OPEN
-        const newStatus = data.status || currentStatus
+        const currentStatus: ThingRequestStatus = (originalDoc?.status as ThingRequestStatus) || ThingRequestStatus.OPEN
+        const newStatus: ThingRequestStatus = (data.status as ThingRequestStatus) || currentStatus
 
         if (currentStatus !== newStatus) {
           const validNextStatuses = requestStatusTransitions[currentStatus] || []

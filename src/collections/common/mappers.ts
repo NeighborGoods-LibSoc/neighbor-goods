@@ -57,8 +57,8 @@ export function mapUserToPerson(user: any): Person {
   if (!user) throw new Error('User is required to map to Person')
   const personID = new ID(String(user.id || user._id))
   const nameParts = String(user.name || '').split(' ')
-  const firstName = nameParts[0] || 'Unknown'
-  const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : 'Unknown'
+  const firstName: string = nameParts[0] || 'Unknown'
+  const lastName: string = (nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined) || 'Unknown'
 
   return new Person({
     personID,
@@ -89,7 +89,7 @@ class ZeroFeeSchedule implements FeeSchedule {
 }
 
 export async function buildDomainDistributedLibraryFromData(data: any, req?: any): Promise<DomainDistributedLibrary> {
-  const libraryID = new ID(String(data.library_id))
+  const libraryID = data.library_id ? ID.parse(String(data.library_id)) : ID.generate()
   const name = String(data.name || '')
   if (!name) throw new Error('Name is required')
 
