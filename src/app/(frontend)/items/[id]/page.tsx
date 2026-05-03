@@ -66,6 +66,36 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
   // Check if current user can request to borrow (logged in, not owner, item is READY)
   const canRequestToBorrow = currentUser && !isOwner && item.status === 'READY'
 
+  // Fetch active loan for this item if it's borrowed
+  let activeLoan: { id: string; borrower: User | null; due_date: string | null; status: string } | null = null
+  if (item.status === 'BORROWED') {
+    try {
+      const loanResult = await payload.find({
+        collection: 'loans',
+        where: {
+          item: { equals: id },
+          status: { in: ['BORROWED', 'OVERDUE'] },
+        },
+        depth: 1,
+        limit: 1,
+      })
+      const loanDoc = loanResult.docs[0]
+      if (loanDoc) {
+        activeLoan = {
+          id: loanDoc.id,
+          borrower: (typeof loanDoc.borrower === 'object' ? loanDoc.borrower : null) as User | null,
+          due_date: loanDoc.due_date || null,
+          status: loanDoc.status,
+        }
+      }
+    } catch {
+      // Loan lookup failed, that's okay
+    }
+  }
+
+  // Check if current user is the borrower of the active loan
+  const isBorrower = currentUser && activeLoan?.borrower && currentUser.id === activeLoan?.borrower?.id
+
   return (
     <main className="container">
       {isNewlyCreated && (
@@ -134,6 +164,34 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
               <p>
                 <strong>Offered by:</strong> {offeredBy.name || 'Anonymous'}
               </p>
+            </div>
+          )}
+
+          {/* Active loan info */}
+          {activeLoan && (isOwner || isBorrower) && (
+            <div className="item-loan-info" style={{ marginTop: '1.5rem', padding: '1rem', borderRadius: '8px', backgroundColor: 'var(--muted)', border: '1px solid var(--border)' }}>
+              <h3 style={{ marginBottom: '0.5rem' }}>Active Loan</h3>
+              {isOwner && activeLoan.borrower && (
+                <p><strong>Borrowed by:</strong> {activeLoan.borrower.name || 'A neighbor'}</p>
+              )}
+              {isBorrower && (
+                <p><strong>You</strong> are currently borrowing this item.</p>
+              )}
+              {activeLoan.due_date && (
+                <p>
+                  <strong>Due date:</strong>{' '}
+                  {new Date(activeLoan.due_date).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric',
+                  })}
+                  {activeLoan.status === 'OVERDUE' && (
+                    <span style={{ marginLeft: '0.5rem', color: '#991b1b', fontWeight: 'bold' }}>
+                      ⚠ Overdue
+                    </span>
+                  )}
+                </p>
+              )}
             </div>
           )}
 

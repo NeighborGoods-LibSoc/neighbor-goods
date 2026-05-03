@@ -19,3 +19,6 @@ public/sitemap*.xml
 
 coverage/.tmp/
 coverage/
+/.next-e2e/
+/playwright-report/
+/test-results/

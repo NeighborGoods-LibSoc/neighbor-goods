@@ -10,6 +10,7 @@ import { ID } from '@/domain'
 import { ThingService } from '@/domain'
 import { PayloadBorrowRequestRepository } from '@/infrastructure/repositories/PayloadBorrowRequestRepository'
 import { buildDomainThingFromData, thingToPayloadData } from './common/mappers'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * Custom access control for item updates:
@@ -192,6 +193,108 @@ export const Things: CollectionConfig = {
         }
 
         return thingToPayloadData(thing, originalDoc)
+      },
+    ],
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        // Create a Loan record when an item transitions to BORROWED
+        if (
+          operation === 'update' &&
+          doc.status === ThingStatus.BORROWED &&
+          previousDoc?.status !== ThingStatus.BORROWED
+        ) {
+          const borrowerId =
+            typeof doc.requestedToBorrowBy === 'object'
+              ? doc.requestedToBorrowBy?.id
+              : doc.requestedToBorrowBy
+
+          if (borrowerId) {
+            try {
+              // Calculate due date from borrowingTime (days)
+              const dueDate = doc.borrowingTime
+                ? new Date(Date.now() + doc.borrowingTime * 24 * 60 * 60 * 1000)
+                    .toISOString()
+                    .split('T')[0]
+                : null
+
+              await req.payload.create({
+                collection: 'loans',
+                data: {
+                  loan_id: uuidv4(),
+                  item: doc.id,
+                  borrower: borrowerId,
+                  status: 'BORROWED',
+                  due_date: dueDate,
+                },
+              })
+            } catch (error) {
+              console.error('Failed to create loan record:', error)
+            }
+          }
+        }
+
+        // When item returns to READY, mark any active loans as RETURNED
+        if (
+          operation === 'update' &&
+          doc.status === ThingStatus.READY &&
+          (previousDoc?.status === ThingStatus.BORROWED ||
+            previousDoc?.status === ThingStatus.DAMAGED)
+        ) {
+          try {
+            const activeLoans = await req.payload.find({
+              collection: 'loans',
+              where: {
+                item: { equals: doc.id },
+                status: { in: ['BORROWED', 'OVERDUE'] },
+              },
+            })
+
+            for (const loan of activeLoans.docs) {
+              await req.payload.update({
+                collection: 'loans',
+                id: loan.id,
+                data: {
+                  status: 'RETURNED',
+                  time_returned: new Date().toISOString(),
+                },
+              })
+            }
+          } catch (error) {
+            console.error('Failed to update loan records:', error)
+          }
+        }
+
+        // When item is marked DAMAGED, mark any active loans as RETURNED_DAMAGED
+        if (
+          operation === 'update' &&
+          doc.status === ThingStatus.DAMAGED &&
+          previousDoc?.status === ThingStatus.BORROWED
+        ) {
+          try {
+            const activeLoans = await req.payload.find({
+              collection: 'loans',
+              where: {
+                item: { equals: doc.id },
+                status: { in: ['BORROWED', 'OVERDUE'] },
+              },
+            })
+
+            for (const loan of activeLoans.docs) {
+              await req.payload.update({
+                collection: 'loans',
+                id: loan.id,
+                data: {
+                  status: 'RETURNED_DAMAGED',
+                  time_returned: new Date().toISOString(),
+                },
+              })
+            }
+          } catch (error) {
+            console.error('Failed to update loan records:', error)
+          }
+        }
+
+        return doc
       },
     ],
   },

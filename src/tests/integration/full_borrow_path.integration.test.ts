@@ -249,18 +249,19 @@ describe("Full Borrow Happy Path Integration Test", () => {
         const itemAfterApproval = await payload.findByID({ collection: 'items', id: drillItem.id })
         expect(itemAfterApproval.status).toBe('BORROWED')
 
-        // 6d. Manually create the Loan record since it's not automated yet
-        activeLoan = await payload.create({
+        // 6d. Verify the Loan record was automatically created by the afterChange hook
+        const loanSearch = await payload.find({
           collection: 'loans',
-          data: {
-            loan_id: (await import('../../domain/valueItems')).ID.generate().toString(),
-            item: drillItem.id,
-            borrower: borrowerUser.id,
-            status: 'BORROWED',
-            due_date: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+          where: {
+            item: { equals: drillItem.id },
+            borrower: { equals: borrowerUser.id },
+            status: { equals: 'BORROWED' },
           },
         })
+        expect(loanSearch.totalDocs).toBe(1)
+        activeLoan = loanSearch.docs[0]
         expect(activeLoan.id).toBeDefined()
+        expect(activeLoan.due_date).toBeDefined()
       });
 
       it('7. borrower returns item', async () => {
@@ -284,7 +285,7 @@ describe("Full Borrow Happy Path Integration Test", () => {
           req: { user: lenderUser } as any,
         })
 
-        // Also update the item status to READY since it's not automated yet
+        // Update the item status back to READY (triggers hook to mark any remaining active loans as RETURNED)
         await payload.update({
           collection: 'items',
           id: drillItem.id,
