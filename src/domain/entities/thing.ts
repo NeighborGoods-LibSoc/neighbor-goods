@@ -6,8 +6,8 @@ import {
   Money,
   ThingStatus,
   ThingTitle,
-} from '../valueItems'
-import { thingStatusTransitions } from '../valueItems/statusTransitions'
+  thingStatusTransitions
+} from '@/domain'
 
 export class Thing extends Entity {
   thing_id: ID
