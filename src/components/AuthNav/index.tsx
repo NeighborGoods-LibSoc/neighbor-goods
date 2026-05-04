@@ -51,6 +51,12 @@ export const AuthNav: React.FC = () => {
           Inventory
         </Link>
         <Link
+          href="/libraries"
+          className="text-primary hover:text-var(--light-green) transition-colors"
+        >
+          Libraries
+        </Link>
+        <Link
           href="/profile"
           className="text-primary hover:text-var(--light-green) transition-colors"
         >
