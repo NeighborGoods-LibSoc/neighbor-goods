@@ -1007,6 +1007,9 @@ export interface DistributedLibrary {
    */
   public_url?: string | null;
   administrators?: (string | User)[] | null;
+  /**
+   * Users who have joined this library
+   */
   members?: (string | User)[] | null;
   /**
    * Default loan time in days
@@ -1027,7 +1030,6 @@ export interface DistributedLibrary {
     };
     radius_kilometers: number;
   };
-  items?: (string | Item)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1818,7 +1820,6 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
             };
         radius_kilometers?: T;
       };
-  items?: T;
   updatedAt?: T;
   createdAt?: T;
 }

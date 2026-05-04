@@ -7,7 +7,5 @@ export default async function LibrariesPage() {
     nullUserRedirect: '/login',
   })
 
-  if (!user) return null
-
   return <LibrariesClient user={user} />
 }
