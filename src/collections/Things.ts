@@ -1,13 +1,14 @@
 import type { CollectionConfig, Access } from 'payload'
 import type { User } from '@/payload-types'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
-import { isOwner } from '../access/isOwner'
-import { ThingStatus } from '../domain/valueItems/thingStatus'
-import { ID } from '../domain/valueItems'
-import { ThingService } from '../domain/services/ThingService'
-import { PayloadBorrowRequestRepository } from '../infrastructure/repositories/PayloadBorrowRequestRepository'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
+import { isOwner } from '@/access/isOwner'
+import { uuidField } from '@/fields/uuid'
+import { ThingStatus } from '@/domain'
+import { ID } from '@/domain'
+import { ThingService } from '@/domain'
+import { PayloadBorrowRequestRepository } from '@/infrastructure/repositories/PayloadBorrowRequestRepository'
 import { buildDomainThingFromData, thingToPayloadData } from './common/mappers'
 
 /**
@@ -34,6 +35,7 @@ export const Things: CollectionConfig = {
     useAsTitle: 'name',
   },
   fields: [
+    uuidField({ name: 'item_id', description: 'UUID for the item (domain ID)' }),
     {
       name: 'name',
       type: 'text',
@@ -46,7 +48,10 @@ export const Things: CollectionConfig = {
       defaultValue: ThingStatus.READY,
       options: [
         { label: 'Ready', value: ThingStatus.READY },
-        { label: 'Waiting for Lender Approval', value: ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW },
+        {
+          label: 'Waiting for Lender Approval',
+          value: ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW,
+        },
         { label: 'Borrowed', value: ThingStatus.BORROWED },
         { label: 'Damaged', value: ThingStatus.DAMAGED },
         { label: 'Reserved', value: ThingStatus.RESERVED },
@@ -126,6 +131,15 @@ export const Things: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeValidate: [
+      async ({ data, operation }) => {
+        if (!data) return data
+        if (operation === 'create' && !data.item_id) {
+          data.item_id = ID.generate().toString()
+        }
+        return data
+      },
+    ],
     beforeChange: [
       async ({ data, originalDoc, operation, req }) => {
         if (!data) return data
@@ -145,7 +159,7 @@ export const Things: CollectionConfig = {
         }
 
         const thing = buildDomainThingFromData(originalDoc)
-        const userId = ID.parse(req.user.id)
+        const userId = new ID(req.user.id)
         const newStatus = (data.status as ThingStatus) || thing.status
 
         // Non-owner requesting to borrow
@@ -156,7 +170,7 @@ export const Things: CollectionConfig = {
 
           const borrowRequestRepo = new PayloadBorrowRequestRepository(req.payload)
           const thingService = new ThingService(borrowRequestRepo)
-          await thingService.requestBorrow(thing, userId)
+          await thingService.requestBorrow(thing, userId, new ID(originalDoc.id))
 
           return thingToPayloadData(thing, originalDoc)
         }

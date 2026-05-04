@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Thing } from "../../entities/thing";
-import { ID } from "../../valueItems/id";
-import { ThingTitle } from "../../valueItems/thingTitle";
-import { ThingStatus } from "../../valueItems/thingStatus";
-import { PhysicalLocation } from "../../valueItems/location/physicalLocation";
+import { Thing, ID, ThingTitle, ThingStatus, PhysicalLocation } from '@/domain';
 
 describe("Thing", () => {
   function makeThing(): Thing {

@@ -98,7 +98,39 @@ If the campaign is successful, each member who pledges to the campaign must exec
 
  - [ ] Examples including listing items as "borrowed" or transferring money?
 
-# Data Models
+# Domain Model
+
+The following entities are currently implemented as Payload CMS collections (defined in `src/collections/`):
+
+- **User** (`users`): Represents a registered community member. Stores the user's name and handles authentication. Users can offer items, request to borrow, and participate in the community.
+- **Admin** (`admins`): An administrative user with elevated privileges. Has a name, email, and role for managing the platform.
+- **Thing** (`items`): Represents a physical item offered for sharing. Includes a name, description, status (Ready, Waiting for Lender Approval, Borrowed, Damaged, Reserved), rules for use, maximum borrowing time, tags, and images. Linked to the offering user (`offeredBy`) and optionally to a user who has requested to borrow it.
+- **BorrowRequest** (`borrow-requests`): A request from a user to borrow a specific item. Links a user (`requestedBy`) to an item, with a timestamp for when the request was made.
+- **Loan** (`loans`): Tracks an active or completed loan of an item. Contains a UUID, references to the item and borrower, a due date, status (Borrowed, Overdue, Return Started, Waiting on Lender Acceptance, Returned Damaged, Returned), return location (with address and coordinates), and the time returned.
+- **ThingRequest** (`thing-requests`): A community request for an item that is not currently available. Includes a name, description, status (Open, Fulfilled, Closed), tags, a reference image, and the requesting user.
+- **Tag** (`tags`): A user-created label for categorizing items and requests. Has a name, description, and color.
+- **Category** (`categories`): A broader classification used to organize content. Has a title and an auto-generated slug.
+- **DistributedLibrary** (`distributedLibraries`): Represents a local sharing node in the federated network. Includes a UUID, name, public URL, administrators (users), a default loan time, and a geographic service area defined by a center point (address and coordinates) and radius.
+- **Media** (`media`): Uploaded images and files. Stores alt text, a rich-text caption, and auto-generated size variants (thumbnail, square, small, medium, large, xlarge, og).
+- **Post** (`posts`): A content post with rich text, managed through the Payload CMS publishing workflow.
+- **Page** (`pages`): A full website page built from configurable content blocks (Call to Action, Content, Media, Archive, Form), with publishing controls.
+
+### Entity Relationships
+
+```
+User ──offers──▶ Thing ◀──references── BorrowRequest ◀──requestedBy── User
+                   │                         │
+                   ▼                         ▼
+                  Tag                      Loan (item + borrower)
+                   ▲
+                   │
+            ThingRequest ◀──requestedBy── User
+
+DistributedLibrary ──administrators──▶ User
+Thing ──primaryImage / additional_images──▶ Media
+```
+
+# Planned Data Models
 The following are database models that will be needed for the above system:
 1. User - contains the personal information of the user, allows for authentication.
 2. Item - the representation of an item

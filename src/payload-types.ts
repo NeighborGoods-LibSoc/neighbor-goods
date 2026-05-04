@@ -76,6 +76,7 @@ export interface Config {
     admins: Admin;
     items: Item;
     loans: Loan;
+    libraries: Library;
     'thing-requests': ThingRequest;
     'borrow-requests': BorrowRequest;
     distributedLibraries: DistributedLibrary;
@@ -100,6 +101,7 @@ export interface Config {
     admins: AdminsSelect<false> | AdminsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     loans: LoansSelect<false> | LoansSelect<true>;
+    libraries: LibrariesSelect<false> | LibrariesSelect<true>;
     'thing-requests': ThingRequestsSelect<false> | ThingRequestsSelect<true>;
     'borrow-requests': BorrowRequestsSelect<false> | BorrowRequestsSelect<true>;
     distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
@@ -805,6 +807,10 @@ export interface Admin {
  */
 export interface Item {
   id: string;
+  /**
+   * UUID for the item (domain ID)
+   */
+  item_id: string;
   name: string;
   /**
    * Current availability status of this item
@@ -893,6 +899,56 @@ export interface Loan {
    * Timestamp when the item was returned
    */
   time_returned?: string | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "libraries".
+ */
+export interface Library {
+  id: string;
+  name: string;
+  /**
+   * UUID for the library (domain ID)
+   */
+  library_id: string;
+  location?: {
+    latitude?: number | null;
+    longitude?: number | null;
+    street_address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip_code?: string | null;
+    country?: string | null;
+  };
+  administrators: (string | User)[];
+  members?: (string | User)[] | null;
+  waitingListType: 'NONE' | 'QUADRATIC_WAITING_LIST' | 'FIRST_COME_FIRST_SERVE';
+  maxFinesBeforeSuspension: {
+    amount: number;
+    currency: 'USD' | 'EUR' | 'HOUR';
+  };
+  feeSchedule: {
+    feeForOverdueItem: {
+      amount: number;
+      currency: 'USD' | 'EUR' | 'HOUR';
+    };
+    feeForDamagedItem: {
+      amount: number;
+      currency: 'USD' | 'EUR' | 'HOUR';
+    };
+  };
+  /**
+   * Default loan time in days
+   */
+  defaultLoanTime: number;
+  mopServer: {
+    url: string;
+    version: string;
+  };
+  publicURL?: string | null;
+  items?: (string | Item)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1198,6 +1254,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'loans';
         value: string | Loan;
+      } | null)
+    | ({
+        relationTo: 'libraries';
+        value: string | Library;
       } | null)
     | ({
         relationTo: 'thing-requests';
@@ -1614,6 +1674,7 @@ export interface AdminsSelect<T extends boolean = true> {
  * via the `definition` "items_select".
  */
 export interface ItemsSelect<T extends boolean = true> {
+  item_id?: T;
   name?: T;
   status?: T;
   description?: T;
@@ -1649,6 +1710,61 @@ export interface LoansSelect<T extends boolean = true> {
         country?: T;
       };
   time_returned?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "libraries_select".
+ */
+export interface LibrariesSelect<T extends boolean = true> {
+  name?: T;
+  library_id?: T;
+  location?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+        street_address?: T;
+        city?: T;
+        state?: T;
+        zip_code?: T;
+        country?: T;
+      };
+  administrators?: T;
+  members?: T;
+  waitingListType?: T;
+  maxFinesBeforeSuspension?:
+    | T
+    | {
+        amount?: T;
+        currency?: T;
+      };
+  feeSchedule?:
+    | T
+    | {
+        feeForOverdueItem?:
+          | T
+          | {
+              amount?: T;
+              currency?: T;
+            };
+        feeForDamagedItem?:
+          | T
+          | {
+              amount?: T;
+              currency?: T;
+            };
+      };
+  defaultLoanTime?: T;
+  mopServer?:
+    | T
+    | {
+        url?: T;
+        version?: T;
+      };
+  publicURL?: T;
+  items?: T;
   updatedAt?: T;
   createdAt?: T;
 }

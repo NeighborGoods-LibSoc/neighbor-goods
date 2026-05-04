@@ -21,3 +21,4 @@ coverage/.tmp/
 /.next-e2e/
 /playwright-report/
 /test-results/
+coverage/

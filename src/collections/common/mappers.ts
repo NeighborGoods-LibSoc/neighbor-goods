@@ -1,15 +1,19 @@
 import { Thing } from '@/domain/entities/thing'
+import { ThingRequest } from '@/domain/entities/thingRequest'
 import { DistributedLibrary as DomainDistributedLibrary } from '@/domain/entities/libraries/distributedLibrary'
 import { MOPServer } from '@/domain/entities/mopServer'
-import { ID, WaitingListType, Money, Currency, ThingStatus } from '@/domain/valueItems'
+import { WaitingListType, Money, Currency, ThingStatus, ThingRequestStatus } from '@/domain/valueItems'
 import type { FeeSchedule } from '@/domain/valueItems'
+import { ID, PersonName, EmailAddress } from '@/domain/valueItems'
 import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
 import { PhysicalArea } from '@/domain/valueItems/location/physicalArea'
 import { Distance } from '@/domain/valueItems/location/distance'
 import { ThingTitle } from '@/domain/valueItems/thingTitle'
+import { Person } from '@/domain/entities/people/person'
+import { URL } from '@/domain/valueItems/url'
 
 export function mapItemToThing(item: any): Thing {
-  const thing_id = new ID(String(item?.id || item?._id))
+  const thing_id = item?.item_id ? ID.parse(String(item.item_id)) : new ID(String(item?.id || item?._id))
   const title = new ThingTitle({ name: String(item?.name || 'Untitled'), description: item?.description || undefined })
   const owner_id = new ID(String(item?.offeredBy?.id || item?.offeredBy || 'unknown'))
   const storage_location = new PhysicalLocation({
@@ -29,6 +33,8 @@ export function mapItemToThing(item: any): Thing {
     storage_location,
     image_urls: [],
     purchase_cost: null,
+    status: (item?.status as ThingStatus) || ThingStatus.READY,
+    requestedToBorrowBy: item?.requestedToBorrowBy ? new ID(String(item.requestedToBorrowBy?.id || item.requestedToBorrowBy)) : null,
   })
 }
 
@@ -47,13 +53,43 @@ export function mapReturnLocation(loc: any) {
   })
 }
 
+export function mapUserToPerson(user: any): Person {
+  if (!user) throw new Error('User is required to map to Person')
+  const personID = new ID(String(user.id || user._id))
+  const nameParts = String(user.name || '').split(' ')
+  const firstName: string = nameParts[0] || 'Unknown'
+  const lastName: string = (nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined) || 'Unknown'
+
+  return new Person({
+    personID,
+    name: new PersonName({ firstName, lastName }),
+    emails: [new EmailAddress(user.email)],
+  })
+}
+
+export function mapDataToMoney(data: any): Money {
+  if (!data) return new Money({ amount: 0, currency: Currency.USD })
+  return new Money({
+    amount: data.amount || 0,
+    currency: (data.currency as Currency) || Currency.USD,
+  })
+}
+
+export function mapDataToMopServer(data: any): MOPServer {
+  if (!data) return MOPServer.localhost()
+  return new MOPServer({
+    url: URL.parse(data.url || 'https://localhost'),
+    version: data.version || '0.0.0',
+  })
+}
+
 class ZeroFeeSchedule implements FeeSchedule {
   feeForOverdueItem() { return new Money({ amount: 0, currency: Currency.USD }) }
   feeForDamagedItem() { return new Money({ amount: 0, currency: Currency.USD }) }
 }
 
-export function buildDomainDistributedLibraryFromData(data: any): DomainDistributedLibrary {
-  const libraryID = new ID(String(data.library_id))
+export async function buildDomainDistributedLibraryFromData(data: any, req?: any): Promise<DomainDistributedLibrary> {
+  const libraryID = data.library_id ? ID.parse(String(data.library_id)) : ID.generate()
   const name = String(data.name || '')
   if (!name) throw new Error('Name is required')
 
@@ -62,10 +98,29 @@ export function buildDomainDistributedLibraryFromData(data: any): DomainDistribu
     ? data.public_url.trim()
     : null
 
+  const resolveUsers = async (userIds: any[]) => {
+    const people: Person[] = []
+    for (const item of (userIds || [])) {
+      if (typeof item === 'object') {
+        if (item.id || item._id) people.push(mapUserToPerson(item))
+      } else if (req) {
+        try {
+          const userDoc = await req.payload.findByID({ collection: 'users', id: String(item) })
+          if (userDoc) people.push(mapUserToPerson(userDoc))
+        } catch {}
+      }
+    }
+    return people
+  }
+
+  const administrators = await resolveUsers(data.administrators)
+  const members = await resolveUsers(data.members)
+
   const dl = new DomainDistributedLibrary({
     libraryID,
     name,
-    administrators: [],
+    administrators,
+    members,
     waitingListType: WaitingListType.FIRST_COME_FIRST_SERVE,
     maxFinesBeforeSuspension: new Money({ amount: 100, currency: Currency.USD }),
     feeSchedule: new ZeroFeeSchedule(),
@@ -149,18 +204,18 @@ export function buildDomainThingFromData(doc: any): Thing {
   })
 
   return new Thing({
-    thing_id: ID.parse(doc.id),
+    thing_id: doc.item_id ? ID.parse(doc.item_id) : new ID(doc.id),
     title: new ThingTitle({
       name: String(doc.name || 'Untitled'),
       description: doc.description || undefined,
     }),
     description: doc.description || null,
-    owner_id: ID.parse(ownerId),
+    owner_id: new ID(ownerId),
     storage_location,
     image_urls: [],
     purchase_cost: null,
     status: (doc.status as ThingStatus) || ThingStatus.READY,
-    requestedToBorrowBy: requestedById ? ID.parse(requestedById) : null,
+    requestedToBorrowBy: requestedById ? new ID(requestedById) : null,
   })
 }
 
@@ -171,8 +226,42 @@ export function buildDomainThingFromData(doc: any): Thing {
 export function thingToPayloadData(thing: Thing, originalDoc: any): any {
   return {
     ...originalDoc,
+    item_id: thing.thing_id.toString(),
     status: thing.status,
     requestedToBorrowBy: thing.requestedToBorrowBy?.toString() || null,
     offeredBy: thing.owner_id.toString(),
+  }
+}
+
+/**
+ * Build a domain ThingRequest from Payload document data.
+ * Used by ThingRequests collection hooks for domain-driven validation.
+ */
+export function buildDomainThingRequestFromData(doc: any): ThingRequest {
+  if (!doc) {
+    throw new Error('Cannot build ThingRequest from null document')
+  }
+
+  const requestedById =
+    typeof doc.requestedBy === 'object' ? doc.requestedBy.id : doc.requestedBy
+
+  return new ThingRequest({
+    thingRequestID: doc.id ? new ID(doc.id) : ID.generate(),
+    name: String(doc.name || ''),
+    description: doc.description || null,
+    status: (doc.status as ThingRequestStatus) || ThingRequestStatus.OPEN,
+    requestedBy: new ID(requestedById),
+  })
+}
+
+/**
+ * Convert a domain ThingRequest back to Payload data format.
+ * Preserves fields that shouldn't change through domain operations.
+ */
+export function thingRequestToPayloadData(thingRequest: ThingRequest, originalDoc: any): any {
+  return {
+    ...originalDoc,
+    status: thingRequest.status,
+    requestedBy: thingRequest.requestedBy.toString(),
   }
 }

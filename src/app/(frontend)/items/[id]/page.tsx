@@ -3,7 +3,7 @@ import { getPayload } from 'payload'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
-import type { Item, Media, User, Tag } from '@/payload-types'
+import type { Media, User, Tag } from '@/payload-types'
 import { DeleteItemButton } from './DeleteItemButton'
 import { RequestToBorrowButton } from './RequestToBorrowButton'
 import { OwnerBorrowActions } from './OwnerBorrowActions'
@@ -79,7 +79,7 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
 
       <div className="page-header">
         <Link href="/dashboard" className="btn btn-secondary">
-          &larr; Back to Dashboard
+          &larr; Back to User Dashboard
         </Link>
       </div>
 
@@ -148,7 +148,7 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
           {!currentUser && item.status === 'READY' && (
             <div className="item-borrow-action" style={{ marginTop: '2rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
               <p style={{ color: 'var(--muted-foreground)' }}>
-                <a href="/login" style={{ color: 'var(--primary)' }}>Log in</a> to request this item.
+                <Link href="/login" style={{ color: 'var(--primary)' }}>Log in</Link> to request this item.
               </p>
             </div>
           )}

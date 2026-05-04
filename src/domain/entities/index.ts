@@ -1,5 +1,6 @@
 export * from "./entity";
 export * from "./thing";
+export * from "./thingRequest";
 export * from "./loan";
 export * from "./borrower";
 export * from "./people/person";

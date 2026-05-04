@@ -1,11 +1,11 @@
-import { Entity } from '../entity'
-import { Borrower } from '../borrower'
-import { LibraryFee } from './libraryFee'
+import { Entity } from '@/domain'
+import { Borrower } from '@/domain'
+import { LibraryFee } from '@/domain'
 import { Loan } from '../loan'
-import { MOPServer } from '../mopServer'
-import { Person } from '../people/person'
+import { MOPServer } from '@/domain'
+import { Person } from '@/domain'
 import { Thing } from '../thing'
-import { WaitingList } from '../waiting_lists/waitingList'
+import { WaitingList } from '@/domain'
 import { MoneyFactory, WaitingListFactory } from '../../factories'
 import {
   DueDate,
@@ -23,6 +23,7 @@ export abstract class Library extends Entity {
   libraryID: ID
   name: string
   administrators: Person[]
+  members: Person[] = []
   waitingListType: WaitingListType
   waitingListsByItemId: Map<string, WaitingList> = new Map()
   maxFinesBeforeSuspension: Money
@@ -39,6 +40,7 @@ export abstract class Library extends Entity {
     libraryID: ID
     name: string
     administrators: Person[]
+    members?: Person[]
     waitingListType: WaitingListType
     maxFinesBeforeSuspension: Money
     feeSchedule: FeeSchedule
@@ -50,6 +52,7 @@ export abstract class Library extends Entity {
     this.libraryID = params.libraryID
     this.name = params.name
     this.administrators = params.administrators
+    this.members = params.members ?? []
     this.waitingListType = params.waitingListType
     this.maxFinesBeforeSuspension = params.maxFinesBeforeSuspension
     this.feeSchedule = params.feeSchedule
