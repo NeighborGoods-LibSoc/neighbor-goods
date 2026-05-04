@@ -1,8 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
 import { uuidField } from '@/fields/uuid'
+// --- Domain mapping helpers ---
+import { Loan } from '@/domain/entities/loan'
+import { DueDate, ID, LoanStatus } from '@/domain/valueItems'
+import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
 
 export const Loans: CollectionConfig = {
   slug: 'loans',
@@ -131,14 +135,6 @@ export const Loans: CollectionConfig = {
   timestamps: true,
 }
 
-// --- Domain mapping helpers ---
-import { Loan } from '@/domain/entities/loan'
-import { Thing } from '@/domain/entities/thing'
-import { ID, DueDate, LoanStatus } from '@/domain/valueItems'
-import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
-import { ThingTitle } from '@/domain/valueItems/thingTitle'
-import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
-
 async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
   const loan_id = new ID(String(data.loan_id))
 
@@ -148,7 +144,8 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
 
   const thing = mapItemToThing(itemDoc)
 
-  const borrowerId = typeof data.borrower === 'object' ? data.borrower?.id || data.borrower?.value : data.borrower
+  const borrowerId =
+    typeof data.borrower === 'object' ? data.borrower?.id || data.borrower?.value : data.borrower
   if (!borrowerId) throw new Error('Borrower is required')
   const borrower_id = new ID(String(borrowerId))
 
@@ -157,7 +154,7 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
   const return_location = mapReturnLocation(data.return_location)
   const time_returned = data.time_returned ? new Date(data.time_returned) : null
 
-  const loan = new Loan({
+  return new Loan({
     loanId: loan_id,
     item: thing,
     dueDate: due_date,
@@ -166,8 +163,6 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
     timeReturned: time_returned,
     status: LoanStatus[data.status as keyof typeof LoanStatus] || LoanStatus.RETURNED,
   })
-
-  return loan
 }
 
 

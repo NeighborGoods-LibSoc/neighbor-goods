@@ -18,11 +18,12 @@ public/sitemap*.xml
 .tool-versions
 
 coverage/.tmp/
+/.next-e2e/
+/playwright-report/
+/test-results/
 coverage/
 
 # Playwright
 .next-e2e/
-/test-results/
-/playwright-report/
 /blob-report/
 /playwright/.cache/
