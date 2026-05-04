@@ -1,6 +1,6 @@
 import { Payload } from 'payload'
-import { ID } from '@/domain'
-import { PersonLookup } from '@/domain'
+import { ID } from '@/domain/valueItems/id'
+import { PersonLookup } from '@/domain/services/NotificationService'
 
 export class PayloadPersonLookup implements PersonLookup {
   constructor(private payload: Payload) {}

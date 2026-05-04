@@ -1,6 +1,6 @@
 import { Payload } from 'payload'
-import { Notification } from '@/domain'
-import { NotificationRepository } from '@/domain/repositories'
+import { Notification } from '@/domain/entities/notification'
+import { NotificationRepository } from '@/domain/repositories/NotificationRepository'
 
 export class PayloadNotificationRepository implements NotificationRepository {
   constructor(private payload: Payload) {}

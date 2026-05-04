@@ -1,5 +1,6 @@
 import { Entity } from './entity'
-import { ID, NotificationType } from '@/domain'
+import { ID } from '@/domain'
+import { NotificationType } from '@/domain'
 
 export class Notification extends Entity {
   readonly notificationID: ID

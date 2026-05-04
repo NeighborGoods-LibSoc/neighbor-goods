@@ -1,5 +1,7 @@
 import { Notification } from '@/domain'
-import { ID, NotificationType, ThingStatus } from '@/domain'
+import { ID } from '@/domain'
+import { NotificationType } from '@/domain'
+import { ThingStatus } from '@/domain'
 import { NotificationRepository } from '@/domain/repositories'
 
 export interface PersonLookup {
