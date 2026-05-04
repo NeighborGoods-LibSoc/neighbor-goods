@@ -1012,6 +1012,10 @@ export interface DistributedLibrary {
    */
   members?: (string | User)[] | null;
   /**
+   * Items shared through this library
+   */
+  items?: (string | Item)[] | null;
+  /**
    * Default loan time in days
    */
   default_loan_time_days: number;
@@ -1803,6 +1807,7 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
   public_url?: T;
   administrators?: T;
   members?: T;
+  items?: T;
   default_loan_time_days?: T;
   area?:
     | T

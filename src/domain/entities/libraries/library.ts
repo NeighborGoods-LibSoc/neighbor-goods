@@ -1,11 +1,11 @@
-import { Entity } from '@/domain'
-import { Borrower } from '@/domain'
-import { LibraryFee } from '@/domain'
+import { Entity } from '../entity'
+import { Borrower } from '../borrower'
+import { LibraryFee } from './libraryFee'
 import { Loan } from '../loan'
-import { MOPServer } from '@/domain'
-import { Person } from '@/domain'
+import { MOPServer } from '../mopServer'
+import { Person } from '../people/person'
 import { Thing } from '../thing'
-import { WaitingList } from '@/domain'
+import { WaitingList } from '../waiting_lists/waitingList'
 import { MoneyFactory, WaitingListFactory } from '../../factories'
 import {
   DueDate,
