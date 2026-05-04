@@ -1,6 +1,6 @@
 import { Entity } from "./entity";
 import { Thing } from "./thing";
-import { ID, DueDate, LoanStatus, Location } from '@/domain';
+import { ID, DueDate, LoanStatus, Location } from '../valueItems';
 
 export class Loan extends Entity {
   loanID: ID;

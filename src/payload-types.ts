@@ -117,7 +117,7 @@ export interface Config {
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {
@@ -185,7 +185,7 @@ export interface AdminAuthOperations {
  * via the `definition` "pages".
  */
 export interface Page {
-  id: string;
+  id: number;
   title: string;
   hero: {
     type: 'none' | 'highImpact' | 'mediumImpact' | 'lowImpact';
@@ -212,11 +212,11 @@ export interface Page {
             reference?:
               | ({
                   relationTo: 'pages';
-                  value: string | Page;
+                  value: number | Page;
                 } | null)
               | ({
                   relationTo: 'posts';
-                  value: string | Post;
+                  value: number | Post;
                 } | null);
             url?: string | null;
             label: string;
@@ -228,7 +228,7 @@ export interface Page {
           id?: string | null;
         }[]
       | null;
-    media?: (string | null) | Media;
+    media?: (number | null) | Media;
   };
   layout: (CallToActionBlock | ContentBlock | MediaBlock | ArchiveBlock | FormBlock)[];
   meta?: {
@@ -236,7 +236,7 @@ export interface Page {
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
-    image?: (string | null) | Media;
+    image?: (number | null) | Media;
     description?: string | null;
   };
   publishedAt?: string | null;
@@ -251,9 +251,9 @@ export interface Page {
  * via the `definition` "posts".
  */
 export interface Post {
-  id: string;
+  id: number;
   title: string;
-  heroImage?: (string | null) | Media;
+  heroImage?: (number | null) | Media;
   content: {
     root: {
       type: string;
@@ -269,18 +269,18 @@ export interface Post {
     };
     [k: string]: unknown;
   };
-  relatedPosts?: (string | Post)[] | null;
-  categories?: (string | Category)[] | null;
+  relatedPosts?: (number | Post)[] | null;
+  categories?: (number | Category)[] | null;
   meta?: {
     title?: string | null;
     /**
      * Maximum upload file size: 12MB. Recommended file size for images is <500KB.
      */
-    image?: (string | null) | Media;
+    image?: (number | null) | Media;
     description?: string | null;
   };
   publishedAt?: string | null;
-  authors?: (string | User)[] | null;
+  authors?: (number | User)[] | null;
   populatedAuthors?:
     | {
         id?: string | null;
@@ -298,7 +298,7 @@ export interface Post {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt?: string | null;
   caption?: {
     root: {
@@ -390,14 +390,14 @@ export interface Media {
  * via the `definition` "categories".
  */
 export interface Category {
-  id: string;
+  id: number;
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
-  parent?: (string | null) | Category;
+  parent?: (number | null) | Category;
   breadcrumbs?:
     | {
-        doc?: (string | null) | Category;
+        doc?: (number | null) | Category;
         url?: string | null;
         label?: string | null;
         id?: string | null;
@@ -411,7 +411,7 @@ export interface Category {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   name?: string | null;
   updatedAt: string;
   createdAt: string;
@@ -460,11 +460,11 @@ export interface CallToActionBlock {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: string | Page;
+                value: number | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: string | Post;
+                value: number | Post;
               } | null);
           url?: string | null;
           label: string;
@@ -510,11 +510,11 @@ export interface ContentBlock {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: string | Page;
+                value: number | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: string | Post;
+                value: number | Post;
               } | null);
           url?: string | null;
           label: string;
@@ -535,7 +535,7 @@ export interface ContentBlock {
  * via the `definition` "MediaBlock".
  */
 export interface MediaBlock {
-  media: string | Media;
+  media: number | Media;
   id?: string | null;
   blockName?: string | null;
   blockType: 'mediaBlock';
@@ -562,12 +562,12 @@ export interface ArchiveBlock {
   } | null;
   populateBy?: ('collection' | 'selection') | null;
   relationTo?: 'posts' | null;
-  categories?: (string | Category)[] | null;
+  categories?: (number | Category)[] | null;
   limit?: number | null;
   selectedDocs?:
     | {
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       }[]
     | null;
   id?: string | null;
@@ -579,7 +579,7 @@ export interface ArchiveBlock {
  * via the `definition` "FormBlock".
  */
 export interface FormBlock {
-  form: string | Form;
+  form: number | Form;
   enableIntro?: boolean | null;
   introContent?: {
     root: {
@@ -605,7 +605,7 @@ export interface FormBlock {
  * via the `definition` "forms".
  */
 export interface Form {
-  id: string;
+  id: number;
   title: string;
   fields?:
     | (
@@ -779,7 +779,7 @@ export interface Form {
  * via the `definition` "admins".
  */
 export interface Admin {
-  id: string;
+  id: number;
   name?: string | null;
   role?: string | null;
   updatedAt: string;
@@ -806,7 +806,7 @@ export interface Admin {
  * via the `definition` "items".
  */
 export interface Item {
-  id: string;
+  id: number;
   /**
    * UUID for the item (domain ID)
    */
@@ -820,7 +820,7 @@ export interface Item {
   /**
    * Select tags to categorize this item
    */
-  tags?: (string | Tag)[] | null;
+  tags?: (number | Tag)[] | null;
   /**
    * Rules and guidelines for using this item
    */
@@ -829,19 +829,19 @@ export interface Item {
    * Maximum borrowing time in days
    */
   borrowingTime: number;
-  offeredBy: string | User;
+  offeredBy: number | User;
   /**
    * Primary image used as thumbnail
    */
-  primaryImage: string | Media;
+  primaryImage: number | Media;
   /**
    * Additional images for this item
    */
-  additional_images?: (string | Media)[] | null;
+  additional_images?: (number | Media)[] | null;
   /**
    * User who has requested to borrow this item (pending approval)
    */
-  requestedToBorrowBy?: (string | null) | User;
+  requestedToBorrowBy?: (number | null) | User;
   updatedAt: string;
   createdAt: string;
 }
@@ -850,7 +850,7 @@ export interface Item {
  * via the `definition` "tags".
  */
 export interface Tag {
-  id: string;
+  id: number;
   /**
    * Tag name (e.g., "Electronics", "Books", "Clothing")
    */
@@ -871,13 +871,13 @@ export interface Tag {
  * via the `definition` "loans".
  */
 export interface Loan {
-  id: string;
+  id: number;
   /**
    * UUID for the loan (domain ID)
    */
   loan_id: string;
-  item: string | Item;
-  borrower: string | User;
+  item: number | Item;
+  borrower: number | User;
   /**
    * Due date for returning the item (no time component)
    */
@@ -907,7 +907,7 @@ export interface Loan {
  * via the `definition` "libraries".
  */
 export interface Library {
-  id: string;
+  id: number;
   name: string;
   /**
    * UUID for the library (domain ID)
@@ -922,8 +922,8 @@ export interface Library {
     zip_code?: string | null;
     country?: string | null;
   };
-  administrators: (string | User)[];
-  members?: (string | User)[] | null;
+  administrators: (number | User)[];
+  members?: (number | User)[] | null;
   waitingListType: 'NONE' | 'QUADRATIC_WAITING_LIST' | 'FIRST_COME_FIRST_SERVE';
   maxFinesBeforeSuspension: {
     amount: number;
@@ -948,7 +948,7 @@ export interface Library {
     version: string;
   };
   publicURL?: string | null;
-  items?: (string | Item)[] | null;
+  items?: (number | Item)[] | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -957,7 +957,7 @@ export interface Library {
  * via the `definition` "thing-requests".
  */
 export interface ThingRequest {
-  id: string;
+  id: number;
   name: string;
   /**
    * Current status of this request
@@ -967,12 +967,12 @@ export interface ThingRequest {
   /**
    * Select tags to categorize this request
    */
-  tags?: (string | Tag)[] | null;
-  requestedBy: string | User;
+  tags?: (number | Tag)[] | null;
+  requestedBy: number | User;
   /**
    * Optional reference image showing what you are looking for
    */
-  referenceImage?: (string | null) | Media;
+  referenceImage?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -981,9 +981,9 @@ export interface ThingRequest {
  * via the `definition` "borrow-requests".
  */
 export interface BorrowRequest {
-  id: string;
-  item: string | Item;
-  requestedBy: string | User;
+  id: number;
+  item: number | Item;
+  requestedBy: number | User;
   /**
    * Timestamp of when the borrow request was made
    */
@@ -996,7 +996,7 @@ export interface BorrowRequest {
  * via the `definition` "distributedLibraries".
  */
 export interface DistributedLibrary {
-  id: string;
+  id: number;
   /**
    * UUID for the library (domain ID)
    */
@@ -1006,11 +1006,15 @@ export interface DistributedLibrary {
    * Public URL for this distributed library
    */
   public_url?: string | null;
-  administrators?: (string | User)[] | null;
+  administrators?: (number | User)[] | null;
   /**
    * Users who have joined this library
    */
-  members?: (string | User)[] | null;
+  members?: (number | User)[] | null;
+  /**
+   * Items shared through this library
+   */
+  items?: (number | Item)[] | null;
   /**
    * Default loan time in days
    */
@@ -1038,7 +1042,7 @@ export interface DistributedLibrary {
  * via the `definition` "redirects".
  */
 export interface Redirect {
-  id: string;
+  id: number;
   /**
    * You will need to rebuild the website when changing this field.
    */
@@ -1048,11 +1052,11 @@ export interface Redirect {
     reference?:
       | ({
           relationTo: 'pages';
-          value: string | Page;
+          value: number | Page;
         } | null)
       | ({
           relationTo: 'posts';
-          value: string | Post;
+          value: number | Post;
         } | null);
     url?: string | null;
   };
@@ -1064,8 +1068,8 @@ export interface Redirect {
  * via the `definition` "form-submissions".
  */
 export interface FormSubmission {
-  id: string;
-  form: string | Form;
+  id: number;
+  form: number | Form;
   submissionData?:
     | {
         field: string;
@@ -1083,18 +1087,18 @@ export interface FormSubmission {
  * via the `definition` "search".
  */
 export interface Search {
-  id: string;
+  id: number;
   title?: string | null;
   priority?: number | null;
   doc: {
     relationTo: 'posts';
-    value: string | Post;
+    value: number | Post;
   };
   slug?: string | null;
   meta?: {
     title?: string | null;
     description?: string | null;
-    image?: (string | null) | Media;
+    image?: (number | null) | Media;
   };
   categories?:
     | {
@@ -1112,7 +1116,7 @@ export interface Search {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -1129,7 +1133,7 @@ export interface PayloadKv {
  * via the `definition` "payload-jobs".
  */
 export interface PayloadJob {
-  id: string;
+  id: number;
   /**
    * Input data provided to the job
    */
@@ -1221,85 +1225,85 @@ export interface PayloadJob {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'pages';
-        value: string | Page;
+        value: number | Page;
       } | null)
     | ({
         relationTo: 'posts';
-        value: string | Post;
+        value: number | Post;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'categories';
-        value: string | Category;
+        value: number | Category;
       } | null)
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'admins';
-        value: string | Admin;
+        value: number | Admin;
       } | null)
     | ({
         relationTo: 'items';
-        value: string | Item;
+        value: number | Item;
       } | null)
     | ({
         relationTo: 'loans';
-        value: string | Loan;
+        value: number | Loan;
       } | null)
     | ({
         relationTo: 'libraries';
-        value: string | Library;
+        value: number | Library;
       } | null)
     | ({
         relationTo: 'thing-requests';
-        value: string | ThingRequest;
+        value: number | ThingRequest;
       } | null)
     | ({
         relationTo: 'borrow-requests';
-        value: string | BorrowRequest;
+        value: number | BorrowRequest;
       } | null)
     | ({
         relationTo: 'distributedLibraries';
-        value: string | DistributedLibrary;
+        value: number | DistributedLibrary;
       } | null)
     | ({
         relationTo: 'tags';
-        value: string | Tag;
+        value: number | Tag;
       } | null)
     | ({
         relationTo: 'redirects';
-        value: string | Redirect;
+        value: number | Redirect;
       } | null)
     | ({
         relationTo: 'forms';
-        value: string | Form;
+        value: number | Form;
       } | null)
     | ({
         relationTo: 'form-submissions';
-        value: string | FormSubmission;
+        value: number | FormSubmission;
       } | null)
     | ({
         relationTo: 'search';
-        value: string | Search;
+        value: number | Search;
       } | null);
   globalSlug?: string | null;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       }
     | {
         relationTo: 'admins';
-        value: string | Admin;
+        value: number | Admin;
       };
   updatedAt: string;
   createdAt: string;
@@ -1309,15 +1313,15 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user:
     | {
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       }
     | {
         relationTo: 'admins';
-        value: string | Admin;
+        value: number | Admin;
       };
   key?: string | null;
   value?:
@@ -1337,7 +1341,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -1803,6 +1807,7 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
   public_url?: T;
   administrators?: T;
   members?: T;
+  items?: T;
   default_loan_time_days?: T;
   area?:
     | T
@@ -2102,7 +2107,7 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
  * via the `definition` "header".
  */
 export interface Header {
-  id: string;
+  id: number;
   navItems?:
     | {
         link: {
@@ -2111,11 +2116,11 @@ export interface Header {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: string | Page;
+                value: number | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: string | Post;
+                value: number | Post;
               } | null);
           url?: string | null;
           label: string;
@@ -2131,7 +2136,7 @@ export interface Header {
  * via the `definition` "footer".
  */
 export interface Footer {
-  id: string;
+  id: number;
   navItems?:
     | {
         link: {
@@ -2140,11 +2145,11 @@ export interface Footer {
           reference?:
             | ({
                 relationTo: 'pages';
-                value: string | Page;
+                value: number | Page;
               } | null)
             | ({
                 relationTo: 'posts';
-                value: string | Post;
+                value: number | Post;
               } | null);
           url?: string | null;
           label: string;
@@ -2222,14 +2227,14 @@ export interface TaskSchedulePublish {
     doc?:
       | ({
           relationTo: 'pages';
-          value: string | Page;
+          value: number | Page;
         } | null)
       | ({
           relationTo: 'posts';
-          value: string | Post;
+          value: number | Post;
         } | null);
     global?: string | null;
-    user?: (string | null) | Admin;
+    user?: (number | null) | Admin;
   };
   output?: unknown;
 }

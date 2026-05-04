@@ -44,6 +44,8 @@ describe("Full Borrow Happy Path Integration Test", () => {
 
       beforeAll(async () => {
         payload = await getTestPayload();
+        // Clean up stale data from previous runs (FK-safe order)
+        await cleanupTestData(payload);
       });
 
       afterAll(async () => {

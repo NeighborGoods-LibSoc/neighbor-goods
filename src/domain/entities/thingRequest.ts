@@ -3,8 +3,8 @@ import {
   ID,
   InvalidThingRequestStateTransitionError,
   ThingRequestStatus,
-} from '@/domain'
-import { requestStatusTransitions } from '@/domain'
+} from '../valueItems'
+import { requestStatusTransitions } from '../valueItems/statusTransitions'
 
 export class ThingRequest extends Entity {
   thingRequestID: ID

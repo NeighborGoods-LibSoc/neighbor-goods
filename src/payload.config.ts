@@ -1,8 +1,19 @@
 // storage-adapter-import-placeholder
 import dotenv from 'dotenv';
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import { postgresAdapter } from '@payloadcms/db-postgres'
 
 dotenv.config(); // ensure env vars are loaded when config is imported
+
+const databaseType = (process.env.DATABASE_TYPE || 'mongodb').toLowerCase()
+
+function getDatabaseAdapter() {
+  const uri = process.env.DATABASE_URI || ''
+  if (databaseType === 'postgres') {
+    return postgresAdapter({ pool: { connectionString: uri } })
+  }
+  return mongooseAdapter({ url: uri })
+}
 
 const disableEmailForTests = process.env.DISABLE_EMAIL_FOR_TESTS === 'true';
 
@@ -74,9 +85,7 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
-  }),
+  db: getDatabaseAdapter(),
   collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, Libraries, ThingRequests, BorrowRequests, DistributedLibraries, Tags],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
