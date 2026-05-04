@@ -8,7 +8,10 @@ import { uuidField } from '@/fields/uuid'
 import { ThingStatus } from '@/domain'
 import { ID } from '@/domain'
 import { ThingService } from '@/domain'
+import { NotificationService } from '@/domain'
 import { PayloadBorrowRequestRepository } from '@/infrastructure/repositories/PayloadBorrowRequestRepository'
+import { PayloadNotificationRepository } from '@/infrastructure/repositories/PayloadNotificationRepository'
+import { PayloadPersonLookup } from '@/infrastructure/repositories/PayloadPersonLookup'
 import { buildDomainThingFromData, thingToPayloadData } from './common/mappers'
 import { v4 as uuidv4 } from 'uuid'
 
@@ -197,6 +200,36 @@ export const Things: CollectionConfig = {
     ],
     afterChange: [
       async ({ doc, previousDoc, operation, req }) => {
+        // --- Notification logic (delegated to domain service) ---
+        if (operation === 'update' && previousDoc) {
+          const ownerId =
+            typeof doc.offeredBy === 'object' ? doc.offeredBy?.id : doc.offeredBy
+          const requesterId =
+            typeof (doc.requestedToBorrowBy ?? previousDoc.requestedToBorrowBy) === 'object'
+              ? (doc.requestedToBorrowBy ?? previousDoc.requestedToBorrowBy)?.id
+              : (doc.requestedToBorrowBy ?? previousDoc.requestedToBorrowBy)
+
+          if (ownerId) {
+            const notificationService = new NotificationService(
+              new PayloadNotificationRepository(req.payload),
+              new PayloadPersonLookup(req.payload),
+            )
+
+            try {
+              await notificationService.notifyOnStatusChange({
+                itemId: new ID(doc.id),
+                itemName: doc.name || 'an item',
+                previousStatus: previousDoc.status as ThingStatus,
+                newStatus: doc.status as ThingStatus,
+                ownerId: new ID(ownerId),
+                requesterId: requesterId ? new ID(requesterId) : null,
+              })
+            } catch (error) {
+              console.error('Failed to create notification:', error)
+            }
+          }
+        }
+
         // Create a Loan record when an item transitions to BORROWED
         if (
           operation === 'update' &&

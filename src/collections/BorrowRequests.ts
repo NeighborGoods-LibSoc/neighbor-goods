@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
 
 /**
  * Tracks borrow requests for cooldown purposes.
@@ -41,6 +41,20 @@ export const BorrowRequests: CollectionConfig = {
       required: true,
       admin: {
         description: 'Timestamp of when the borrow request was made',
+      },
+    },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'pending',
+      options: [
+        { label: 'Pending', value: 'pending' },
+        { label: 'Approved', value: 'approved' },
+        { label: 'Rejected', value: 'rejected' },
+      ],
+      admin: {
+        description: 'Current status of the borrow request',
       },
     },
   ],

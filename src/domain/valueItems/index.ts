@@ -14,6 +14,7 @@ export * from "./thingTitle";
 export * from "./titleSearchRequest";
 export * from "./userRoles";
 export * from "./waitingListTypes";
+export * from "./notificationType";
 export * from "./dueDate";
 export * from "./auctionBid";
 export * from "./borrowerVerificationFlags";

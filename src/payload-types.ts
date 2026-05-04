@@ -81,6 +81,7 @@ export interface Config {
     'borrow-requests': BorrowRequest;
     distributedLibraries: DistributedLibrary;
     tags: Tag;
+    notifications: Notification;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -106,6 +107,7 @@ export interface Config {
     'borrow-requests': BorrowRequestsSelect<false> | BorrowRequestsSelect<true>;
     distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -988,6 +990,10 @@ export interface BorrowRequest {
    * Timestamp of when the borrow request was made
    */
   requestedAt: string;
+  /**
+   * Current status of the borrow request
+   */
+  status: 'pending' | 'approved' | 'rejected';
   updatedAt: string;
   createdAt: string;
 }
@@ -1034,6 +1040,31 @@ export interface DistributedLibrary {
     };
     radius_kilometers: number;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications".
+ */
+export interface Notification {
+  id: string;
+  recipient: string | User;
+  type: 'borrow_request' | 'borrow_approved' | 'borrow_rejected' | 'item_returned' | 'item_damaged';
+  message: string;
+  item?: (string | null) | Item;
+  /**
+   * The user who triggered this notification
+   */
+  triggeredBy?: (string | null) | User;
+  /**
+   * Whether the notification has been read
+   */
+  read?: boolean | null;
+  /**
+   * URL to navigate to when notification is clicked
+   */
+  actionURL?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1278,6 +1309,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'tags';
         value: string | Tag;
+      } | null)
+    | ({
+        relationTo: 'notifications';
+        value: string | Notification;
       } | null)
     | ({
         relationTo: 'redirects';
@@ -1794,6 +1829,7 @@ export interface BorrowRequestsSelect<T extends boolean = true> {
   item?: T;
   requestedBy?: T;
   requestedAt?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1836,6 +1872,21 @@ export interface TagsSelect<T extends boolean = true> {
   name?: T;
   description?: T;
   color?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications_select".
+ */
+export interface NotificationsSelect<T extends boolean = true> {
+  recipient?: T;
+  type?: T;
+  message?: T;
+  item?: T;
+  triggeredBy?: T;
+  read?: T;
+  actionURL?: T;
   updatedAt?: T;
   createdAt?: T;
 }

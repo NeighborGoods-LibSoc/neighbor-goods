@@ -11,6 +11,7 @@ export * from "./libraries/simpleLibrary";
 export * from "./libraries/distributedLibrary";
 export * from "./lenders/lender";
 export * from "./mopServer";
+export * from "./notification";
 export * from "./waiting_lists/waitingList";
 export * from "./waiting_lists/firstComeFirstServeWaitingList";
 export * from "./waiting_lists/nullWaitingList";
