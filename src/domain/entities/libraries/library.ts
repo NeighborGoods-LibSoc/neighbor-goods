@@ -6,7 +6,7 @@ import { MOPServer } from '@/domain'
 import { Person } from '@/domain'
 import { Thing } from '../thing'
 import { WaitingList } from '@/domain'
-import { MoneyFactory, WaitingListFactory } from '../../factories'
+import { MoneyFactory, WaitingListFactory } from '@/domain'
 import {
   DueDate,
   FeeSchedule,
@@ -17,7 +17,7 @@ import {
   ThingStatus,
   ThingTitle,
   WaitingListType,
-} from '../../valueItems'
+} from '@/domain'
 
 export abstract class Library extends Entity {
   libraryID: ID

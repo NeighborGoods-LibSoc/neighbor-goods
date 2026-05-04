@@ -22,3 +22,8 @@ coverage/.tmp/
 /playwright-report/
 /test-results/
 coverage/
+
+# Playwright
+.next-e2e/
+/blob-report/
+/playwright/.cache/
