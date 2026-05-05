@@ -1016,6 +1016,10 @@ export interface DistributedLibrary {
    */
   default_loan_time_days: number;
   /**
+   * Items available in this distributed library
+   */
+  items?: (string | Item)[] | null;
+  /**
    * Geographic service area
    */
   area: {
@@ -1804,6 +1808,7 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
   administrators?: T;
   members?: T;
   default_loan_time_days?: T;
+  items?: T;
   area?:
     | T
     | {

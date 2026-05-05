@@ -27,3 +27,4 @@ coverage/
 .next-e2e/
 /blob-report/
 /playwright/.cache/
+/.junie/
