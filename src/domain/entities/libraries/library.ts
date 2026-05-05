@@ -1,21 +1,22 @@
-import { Entity } from '@/domain'
-import { Borrower } from '@/domain'
-import { LibraryFee } from '@/domain'
+import { Entity } from '../entity'
 import { Loan } from '../loan'
-import { MOPServer } from '@/domain'
-import { Person } from '@/domain'
 import { Thing } from '../thing'
-import { WaitingList } from '@/domain'
-import { MoneyFactory, WaitingListFactory } from '@/domain'
 import {
+  Borrower,
   DueDate,
   FeeSchedule,
   FeeStatus,
   ID,
+  LibraryFee,
   LoanStatus,
+  MOPServer,
   Money,
+  MoneyFactory,
+  Person,
   ThingStatus,
   ThingTitle,
+  WaitingList,
+  WaitingListFactory,
   WaitingListType,
 } from '@/domain'
 

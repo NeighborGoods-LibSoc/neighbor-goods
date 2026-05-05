@@ -53,6 +53,14 @@ export const DistributedLibraries: CollectionConfig = {
       admin: { description: 'Default loan time in days' },
     },
     {
+      name: 'items',
+      type: 'relationship',
+      relationTo: 'items',
+      hasMany: true,
+      required: false,
+      admin: { description: 'Items available in this distributed library' },
+    },
+    {
       name: 'area',
       type: 'group',
       admin: { description: 'Geographic service area' },
@@ -84,7 +92,7 @@ export const DistributedLibraries: CollectionConfig = {
       async ({ data }) => {
         if (!data) return data
         try {
-          const domainDL = buildDomainDistributedLibraryFromData(data)
+          const domainDL = await buildDomainDistributedLibraryFromData(data)
           // write back normalized values
           data.library_id = domainDL.libraryID.toString()
           data.name = String(domainDL.name)
@@ -107,7 +115,7 @@ export const DistributedLibraries: CollectionConfig = {
       async ({ data }) => {
         if (!data) return data
         try {
-          const domainDL = buildDomainDistributedLibraryFromData(data)
+          const domainDL = await buildDomainDistributedLibraryFromData(data)
           // write back normalized values again
           data.library_id = domainDL.libraryID.toString()
           data.name = String(domainDL.name)
@@ -128,7 +136,7 @@ export const DistributedLibraries: CollectionConfig = {
     afterRead: [
       async ({ doc }) => {
         try {
-          const domainDL = buildDomainDistributedLibraryFromData(doc)
+          const domainDL = await buildDomainDistributedLibraryFromData(doc)
           // reflect any normalization
           if (doc.library_id !== domainDL.libraryID.toString())
             doc.library_id = domainDL.libraryID.toString()
