@@ -1,4 +1,3 @@
-import { redirect } from 'next/navigation'
 import { getMeUser } from '@/utilities/getMeUser'
 import { OfferClient } from './page.client'
 

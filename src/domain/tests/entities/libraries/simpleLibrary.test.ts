@@ -1,22 +1,23 @@
 import { describe, it, expect } from "vitest";
-import { SimpleLibrary } from "../../../entities/libraries/simpleLibrary";
 import {
+  SimpleLibrary,
   ID,
   DueDate,
   LoanStatus,
   ThingStatus,
   ThingTitle,
   WaitingListType,
-} from '../../../valueItems'
-import { Person } from "../../../entities/people/person";
-import { PersonName } from "../../../valueItems/personName";
-import { URL } from "../../../valueItems/url";
-import { MOPServer } from "../../../entities/mopServer";
-import { Money, Currency } from "../../../valueItems/money";
-import { MoneyFactory } from "../../../factories/moneyFactory";
-import { FeeSchedule } from "../../../valueItems/feeSchedules/feeSchedule";
-import { Thing } from "../../../entities/thing";
-import { PhysicalLocation } from "../../../valueItems/location/physicalLocation";
+  Person,
+  PersonName,
+  URL,
+  MOPServer,
+  Money,
+  Currency,
+  MoneyFactory,
+  type FeeSchedule,
+  Thing,
+  PhysicalLocation,
+} from "../../..";
 
 class TestFeeSchedule implements FeeSchedule {
   feeForOverdueItem(): Money {

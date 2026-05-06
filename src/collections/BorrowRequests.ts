@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '@/access/authenticated'
-import { anyone } from '@/access/anyone'
+import { authenticated, anyone } from '@/access'
+import { uuidField } from '@/fields'
 
 /**
  * Tracks borrow requests for cooldown purposes.
@@ -21,6 +21,7 @@ export const BorrowRequests: CollectionConfig = {
     useAsTitle: 'id',
   },
   fields: [
+    uuidField({ name: 'borrow_request_id', label: 'Borrow Request ID', description: 'UUID for this request' }),
     {
       name: 'item',
       type: 'relationship',

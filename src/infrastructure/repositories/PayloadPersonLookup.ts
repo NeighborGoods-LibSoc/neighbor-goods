@@ -7,11 +7,12 @@ export class PayloadPersonLookup implements PersonLookup {
 
   async getPersonName(personId: ID): Promise<string> {
     try {
-      const user = await this.payload.findByID({
+      const result = await this.payload.find({
         collection: 'users',
-        id: personId.toString(),
+        where: { user_id: { equals: personId.toString() } },
+        limit: 1,
       })
-      return user?.name || 'A neighbor'
+      return result.docs[0]?.name || 'A neighbor'
     } catch {
       return 'A neighbor'
     }

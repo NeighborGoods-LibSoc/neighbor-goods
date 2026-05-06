@@ -1,4 +1,5 @@
 import type { CollectionConfig } from 'payload'
+import { uuidField } from '@/fields/uuid'
 
 import { authenticated } from '@/access/authenticated'
 import { anyone } from '@/access/anyone'
@@ -19,6 +20,7 @@ export const ThingRequests: CollectionConfig = {
     useAsTitle: 'name',
   },
   fields: [
+    uuidField({ name: 'request_id', label: 'Request ID', description: 'UUID for this request' }),
     {
       name: 'name',
       type: 'text',

@@ -1,23 +1,23 @@
 import { Entity } from '../entity'
-import { Borrower } from '../borrower'
-import { LibraryFee } from './libraryFee'
 import { Loan } from '../loan'
-import { MOPServer } from '../mopServer'
-import { Person } from '../people/person'
 import { Thing } from '../thing'
+import { Borrower } from '../borrower'
+import { Person } from '../people/person'
 import { WaitingList } from '../waiting_lists/waitingList'
-import { MoneyFactory, WaitingListFactory } from '../../factories'
-import {
-  DueDate,
-  FeeSchedule,
-  FeeStatus,
-  ID,
-  LoanStatus,
-  Money,
-  ThingStatus,
-  ThingTitle,
-  WaitingListType,
-} from '../../valueItems'
+import { MoneyFactory } from '../../factories/moneyFactory'
+import { WaitingListFactory } from '../../factories/waitingListFactory'
+import { DueDate } from '../../valueItems/dueDate'
+import { FeeSchedule } from '../../valueItems/feeSchedules/feeSchedule'
+import { FeeStatus } from '../../valueItems/feeStatus'
+import { ID } from '../../valueItems/id'
+import { LibraryFee } from './libraryFee'
+import { LoanStatus } from '../../valueItems/loanStatus'
+import { MOPServer } from '../../valueItems/mopServer'
+import { Money } from '../../valueItems/money'
+import { ThingStatus } from '../../valueItems/thingStatus'
+import { ThingTitle } from '../../valueItems/thingTitle'
+import { WaitingListType } from '../../valueItems/waitingListTypes'
+import { BorrowerVerificationFlags } from '../../valueItems/borrowerVerificationFlags'
 
 export abstract class Library extends Entity {
   libraryID: ID
@@ -45,6 +45,7 @@ export abstract class Library extends Entity {
     maxFinesBeforeSuspension: Money
     feeSchedule: FeeSchedule
     defaultLoanTime: { days: number }
+    defaultBorrowerVerification?: BorrowerVerificationFlags[]
     mopServer: MOPServer
     publicURL?: string | null
   }) {
@@ -57,6 +58,7 @@ export abstract class Library extends Entity {
     this.maxFinesBeforeSuspension = params.maxFinesBeforeSuspension
     this.feeSchedule = params.feeSchedule
     this.defaultLoanTime = params.defaultLoanTime
+    this.defaultBorrowerVerification = params.defaultBorrowerVerification ?? []
     this.mopServer = params.mopServer
     this.publicURL = params.publicURL ?? null
   }
@@ -165,14 +167,14 @@ export abstract class Library extends Entity {
     if (loan.item.status === ThingStatus.DAMAGED) {
       // prefer camelCase per FeeSchedule interface; fall back if implementation uses snake_case
       const calculator =
-        (this.feeSchedule as any).feeForDamagedItem ??
-        (this.feeSchedule as any).fee_for_damaged_item
+        this.feeSchedule.feeForDamagedItem ??
+        this.feeSchedule.fee_for_damaged_item
       if (calculator) fee_amount = calculator.call(this.feeSchedule, loan)
     }
     if (loan.status === LoanStatus.OVERDUE) {
       const calculator =
-        (this.feeSchedule as any).feeForOverdueItem ??
-        (this.feeSchedule as any).fee_for_overdue_item
+        this.feeSchedule.feeForOverdueItem ??
+        this.feeSchedule.fee_for_overdue_item
       if (calculator) fee_amount = calculator.call(this.feeSchedule, loan)
     }
 

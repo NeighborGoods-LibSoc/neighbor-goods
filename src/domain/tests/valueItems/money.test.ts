@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Currency, Money } from "../../valueItems/money";
-import { MoneyFactory } from "../../factories/moneyFactory";
+import { Currency, Money, MoneyFactory } from "../..";
 
 describe("Money and MoneyFactory", () => {
   it("adds same-currency amounts", () => {

@@ -1,4 +1,5 @@
 import type { Field } from 'payload'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * Payload does not have a native `uuid` field type. The recommended approach is to use a
@@ -9,13 +10,15 @@ export function uuidField(params: {
   label?: string
   required?: boolean
   description?: string
+  defaultValue?: any
 }): Field {
-  const { name, label, required = true, description = 'UUID (validated as RFC4122)'} = params
+  const { name, label, required = true, description = 'UUID (validated as RFC4122)', defaultValue } = params
   return {
     name,
     type: 'text',
     required,
     label,
+    defaultValue: defaultValue || (() => uuidv4()),
     admin: { description },
     validate: (val: unknown) => {
       if (typeof val !== 'string') return 'Must be a string'
