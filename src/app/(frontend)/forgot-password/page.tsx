@@ -1,15 +1,13 @@
 'use client'
 
 import React, { useState } from 'react'
-import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { nodemailerAdapter } from '@payloadcms/email-nodemailer'
 
 export default function ForgotPasswordPage() {
   const [formData, setFormData] = useState({
     email: '',
   })
-  const [error, setError] = useState('')
+  const [_error, setError] = useState('')
   const [status, setStatus] = useState<'idle' | 'sent' | 'error'>('idle')
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
@@ -35,7 +33,7 @@ export default function ForgotPasswordPage() {
         const data = await res.json()
         setError(data.errors?.[0]?.message || 'Failed to send password reset email!')
       }
-    } catch (err) {
+    } catch (_err) {
       setError('An error occurred. Please try again.')
     } finally {
       setIsLoading(false)

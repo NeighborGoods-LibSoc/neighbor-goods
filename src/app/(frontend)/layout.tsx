@@ -3,7 +3,19 @@ import type { Metadata } from 'next'
 import { cn } from '@/utilities/ui'
 import { GeistMono } from 'geist/font/mono'
 import { GeistSans } from 'geist/font/sans'
+import { Quando, Cabin } from 'next/font/google'
 import React from 'react'
+
+const quando = Quando({
+  weight: '400',
+  subsets: ['latin'],
+  variable: '--font-quando',
+})
+
+const cabin = Cabin({
+  subsets: ['latin'],
+  variable: '--font-cabin',
+})
 
 import { AdminBar } from '@/components/AdminBar'
 import { Footer } from '@/Footer/Component'
@@ -20,17 +32,15 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const { isEnabled } = await draftMode()
 
   return (
-    <html className={cn(GeistSans.variable, GeistMono.variable)} lang="en" suppressHydrationWarning>
+    <html
+      className={cn(GeistSans.variable, GeistMono.variable, quando.variable, cabin.variable)}
+      lang="en"
+      suppressHydrationWarning
+    >
       <head>
         <InitTheme />
         <link href="/favicon.ico" rel="icon" sizes="32x32" />
         <link href="/favicon.svg" rel="icon" type="image/svg+xml" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Quando&family=Cabin:wght@400;500;700&display=swap"
-          rel="stylesheet"
-        />
       </head>
       <body>
         <Providers>

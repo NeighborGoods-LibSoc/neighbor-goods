@@ -1,6 +1,7 @@
-import { Entity } from "./entity";
-import { LibraryFee } from "./libraries/libraryFee";
-import { ID, BorrowerVerificationFlags } from "../valueItems";
+import { Entity } from './entity'
+import { LibraryFee } from './libraries/libraryFee'
+import { ID } from '../valueItems/id'
+import { BorrowerVerificationFlags } from '../valueItems/borrowerVerificationFlags'
 
 export abstract class Borrower extends Entity {
   libraryID!: ID;

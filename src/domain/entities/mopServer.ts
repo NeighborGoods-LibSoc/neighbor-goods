@@ -1,1 +1,1 @@
-export { MOPServer } from "../valueItems/mopServer";
+export { MOPServer } from "../valueItems";

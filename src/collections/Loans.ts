@@ -135,6 +135,14 @@ export const Loans: CollectionConfig = {
   timestamps: true,
 }
 
+// --- Domain mapping helpers ---
+import { Loan } from '@/domain/entities/loan'
+import { Thing } from '@/domain/entities/thing'
+import { ID, DueDate, LoanStatus } from '@/domain/valueItems'
+import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
+import { ThingTitle } from '@/domain/valueItems/thingTitle'
+import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
+
 async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
   const loan_id = new ID(String(data.loan_id))
 
@@ -147,7 +155,9 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
   const borrowerId =
     typeof data.borrower === 'object' ? data.borrower?.id || data.borrower?.value : data.borrower
   if (!borrowerId) throw new Error('Borrower is required')
-  const borrower_id = new ID(String(borrowerId))
+  const borrowerDoc: any = await req.payload.findByID({ collection: 'users', id: String(borrowerId) })
+  if (!borrowerDoc?.user_id) throw new Error(`User UUID not found for borrower: ${borrowerId}`)
+  const borrower_id = new ID(String(borrowerDoc.user_id))
 
   const due_date = data.due_date ? DueDate.of(new Date(data.due_date)) : DueDate.of(null)
 

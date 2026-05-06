@@ -299,6 +299,10 @@ export interface Post {
  */
 export interface Media {
   id: string;
+  /**
+   * UUID for this media
+   */
+  media_id: string;
   alt?: string | null;
   caption?: {
     root: {
@@ -391,6 +395,10 @@ export interface Media {
  */
 export interface Category {
   id: string;
+  /**
+   * UUID for this category
+   */
+  category_id: string;
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
@@ -412,7 +420,19 @@ export interface Category {
  */
 export interface User {
   id: string;
+  /**
+   * UUID for this user
+   */
+  user_id: string;
   name?: string | null;
+  /**
+   * Verification methods this user has completed.
+   */
+  verificationFlags?: ('EMAIL' | 'PHONE_NUMBER' | 'ID' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  /**
+   * Amount of money this user has in escrow for deposits.
+   */
+  escrowBalance?: number | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -780,6 +800,10 @@ export interface Form {
  */
 export interface Admin {
   id: string;
+  /**
+   * UUID for this admin
+   */
+  admin_id: string;
   name?: string | null;
   role?: string | null;
   updatedAt: string;
@@ -811,6 +835,14 @@ export interface Item {
    * UUID for the item (domain ID)
    */
   item_id: string;
+  /**
+   * UUID of the owner (domain ID)
+   */
+  owner_uuid?: string | null;
+  /**
+   * UUID of the user who requested to borrow (domain ID)
+   */
+  requested_by_uuid?: string | null;
   name: string;
   /**
    * Current availability status of this item
@@ -822,9 +854,13 @@ export interface Item {
    */
   tags?: (string | Tag)[] | null;
   /**
-   * Rules and guidelines for using this item
+   * Verification methods required for a borrower to use this item.
    */
-  rulesForUse: string;
+  borrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'ID' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  /**
+   * Amount of deposit required if DEPOSIT is selected.
+   */
+  depositAmount?: number | null;
   /**
    * Maximum borrowing time in days
    */
@@ -851,6 +887,10 @@ export interface Item {
  */
 export interface Tag {
   id: string;
+  /**
+   * UUID for this tag
+   */
+  tag_id: string;
   /**
    * Tag name (e.g., "Electronics", "Books", "Clothing")
    */
@@ -958,6 +998,10 @@ export interface Library {
  */
 export interface ThingRequest {
   id: string;
+  /**
+   * UUID for this request
+   */
+  request_id: string;
   name: string;
   /**
    * Current status of this request
@@ -982,6 +1026,10 @@ export interface ThingRequest {
  */
 export interface BorrowRequest {
   id: string;
+  /**
+   * UUID for this request
+   */
+  borrow_request_id: string;
   item: string | Item;
   requestedBy: string | User;
   /**
@@ -1015,6 +1063,10 @@ export interface DistributedLibrary {
    * Default loan time in days
    */
   default_loan_time_days: number;
+  /**
+   * Default verification methods required for borrowers in this library.
+   */
+  defaultBorrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'ID' | 'DEPOSIT' | 'IN_PERSON')[] | null;
   /**
    * Items available in this distributed library
    */
@@ -1518,6 +1570,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  media_id?: T;
   alt?: T;
   caption?: T;
   updatedAt?: T;
@@ -1611,6 +1664,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
+  category_id?: T;
   title?: T;
   slug?: T;
   slugLock?: T;
@@ -1631,7 +1685,10 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  user_id?: T;
   name?: T;
+  verificationFlags?: T;
+  escrowBalance?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1654,6 +1711,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "admins_select".
  */
 export interface AdminsSelect<T extends boolean = true> {
+  admin_id?: T;
   name?: T;
   role?: T;
   updatedAt?: T;
@@ -1679,11 +1737,14 @@ export interface AdminsSelect<T extends boolean = true> {
  */
 export interface ItemsSelect<T extends boolean = true> {
   item_id?: T;
+  owner_uuid?: T;
+  requested_by_uuid?: T;
   name?: T;
   status?: T;
   description?: T;
   tags?: T;
-  rulesForUse?: T;
+  borrowerVerification?: T;
+  depositAmount?: T;
   borrowingTime?: T;
   offeredBy?: T;
   primaryImage?: T;
@@ -1777,6 +1838,7 @@ export interface LibrariesSelect<T extends boolean = true> {
  * via the `definition` "thing-requests_select".
  */
 export interface ThingRequestsSelect<T extends boolean = true> {
+  request_id?: T;
   name?: T;
   status?: T;
   description?: T;
@@ -1791,6 +1853,7 @@ export interface ThingRequestsSelect<T extends boolean = true> {
  * via the `definition` "borrow-requests_select".
  */
 export interface BorrowRequestsSelect<T extends boolean = true> {
+  borrow_request_id?: T;
   item?: T;
   requestedBy?: T;
   requestedAt?: T;
@@ -1808,6 +1871,7 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
   administrators?: T;
   members?: T;
   default_loan_time_days?: T;
+  defaultBorrowerVerification?: T;
   items?: T;
   area?:
     | T
@@ -1833,6 +1897,7 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
  * via the `definition` "tags_select".
  */
 export interface TagsSelect<T extends boolean = true> {
+  tag_id?: T;
   name?: T;
   description?: T;
   color?: T;

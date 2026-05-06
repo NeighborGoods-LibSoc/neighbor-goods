@@ -1,5 +1,6 @@
 import React from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import './styles.css'
 
 interface LandingPageProps {
@@ -18,7 +19,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="container">
           <div className="hero__logo">
             <div className="logo-text">
-              <img src="/Logo-lightbg.png" alt="logo"></img>
+              <Image
+                src="/Logo-lightbg.png"
+                alt="NeighborGoods Logo"
+                width={300}
+                height={100}
+                priority
+              />
             </div>
           </div>
           <h1 className="hero__title">

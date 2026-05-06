@@ -53,6 +53,21 @@ export const DistributedLibraries: CollectionConfig = {
       admin: { description: 'Default loan time in days' },
     },
     {
+      name: 'defaultBorrowerVerification',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'Email', value: 'EMAIL' },
+        { label: 'Phone Number', value: 'PHONE_NUMBER' },
+        { label: 'ID', value: 'ID' },
+        { label: 'Deposit', value: 'DEPOSIT' },
+        { label: 'In-person', value: 'IN_PERSON' },
+      ],
+      admin: {
+        description: 'Default verification methods required for borrowers in this library.',
+      },
+    },
+    {
       name: 'items',
       type: 'relationship',
       relationTo: 'items',

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { User } from '@/payload-types'
 
 interface DashboardClientProps {
@@ -120,7 +121,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
       <div className="card">
         <div className="profile-top">
           <div className="avatar">
-            <img src="/api/placeholder/120/120" alt="User Avatar" />
+            <Image src="/api/placeholder/120/120" alt="User Avatar" width={120} height={120} />
           </div>
           <div className="profile-name-section">
             <h1 className="profile-name">{user.name}</h1>

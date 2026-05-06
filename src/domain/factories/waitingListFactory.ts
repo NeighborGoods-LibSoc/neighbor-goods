@@ -1,8 +1,10 @@
-import { Thing } from "../entities/thing";
-import { WaitingList } from "../entities/waiting_lists/waitingList";
-import { FirstComeFirstServeWaitingList } from "../entities/waiting_lists/firstComeFirstServeWaitingList";
-import { NullWaitingList } from "../entities/waiting_lists/nullWaitingList";
-import { WaitingListType } from "../valueItems/waitingListTypes";
+import {
+  Thing,
+  WaitingList,
+  FirstComeFirstServeWaitingList,
+  NullWaitingList,
+  WaitingListType,
+} from "..";
 
 export class WaitingListFactory {
   static createNewList(

@@ -1,6 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../../access/authenticated'
+import { authenticated } from '@/access'
+import { uuidField } from '@/fields'
 
 export const Admins: CollectionConfig = {
   slug: 'admins',
@@ -21,6 +22,7 @@ export const Admins: CollectionConfig = {
     },
   },
   fields: [
+    uuidField({ name: 'admin_id', label: 'Admin ID', description: 'UUID for this admin' }),
     {
       name: 'name',
       type: 'text',
