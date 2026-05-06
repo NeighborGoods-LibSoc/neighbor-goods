@@ -149,44 +149,44 @@ describe('collections/common/mappers', () => {
   })
 
   describe('buildDomainDistributedLibraryFromData', () => {
-    it('throws when name is missing', () => {
+    it('throws when name is missing', async () => {
       const data = {
         library_id: '00000000-0000-4000-8000-000000000000',
         name: '',
       }
-      expect(() => buildDomainDistributedLibraryFromData(data)).toThrow('Name is required')
+      await expect(buildDomainDistributedLibraryFromData(data)).rejects.toThrow('Name is required')
     })
 
-    it('builds with normalized defaults and trims public_url', () => {
+    it('builds with normalized defaults and trims public_url', async () => {
       const data = {
         library_id: '00000000-0000-4000-8000-000000000000',
         name: 'Neighborhood',
         default_loan_time_days: 0, // should clamp to >= 1
         public_url: '  https://example.org  ',
       }
-      const dl = buildDomainDistributedLibraryFromData(data)
+      const dl = await buildDomainDistributedLibraryFromData(data)
       expect(dl.name).toBe('Neighborhood')
       expect(dl.defaultLoanTime.days).toBeGreaterThanOrEqual(1)
       expect(dl.publicURL).toBe('https://example.org')
     })
 
-    it('accepts null/empty public_url', () => {
+    it('accepts null/empty public_url', async () => {
       const data = {
         library_id: '00000000-0000-4000-8000-000000000000',
         name: 'Neighborhood',
         public_url: '   ',
       }
-      const dl = buildDomainDistributedLibraryFromData(data)
+      const dl = await buildDomainDistributedLibraryFromData(data)
       expect(dl.publicURL).toBeNull()
     })
 
-    it('accepts and maps area when provided', () => {
+    it('accepts and maps area when provided', async () => {
       const data = {
         library_id: '00000000-0000-4000-8000-000000000000',
         name: 'Neighborhood',
         area: makeAreaInput(),
       }
-      const dl = buildDomainDistributedLibraryFromData(data)
+      const dl = await buildDomainDistributedLibraryFromData(data)
       expect(dl.area).toBeInstanceOf(PhysicalArea)
       expect((dl.area as PhysicalArea).radius.kilometers).toBe(12)
     })
@@ -204,8 +204,8 @@ describe('collections/common/mappers', () => {
   })
 
   describe('serializeArea', () => {
-    it('returns undefined when library has no area', () => {
-      const dl = buildDomainDistributedLibraryFromData({
+    it('returns undefined when library has no area', async () => {
+      const dl = await buildDomainDistributedLibraryFromData({
         library_id: '00000000-0000-4000-8000-000000000000',
         name: 'Neighborhood',
       })
@@ -213,8 +213,8 @@ describe('collections/common/mappers', () => {
       expect(serialized).toBeUndefined()
     })
 
-    it('serializes area shape correctly', () => {
-      const dl = buildDomainDistributedLibraryFromData({
+    it('serializes area shape correctly', async () => {
+      const dl = await buildDomainDistributedLibraryFromData({
         library_id: '00000000-0000-4000-8000-000000000000',
         name: 'Neighborhood',
         area: makeAreaInput(),
@@ -226,8 +226,8 @@ describe('collections/common/mappers', () => {
       expect(serialized.radius_kilometers).toBe(12)
     })
 
-    it('round-trips through serializeArea -> toPhysicalArea', () => {
-      const dl = buildDomainDistributedLibraryFromData({
+    it('round-trips through serializeArea -> toPhysicalArea', async () => {
+      const dl = await buildDomainDistributedLibraryFromData({
         library_id: '00000000-0000-4000-8000-000000000000',
         name: 'Neighborhood',
         area: makeAreaInput({ radius_kilometers: 25 }),

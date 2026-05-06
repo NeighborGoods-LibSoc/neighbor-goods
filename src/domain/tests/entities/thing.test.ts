@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Thing, ID, ThingTitle, ThingStatus, PhysicalLocation } from "../..";
+import { Thing, ID, ThingTitle, ThingStatus, PhysicalLocation } from '@/domain';
 
 describe("Thing", () => {
   function makeThing(): Thing {

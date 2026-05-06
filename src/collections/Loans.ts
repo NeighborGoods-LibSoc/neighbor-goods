@@ -1,7 +1,12 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated, anyone } from '@/access'
-import { uuidField } from '@/fields'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
+import { uuidField } from '@/fields/uuid'
+// --- Domain mapping helpers ---
+import { Loan } from '@/domain/entities/loan'
+import { DueDate, ID, LoanStatus } from '@/domain/valueItems'
+import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
 
 export const Loans: CollectionConfig = {
   slug: 'loans',
@@ -16,7 +21,6 @@ export const Loans: CollectionConfig = {
     useAsTitle: 'loan_id',
   },
   fields: [
-    uuidField({ name: 'id', label: 'ID', description: 'UUID for this loan' }),
     uuidField({ name: 'loan_id', description: 'UUID for the loan (domain ID)' }),
     {
       name: 'item',
@@ -75,12 +79,13 @@ export const Loans: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      async ({ data, req }) => {
+      async ({ data, req, originalDoc, operation }) => {
         if (!data) return data
         try {
-          // Build domain object and write normalized values back to data
-          const domainLoan = await buildDomainLoanFromData(data, req)
-          // Normalize status (may auto-transition to OVERDUE based on due_date)
+          // For updates, merge data with originalDoc to build complete domain object
+          const mergedData = operation === 'update' ? { ...originalDoc, ...data } : data
+          const domainLoan = await buildDomainLoanFromData(mergedData, req)
+          // Normalize status
           data.status = domainLoan.status
           // Ensure loan_id remains consistent
           data.loan_id = domainLoan.loanID.toString()
@@ -92,7 +97,6 @@ export const Loans: CollectionConfig = {
             const dd = String(d.getUTCDate()).padStart(2, '0')
             data.due_date = `${yyyy}-${mm}-${dd}`
           }
-          // Normalize return_location/time_returned if needed (no change necessary)
           return data
         } catch (e: any) {
           throw new Error(e?.message || 'Invalid Loan domain state')
@@ -100,10 +104,11 @@ export const Loans: CollectionConfig = {
       },
     ],
     beforeChange: [
-      async ({ data, req }) => {
+      async ({ data, req, originalDoc, operation }) => {
         if (!data) return data
         try {
-          const domainLoan = await buildDomainLoanFromData(data, req)
+          const mergedData = operation === 'update' ? { ...originalDoc, ...data } : data
+          const domainLoan = await buildDomainLoanFromData(mergedData, req)
           // write back normalized values again
           data.status = domainLoan.status
           data.loan_id = domainLoan.loanID.toString()
@@ -131,7 +136,11 @@ export const Loans: CollectionConfig = {
 }
 
 // --- Domain mapping helpers ---
-import { Loan, ID, DueDate, LoanStatus } from '@/domain'
+import { Loan } from '@/domain/entities/loan'
+import { Thing } from '@/domain/entities/thing'
+import { ID, DueDate, LoanStatus } from '@/domain/valueItems'
+import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
+import { ThingTitle } from '@/domain/valueItems/thingTitle'
 import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
 
 async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
@@ -143,33 +152,27 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
 
   const thing = mapItemToThing(itemDoc)
 
-  const borrowerId = typeof data.borrower === 'object' ? data.borrower?.id || data.borrower?.value : data.borrower
+  const borrowerId =
+    typeof data.borrower === 'object' ? data.borrower?.id || data.borrower?.value : data.borrower
   if (!borrowerId) throw new Error('Borrower is required')
-  const borrower_id = new ID(String(borrowerId))
+  const borrowerDoc: any = await req.payload.findByID({ collection: 'users', id: String(borrowerId) })
+  if (!borrowerDoc?.user_id) throw new Error(`User UUID not found for borrower: ${borrowerId}`)
+  const borrower_id = new ID(String(borrowerDoc.user_id))
 
   const due_date = data.due_date ? DueDate.of(new Date(data.due_date)) : DueDate.of(null)
 
   const return_location = mapReturnLocation(data.return_location)
   const time_returned = data.time_returned ? new Date(data.time_returned) : null
 
-  const loan = new Loan({
+  return new Loan({
     loanId: loan_id,
     item: thing,
     dueDate: due_date,
     borrowerId: borrower_id,
     returnLocation: return_location as any,
     timeReturned: time_returned,
+    status: LoanStatus[data.status as keyof typeof LoanStatus] || LoanStatus.RETURNED,
   })
-
-  // Apply the requested status through domain rules
-  const desired = String(data.status || 'RETURNED') as keyof typeof LoanStatus
-  if (!(desired in LoanStatus)) {
-    throw new Error(`Invalid status '${data.status}'`)
-  }
-  // set may throw if transition invalid
-  loan.status = LoanStatus[desired]
-
-  return loan
 }
 
 

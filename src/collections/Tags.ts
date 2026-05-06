@@ -16,7 +16,7 @@ export const Tags: CollectionConfig = {
     useAsTitle: 'name',
   },
   fields: [
-    uuidField({ name: 'id', label: 'ID', description: 'UUID for this tag' }),
+    uuidField({ name: 'tag_id', label: 'Tag ID', description: 'UUID for this tag' }),
     {
       name: 'name',
       type: 'text',

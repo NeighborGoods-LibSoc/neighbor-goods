@@ -23,7 +23,7 @@ export const Media: CollectionConfig = {
     update: authenticated,
   },
   fields: [
-    uuidField({ name: 'id', label: 'ID', description: 'UUID for this media' }),
+    uuidField({ name: 'media_id', label: 'Media ID', description: 'UUID for this media' }),
     {
       name: 'alt',
       type: 'text',

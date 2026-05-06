@@ -21,7 +21,7 @@ export const BorrowRequests: CollectionConfig = {
     useAsTitle: 'id',
   },
   fields: [
-    uuidField({ name: 'id', label: 'ID', description: 'UUID for this request' }),
+    uuidField({ name: 'borrow_request_id', label: 'Borrow Request ID', description: 'UUID for this request' }),
     {
       name: 'item',
       type: 'relationship',

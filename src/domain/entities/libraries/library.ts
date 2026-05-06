@@ -1,38 +1,35 @@
-import {
-  Entity,
-  Borrower,
-  LibraryFee,
-  Loan,
-  Person,
-  Thing,
-  WaitingList,
-} from '..'
-import {
-  MOPServer,
-  DueDate,
-  FeeSchedule,
-  FeeStatus,
-  ID,
-  LoanStatus,
-  Money,
-  ThingStatus,
-  ThingTitle,
-  WaitingListType,
-  BorrowerVerificationFlags,
-} from '@/domain'
-import { MoneyFactory, WaitingListFactory } from '@/domain'
+import { Entity } from '../entity'
+import { Loan } from '../loan'
+import { Thing } from '../thing'
+import { Borrower } from '../borrower'
+import { Person } from '../people/person'
+import { WaitingList } from '../waiting_lists/waitingList'
+import { MoneyFactory } from '../../factories/moneyFactory'
+import { WaitingListFactory } from '../../factories/waitingListFactory'
+import { DueDate } from '../../valueItems/dueDate'
+import { FeeSchedule } from '../../valueItems/feeSchedules/feeSchedule'
+import { FeeStatus } from '../../valueItems/feeStatus'
+import { ID } from '../../valueItems/id'
+import { LibraryFee } from './libraryFee'
+import { LoanStatus } from '../../valueItems/loanStatus'
+import { MOPServer } from '../../valueItems/mopServer'
+import { Money } from '../../valueItems/money'
+import { ThingStatus } from '../../valueItems/thingStatus'
+import { ThingTitle } from '../../valueItems/thingTitle'
+import { WaitingListType } from '../../valueItems/waitingListTypes'
+import { BorrowerVerificationFlags } from '../../valueItems/borrowerVerificationFlags'
 
 export abstract class Library extends Entity {
   libraryID: ID
   name: string
   administrators: Person[]
+  members: Person[] = []
   waitingListType: WaitingListType
   waitingListsByItemId: Map<string, WaitingList> = new Map()
   maxFinesBeforeSuspension: Money
   feeSchedule: FeeSchedule
   moneyFactory: MoneyFactory = new MoneyFactory()
   defaultLoanTime: { days: number }
-  defaultBorrowerVerification: BorrowerVerificationFlags[]
   mopServer: MOPServer
   publicURL?: string | null
 
@@ -43,6 +40,7 @@ export abstract class Library extends Entity {
     libraryID: ID
     name: string
     administrators: Person[]
+    members?: Person[]
     waitingListType: WaitingListType
     maxFinesBeforeSuspension: Money
     feeSchedule: FeeSchedule
@@ -55,6 +53,7 @@ export abstract class Library extends Entity {
     this.libraryID = params.libraryID
     this.name = params.name
     this.administrators = params.administrators
+    this.members = params.members ?? []
     this.waitingListType = params.waitingListType
     this.maxFinesBeforeSuspension = params.maxFinesBeforeSuspension
     this.feeSchedule = params.feeSchedule
@@ -128,7 +127,7 @@ export abstract class Library extends Entity {
 
   abstract startBorrow(thing: Thing, borrower: Borrower): Promise<Thing>
 
-  async rejectBorrow(thing: Thing, _borrower: Borrower, _reason: string): Promise<Thing>{
+  async rejectBorrow(thing: Thing, borrower: Borrower, reason: string): Promise<Thing>{
     thing.status = ThingStatus.READY
 
     // TODO store this reason somehow
@@ -139,13 +138,13 @@ export abstract class Library extends Entity {
 
   abstract startReturn(loan: Loan): Promise<Loan>
 
-  async rejectReturn(loan: Loan, _reason: string): Promise<Loan> {
+  async rejectReturn(loan: Loan, reason: string): Promise<Loan> {
     loan.status = LoanStatus.RETURNED_DAMAGED;
 
     return loan;
   }
 
-  async finishLibraryReturn(loan: Loan, _borrower: Borrower): Promise<Loan> {
+  async finishLibraryReturn(loan: Loan, borrower: Borrower): Promise<Loan> {
     if (loan.status !== LoanStatus.WAITING_ON_LENDER_ACCEPTANCE || !loan.timeReturned) {
       throw new Error('ReturnNotStartedError')
     }

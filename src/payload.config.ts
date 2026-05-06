@@ -1,5 +1,10 @@
 // storage-adapter-import-placeholder
+import dotenv from 'dotenv';
 import { mongooseAdapter } from '@payloadcms/db-mongodb'
+
+dotenv.config(); // ensure env vars are loaded when config is imported
+
+const disableEmailForTests = process.env.DISABLE_EMAIL_FOR_TESTS === 'true';
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
@@ -17,6 +22,7 @@ import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
 import { Admins } from './collections/Admins'
 import { Loans } from './collections/Loans'
+import { Libraries } from './collections/Libraries'
 import { ThingRequests } from './collections/ThingRequests'
 import { BorrowRequests } from './collections/BorrowRequests'
 import { DistributedLibraries } from './collections/DistributedLibraries'
@@ -71,7 +77,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, ThingRequests, BorrowRequests, DistributedLibraries, Tags],
+  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, Libraries, ThingRequests, BorrowRequests, DistributedLibraries, Tags],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
@@ -100,7 +106,7 @@ export default buildConfig({
     },
     tasks: [],
   },
-  email: nodemailerAdapter({
+  email: !disableEmailForTests ? nodemailerAdapter({
     defaultFromAddress: 'info@neighborgoods.com',
     defaultFromName: 'NeighborGoods',
     // Nodemailer transportOptions
@@ -112,5 +118,5 @@ export default buildConfig({
         pass: process.env.SMTP_PASSWORD,
       },
     },
-  }),
+  }) : undefined,
 })

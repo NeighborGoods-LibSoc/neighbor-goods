@@ -1,6 +1,13 @@
-import { Library } from '@/domain'
-import { Borrower, Loan, Thing, Lender } from '..'
-import { ID, DueDate, LoanStatus, PhysicalArea, ThingStatus } from '@/domain'
+import { Library } from './library'
+import { Borrower } from '../borrower'
+import { Loan } from '../loan'
+import { Thing } from '../thing'
+import { Lender } from '../lenders/lender'
+import { ID } from '../../valueItems/id'
+import { DueDate } from '../../valueItems/dueDate'
+import { LoanStatus } from '../../valueItems/loanStatus'
+import { PhysicalArea } from '../../valueItems/location/physicalArea'
+import { ThingStatus } from '../../valueItems/thingStatus'
 
 export class DistributedLibrary extends Library {
   area!: PhysicalArea

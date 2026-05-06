@@ -74,7 +74,7 @@ export default async function RequestPage({ params: paramsPromise, searchParams:
 
       <div className="page-header">
         <Link href="/dashboard" className="btn btn-secondary">
-          &larr; Back to Dashboard
+          &larr; Back to User Dashboard
         </Link>
       </div>
 

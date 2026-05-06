@@ -1,4 +1,6 @@
+// noinspection ES6PreferShortImport -- intentional: relative imports to avoid circular dependency through index barrel
 import { ThingStatus } from './thingStatus'
+// noinspection ES6PreferShortImport
 import { ThingRequestStatus } from './thingRequestStatus'
 
 export const thingStatusTransitions: Record<ThingStatus, ThingStatus[]> = {

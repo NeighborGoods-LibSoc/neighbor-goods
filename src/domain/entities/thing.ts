@@ -1,4 +1,4 @@
-import { Entity } from '.'
+import { Entity } from './entity'
 import {
   ID,
   InvalidThingStateTransitionError,
@@ -6,9 +6,9 @@ import {
   Money,
   ThingStatus,
   ThingTitle,
-  BorrowerVerificationFlags,
-  thingStatusTransitions,
+  BorrowerVerificationFlags
 } from '@/domain'
+import { thingStatusTransitions } from '../valueItems/statusTransitions'
 
 export class Thing extends Entity {
   thing_id: ID

@@ -83,7 +83,7 @@ export const Users: CollectionConfig = {
     ],
   },
   fields: [
-    uuidField({ name: 'id', label: 'ID', description: 'UUID for this user' }),
+    uuidField({ name: 'user_id', label: 'User ID', description: 'UUID for this user' }),
     {
       name: 'name',
       type: 'text',

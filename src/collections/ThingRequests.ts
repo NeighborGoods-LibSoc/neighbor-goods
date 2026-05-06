@@ -1,8 +1,11 @@
 import type { CollectionConfig } from 'payload'
+import { uuidField } from '@/fields/uuid'
 
-import { authenticated, anyone, isOwner } from '@/access'
-import { uuidField } from '@/fields'
-import { ThingRequestStatus, requestStatusTransitions } from '@/domain'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
+import { isOwner } from '@/access/isOwner'
+import { ThingRequestStatus } from '@/domain'
+import { requestStatusTransitions } from '@/domain/valueItems/statusTransitions'
 
 export const ThingRequests: CollectionConfig = {
   slug: 'thing-requests',
@@ -17,7 +20,7 @@ export const ThingRequests: CollectionConfig = {
     useAsTitle: 'name',
   },
   fields: [
-    uuidField({ name: 'id', label: 'ID', description: 'UUID for this request' }),
+    uuidField({ name: 'request_id', label: 'Request ID', description: 'UUID for this request' }),
     {
       name: 'name',
       type: 'text',
@@ -90,16 +93,15 @@ export const ThingRequests: CollectionConfig = {
         // On update, prevent changing the owner
         if (originalDoc?.requestedBy) {
           // Preserve original owner, ignore any attempt to change it
-          const originalOwnerId =
+          data.requestedBy =
             typeof originalDoc.requestedBy === 'object'
               ? originalDoc.requestedBy.id
               : originalDoc.requestedBy
-          data.requestedBy = originalOwnerId
         }
 
         // Validate status transition using shared config
-        const currentStatus = originalDoc?.status || ThingRequestStatus.OPEN
-        const newStatus = data.status || currentStatus
+        const currentStatus: ThingRequestStatus = (originalDoc?.status as ThingRequestStatus) || ThingRequestStatus.OPEN
+        const newStatus: ThingRequestStatus = (data.status as ThingRequestStatus) || currentStatus
 
         if (currentStatus !== newStatus) {
           const validNextStatuses = requestStatusTransitions[currentStatus] || []

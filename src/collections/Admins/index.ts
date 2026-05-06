@@ -22,7 +22,7 @@ export const Admins: CollectionConfig = {
     },
   },
   fields: [
-    uuidField({ name: 'id', label: 'ID', description: 'UUID for this admin' }),
+    uuidField({ name: 'admin_id', label: 'Admin ID', description: 'UUID for this admin' }),
     {
       name: 'name',
       type: 'text',

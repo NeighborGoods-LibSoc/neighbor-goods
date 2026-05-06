@@ -1,10 +1,12 @@
 import type { CollectionConfig, Access } from 'payload'
 import type { User } from '@/payload-types'
 
-import { authenticated, anyone, isOwner } from '@/access'
-import { uuidField } from '@/fields'
-import { ThingStatus, ID, BorrowerVerificationFlags, ThingService } from '@/domain'
-import { PayloadBorrowRequestRepository } from '@/infrastructure/repositories'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
+import { isOwner } from '@/access/isOwner'
+import { uuidField } from '@/fields/uuid'
+import { ThingStatus, ID, ThingService, BorrowerVerificationFlags } from '@/domain'
+import { PayloadBorrowRequestRepository } from '@/infrastructure/repositories/PayloadBorrowRequestRepository'
 import { buildDomainThingFromData, thingToPayloadData } from './common/mappers'
 
 /**
@@ -31,7 +33,9 @@ export const Things: CollectionConfig = {
     useAsTitle: 'name',
   },
   fields: [
-    uuidField({ name: 'id', label: 'ID', description: 'UUID for this item' }),
+    uuidField({ name: 'item_id', description: 'UUID for the item (domain ID)' }),
+    uuidField({ name: 'owner_uuid', description: 'UUID of the owner (domain ID)', required: false }),
+    uuidField({ name: 'requested_by_uuid', description: 'UUID of the user who requested to borrow (domain ID)', required: false }),
     {
       name: 'name',
       type: 'text',
@@ -44,7 +48,10 @@ export const Things: CollectionConfig = {
       defaultValue: ThingStatus.READY,
       options: [
         { label: 'Ready', value: ThingStatus.READY },
-        { label: 'Waiting for Lender Approval', value: ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW },
+        {
+          label: 'Waiting for Lender Approval',
+          value: ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW,
+        },
         { label: 'Borrowed', value: ThingStatus.BORROWED },
         { label: 'Damaged', value: ThingStatus.DAMAGED },
         { label: 'Reserved', value: ThingStatus.RESERVED },
@@ -80,7 +87,7 @@ export const Things: CollectionConfig = {
         { label: 'Deposit', value: 'DEPOSIT' },
         { label: 'In-person', value: 'IN_PERSON' },
       ],
-      required: true,
+      required: false,
       admin: {
         description: 'Verification methods required for a borrower to use this item.',
       },
@@ -140,6 +147,15 @@ export const Things: CollectionConfig = {
     },
   ],
   hooks: {
+    beforeValidate: [
+      async ({ data, operation }) => {
+        if (!data) return data
+        if (operation === 'create' && !data.item_id) {
+          data.item_id = ID.generate().toString()
+        }
+        return data
+      },
+    ],
     beforeChange: [
       async ({ data, originalDoc, operation, req }) => {
         if (!data) return data
@@ -150,6 +166,7 @@ export const Things: CollectionConfig = {
             throw new Error('You must be logged in to offer an item')
           }
           data.offeredBy = req.user.id
+          data.owner_uuid = (req.user as any).user_id
           return data
         }
 
@@ -159,7 +176,7 @@ export const Things: CollectionConfig = {
         }
 
         const thing = buildDomainThingFromData(originalDoc)
-        const userId = ID.parse(req.user.id)
+        const userId = new ID((req.user as any).user_id as string)
         const newStatus = (data.status as ThingStatus) || thing.status
 
         // Non-owner requesting to borrow
@@ -193,7 +210,7 @@ export const Things: CollectionConfig = {
 
           const borrowRequestRepo = new PayloadBorrowRequestRepository(req.payload)
           const thingService = new ThingService(borrowRequestRepo)
-          await thingService.requestBorrow(thing, userId)
+          await thingService.requestBorrow(thing, userId, new ID(originalDoc.item_id))
 
           return thingToPayloadData(thing, originalDoc)
         }
@@ -221,7 +238,7 @@ export const Things: CollectionConfig = {
           ...originalDoc,
           ...data,
           status: thing.status,
-          requestedToBorrowBy: thing.requestedToBorrowBy?.toString() || null,
+          requested_by_uuid: thing.requestedToBorrowBy?.toString() || null,
         }
         const updatedThing = buildDomainThingFromData(mergedData)
 

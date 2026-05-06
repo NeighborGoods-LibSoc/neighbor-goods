@@ -15,7 +15,7 @@ export const Categories: CollectionConfig = {
     useAsTitle: 'title',
   },
   fields: [
-    uuidField({ name: 'id', label: 'ID', description: 'UUID for this category' }),
+    uuidField({ name: 'category_id', label: 'Category ID', description: 'UUID for this category' }),
     {
       name: 'title',
       type: 'text',
