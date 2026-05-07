@@ -26,6 +26,7 @@ import { Libraries } from './collections/Libraries'
 import { ThingRequests } from './collections/ThingRequests'
 import { BorrowRequests } from './collections/BorrowRequests'
 import { DistributedLibraries } from './collections/DistributedLibraries'
+import { Notifications } from './collections/Notifications'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -77,7 +78,7 @@ export default buildConfig({
   db: mongooseAdapter({
     url: process.env.DATABASE_URI || '',
   }),
-  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, Libraries, ThingRequests, BorrowRequests, DistributedLibraries, Tags],
+  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, Libraries, ThingRequests, BorrowRequests, DistributedLibraries, Tags, Notifications],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [

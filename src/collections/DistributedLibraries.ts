@@ -46,6 +46,14 @@ export const DistributedLibraries: CollectionConfig = {
       admin: { description: 'Users who have joined this library' },
     },
     {
+      name: 'items',
+      type: 'relationship',
+      relationTo: 'items',
+      hasMany: true,
+      required: false,
+      admin: { description: 'Items shared through this library' },
+    },
+    {
       name: 'default_loan_time_days',
       type: 'number',
       required: true,
@@ -66,14 +74,6 @@ export const DistributedLibraries: CollectionConfig = {
       admin: {
         description: 'Default verification methods required for borrowers in this library.',
       },
-    },
-    {
-      name: 'items',
-      type: 'relationship',
-      relationTo: 'items',
-      hasMany: true,
-      required: false,
-      admin: { description: 'Items available in this distributed library' },
     },
     {
       name: 'area',

@@ -135,14 +135,6 @@ export const Loans: CollectionConfig = {
   timestamps: true,
 }
 
-// --- Domain mapping helpers ---
-import { Loan } from '@/domain/entities/loan'
-import { Thing } from '@/domain/entities/thing'
-import { ID, DueDate, LoanStatus } from '@/domain/valueItems'
-import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
-import { ThingTitle } from '@/domain/valueItems/thingTitle'
-import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
-
 async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
   const loan_id = new ID(String(data.loan_id))
 

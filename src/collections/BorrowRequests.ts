@@ -44,6 +44,20 @@ export const BorrowRequests: CollectionConfig = {
         description: 'Timestamp of when the borrow request was made',
       },
     },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      defaultValue: 'pending',
+      options: [
+        { label: 'Pending', value: 'pending' },
+        { label: 'Approved', value: 'approved' },
+        { label: 'Rejected', value: 'rejected' },
+      ],
+      admin: {
+        description: 'Current status of the borrow request',
+      },
+    },
   ],
   timestamps: true,
 }

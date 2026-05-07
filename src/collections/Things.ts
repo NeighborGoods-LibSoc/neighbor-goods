@@ -5,9 +5,12 @@ import { authenticated } from '@/access/authenticated'
 import { anyone } from '@/access/anyone'
 import { isOwner } from '@/access/isOwner'
 import { uuidField } from '@/fields/uuid'
-import { ThingStatus, ID, ThingService, BorrowerVerificationFlags } from '@/domain'
+import { ThingStatus, ID, ThingService, BorrowerVerificationFlags, NotificationService } from '@/domain'
 import { PayloadBorrowRequestRepository } from '@/infrastructure/repositories/PayloadBorrowRequestRepository'
+import { PayloadNotificationRepository } from '@/infrastructure/repositories/PayloadNotificationRepository'
+import { PayloadPersonLookup } from '@/infrastructure/repositories/PayloadPersonLookup'
 import { buildDomainThingFromData, thingToPayloadData } from './common/mappers'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * Custom access control for item updates:
@@ -212,7 +215,10 @@ export const Things: CollectionConfig = {
           const thingService = new ThingService(borrowRequestRepo)
           await thingService.requestBorrow(thing, userId, new ID(originalDoc.item_id))
 
-          return thingToPayloadData(thing, originalDoc)
+          return {
+            ...thingToPayloadData(thing, originalDoc),
+            requestedToBorrowBy: req.user.id,
+          }
         }
 
         // Owner actions
@@ -243,6 +249,134 @@ export const Things: CollectionConfig = {
         const updatedThing = buildDomainThingFromData(mergedData)
 
         return thingToPayloadData(updatedThing, mergedData)
+      },
+    ],
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        // --- Notification logic (delegated to domain service) ---
+        if (operation === 'update' && previousDoc) {
+          const ownerUuid = doc.owner_uuid
+          const requesterUuid = doc.requested_by_uuid ?? previousDoc.requested_by_uuid
+
+          if (ownerUuid) {
+            const notificationService = new NotificationService(
+              new PayloadNotificationRepository(req.payload),
+              new PayloadPersonLookup(req.payload),
+            )
+
+            try {
+              await notificationService.notifyOnStatusChange({
+                itemId: new ID(doc.item_id),
+                itemName: doc.name || 'an item',
+                previousStatus: previousDoc.status as ThingStatus,
+                newStatus: doc.status as ThingStatus,
+                ownerId: new ID(ownerUuid),
+                requesterId: requesterUuid ? new ID(requesterUuid) : null,
+              })
+            } catch (error) {
+              console.error('Failed to create notification:', error)
+            }
+          }
+        }
+
+        // Create a Loan record when an item transitions to BORROWED
+        if (
+          operation === 'update' &&
+          doc.status === ThingStatus.BORROWED &&
+          previousDoc?.status !== ThingStatus.BORROWED
+        ) {
+          const borrowerId =
+            typeof doc.requestedToBorrowBy === 'object'
+              ? doc.requestedToBorrowBy?.id
+              : doc.requestedToBorrowBy
+
+          if (borrowerId) {
+            try {
+              // Calculate due date from borrowingTime (days)
+              const dueDate = doc.borrowingTime
+                ? new Date(Date.now() + doc.borrowingTime * 24 * 60 * 60 * 1000)
+                    .toISOString()
+                    .split('T')[0]
+                : null
+
+              await req.payload.create({
+                collection: 'loans',
+                data: {
+                  loan_id: uuidv4(),
+                  item: doc.id,
+                  borrower: borrowerId,
+                  status: 'BORROWED',
+                  due_date: dueDate,
+                },
+              })
+            } catch (error) {
+              console.error('Failed to create loan record:', error)
+            }
+          }
+        }
+
+        // When item returns to READY, mark any active loans as RETURNED
+        if (
+          operation === 'update' &&
+          doc.status === ThingStatus.READY &&
+          (previousDoc?.status === ThingStatus.BORROWED ||
+            previousDoc?.status === ThingStatus.DAMAGED)
+        ) {
+          try {
+            const activeLoans = await req.payload.find({
+              collection: 'loans',
+              where: {
+                item: { equals: doc.id },
+                status: { in: ['BORROWED', 'OVERDUE'] },
+              },
+            })
+
+            for (const loan of activeLoans.docs) {
+              await req.payload.update({
+                collection: 'loans',
+                id: loan.id,
+                data: {
+                  status: 'RETURNED',
+                  time_returned: new Date().toISOString(),
+                },
+              })
+            }
+          } catch (error) {
+            console.error('Failed to update loan records:', error)
+          }
+        }
+
+        // When item is marked DAMAGED, mark any active loans as RETURNED_DAMAGED
+        if (
+          operation === 'update' &&
+          doc.status === ThingStatus.DAMAGED &&
+          previousDoc?.status === ThingStatus.BORROWED
+        ) {
+          try {
+            const activeLoans = await req.payload.find({
+              collection: 'loans',
+              where: {
+                item: { equals: doc.id },
+                status: { in: ['BORROWED', 'OVERDUE'] },
+              },
+            })
+
+            for (const loan of activeLoans.docs) {
+              await req.payload.update({
+                collection: 'loans',
+                id: loan.id,
+                data: {
+                  status: 'RETURNED_DAMAGED',
+                  time_returned: new Date().toISOString(),
+                },
+              })
+            }
+          } catch (error) {
+            console.error('Failed to update loan records:', error)
+          }
+        }
+
+        return doc
       },
     ],
   },
