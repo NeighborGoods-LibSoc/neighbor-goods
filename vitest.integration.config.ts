@@ -5,12 +5,14 @@ import dotenv from 'dotenv';
 export default defineConfig({
   test: {
     name: 'integration',
+    root: './src',
     include: ['**/*.integration.test.ts', '**/*.integration.test.tsx'],
+    exclude: ['**/node_modules/**'],
     globals: true,
     environment: 'node',
     testTimeout: 30000,
     hookTimeout: 30000,
-    setupFiles: ['./src/tests/setup/integration.setup.ts'],
+    setupFiles: ['./tests/setup/integration.setup.ts'],
     env: {
       ...dotenv.config({ path: '.env.test' }).parsed,
     },
