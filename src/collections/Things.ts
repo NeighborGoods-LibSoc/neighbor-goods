@@ -5,7 +5,8 @@ import { authenticated } from '@/access/authenticated'
 import { anyone } from '@/access/anyone'
 import { isOwner } from '@/access/isOwner'
 import { uuidField } from '@/fields/uuid'
-import { ThingStatus, ID, ThingService, BorrowerVerificationFlags, NotificationService } from '@/domain'
+import { ThingStatus, ID, ThingService, BorrowerVerificationFlags, NotificationService, InvalidThingStatusToBorrowError, BorrowCooldownError } from '@/domain'
+import { APIError } from 'payload'
 import { PayloadBorrowRequestRepository } from '@/infrastructure/repositories/PayloadBorrowRequestRepository'
 import { PayloadNotificationRepository } from '@/infrastructure/repositories/PayloadNotificationRepository'
 import { PayloadPersonLookup } from '@/infrastructure/repositories/PayloadPersonLookup'
@@ -213,7 +214,17 @@ export const Things: CollectionConfig = {
 
           const borrowRequestRepo = new PayloadBorrowRequestRepository(req.payload)
           const thingService = new ThingService(borrowRequestRepo)
-          await thingService.requestBorrow(thing, userId, new ID(originalDoc.item_id))
+          try {
+            await thingService.requestBorrow(thing, userId, new ID(originalDoc.item_id))
+          } catch (err) {
+            if (err instanceof InvalidThingStatusToBorrowError) {
+              throw new APIError('This item is not available for borrowing', 409)
+            }
+            if (err instanceof BorrowCooldownError) {
+              throw new APIError(err.message, 429)
+            }
+            throw err
+          }
 
           return {
             ...thingToPayloadData(thing, originalDoc),

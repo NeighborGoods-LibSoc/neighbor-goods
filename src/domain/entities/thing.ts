@@ -2,13 +2,14 @@ import { Entity } from './entity'
 import {
   ID,
   InvalidThingStateTransitionError,
+  InvalidThingStatusToBorrowError,
   Location,
   Money,
   ThingStatus,
   ThingTitle,
-  BorrowerVerificationFlags
+  BorrowerVerificationFlags,
+  thingStatusTransitions
 } from '@/domain'
-import { thingStatusTransitions } from '../valueItems/statusTransitions'
 
 export class Thing extends Entity {
   thing_id: ID
@@ -83,7 +84,7 @@ export class Thing extends Entity {
       throw new Error('Cannot request to borrow your own item')
     }
     if (this._status !== ThingStatus.READY) {
-      throw new Error('Item is not available for borrowing')
+      throw new InvalidThingStatusToBorrowError(this._status)
     }
     this.status = ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW
     this._requestedToBorrowBy = requesterId
