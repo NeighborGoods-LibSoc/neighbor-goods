@@ -5,21 +5,20 @@ import {
   mapReturnLocation,
   toPhysicalArea,
   buildDomainDistributedLibraryFromData,
+  buildDomainThingFromData,
+  thingToPayloadData,
   serializeArea,
 } from '@/collections/common/mappers'
 
-import { ID } from '@/domain/valueItems'
-import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
-import { PhysicalArea } from '@/domain/valueItems/location/physicalArea'
-import { Distance } from '@/domain/valueItems/location/distance'
+import { ID, PhysicalLocation, PhysicalArea } from '@/domain'
 
 // Helpers
 function makeItem(overrides: any = {}) {
   return {
-    id: 'item-1',
+    id: '00000000-0000-4000-8000-000000000001',
     name: 'Hammer',
     description: 'A heavy hammer',
-    offeredBy: { id: 'user-1' },
+    offeredBy: { id: '00000000-0000-4000-8000-000000000002' },
     ...overrides,
   }
 }
@@ -53,7 +52,7 @@ describe('collections/common/mappers', () => {
       // owner id comes from offeredBy
       // mapItemToThing accepts either object with id or plain value
       expect(thing.owner_id).toBeInstanceOf(ID)
-      expect(thing.owner_id.toString()).toBe('user-1')
+      expect(thing.owner_id.toString()).toBe('00000000-0000-4000-8000-000000000002')
       // storage_location is a PhysicalLocation placeholder
       const loc = thing.storage_location as PhysicalLocation
       expect(loc).toBeInstanceOf(PhysicalLocation)
@@ -62,12 +61,12 @@ describe('collections/common/mappers', () => {
     })
 
     it('uses fallback names and ids if missing', () => {
-      const item = makeItem({ id: undefined, _id: 'mongo-id-123', name: undefined, description: undefined, offeredBy: 'user-xyz' })
+      const item = makeItem({ id: undefined, _id: '00000000-0000-4000-8000-000000000003', name: undefined, description: undefined, offeredBy: '00000000-0000-4000-8000-000000000004' })
       const thing = mapItemToThing(item)
-      expect(thing.entityID.toString()).toBe('mongo-id-123')
+      expect(thing.entityID.toString()).toBe('00000000-0000-4000-8000-000000000003')
       expect(thing.title.name).toBe('Untitled')
       expect(thing.description).toBeNull()
-      expect(thing.owner_id.toString()).toBe('user-xyz')
+      expect(thing.owner_id.toString()).toBe('00000000-0000-4000-8000-000000000004')
     })
   })
 
@@ -121,6 +120,34 @@ describe('collections/common/mappers', () => {
     })
   })
 
+  describe('buildDomainThingFromData', () => {
+    it('maps verification flags and deposit amount', () => {
+      const doc = {
+        id: '00000000-0000-4000-8000-000000000001',
+        name: 'Power Drill',
+        description: 'Cordless drill',
+        offeredBy: '00000000-0000-4000-8000-000000000002',
+        borrowerVerification: ['ID', 'DEPOSIT'],
+        depositAmount: 50,
+        status: 'READY',
+      }
+      const thing = buildDomainThingFromData(doc)
+      expect(thing.borrowerVerification).toContain('ID')
+      expect(thing.borrowerVerification).toContain('DEPOSIT')
+      expect(thing.depositAmount?.amount.toNumber()).toBe(50)
+    })
+
+    it('handles missing verification fields with defaults', () => {
+      const doc = {
+        id: '00000000-0000-4000-8000-000000000001',
+        offeredBy: '00000000-0000-4000-8000-000000000002',
+      }
+      const thing = buildDomainThingFromData(doc)
+      expect(thing.borrowerVerification).toEqual([])
+      expect(thing.depositAmount).toBeNull()
+    })
+  })
+
   describe('buildDomainDistributedLibraryFromData', () => {
     it('throws when name is missing', async () => {
       const data = {
@@ -163,6 +190,17 @@ describe('collections/common/mappers', () => {
       expect(dl.area).toBeInstanceOf(PhysicalArea)
       expect((dl.area as PhysicalArea).radius.kilometers).toBe(12)
     })
+
+    it('maps default verification flags', () => {
+      const data = {
+        library_id: '00000000-0000-4000-8000-000000000000',
+        name: 'Neighborhood',
+        defaultBorrowerVerification: ['EMAIL', 'ID'],
+      }
+      const dl = buildDomainDistributedLibraryFromData(data)
+      expect(dl.defaultBorrowerVerification).toContain('EMAIL')
+      expect(dl.defaultBorrowerVerification).toContain('ID')
+    })
   })
 
   describe('serializeArea', () => {
@@ -198,6 +236,25 @@ describe('collections/common/mappers', () => {
       const back = toPhysicalArea(serialized)
       expect(back).toBeInstanceOf(PhysicalArea)
       expect((back as PhysicalArea).radius.kilometers).toBe(25)
+    })
+  })
+
+  describe('thingToPayloadData', () => {
+    it('should convert Money deposit amount to number', () => {
+      const thing = buildDomainThingFromData(makeItem({
+        depositAmount: 50
+      }))
+      const payloadData = thingToPayloadData(thing, { some: 'other' })
+      expect(typeof payloadData.depositAmount).toBe('number')
+      expect(payloadData.depositAmount).toBe(50)
+    })
+
+    it('should handle null deposit amount', () => {
+      const thing = buildDomainThingFromData(makeItem({
+        depositAmount: null
+      }))
+      const payloadData = thingToPayloadData(thing, { some: 'other' })
+      expect(payloadData.depositAmount).toBeNull()
     })
   })
 })

@@ -2,9 +2,8 @@ import { Thing } from '@/domain/entities/thing'
 import { ThingRequest } from '@/domain/entities/thingRequest'
 import { DistributedLibrary as DomainDistributedLibrary } from '@/domain/entities/libraries/distributedLibrary'
 import { MOPServer } from '@/domain/entities/mopServer'
-import { WaitingListType, Money, Currency, ThingStatus, ThingRequestStatus } from '@/domain/valueItems'
 import type { FeeSchedule } from '@/domain/valueItems'
-import { ID, PersonName, EmailAddress } from '@/domain/valueItems'
+import { WaitingListType, Money, Currency, ThingStatus, ThingRequestStatus, ID, PersonName, EmailAddress } from '@/domain/valueItems'
 import { PhysicalLocation } from '@/domain/valueItems/location/physicalLocation'
 import { PhysicalArea } from '@/domain/valueItems/location/physicalArea'
 import { Distance } from '@/domain/valueItems/location/distance'
@@ -13,9 +12,11 @@ import { Person } from '@/domain/entities/people/person'
 import { URL } from '@/domain/valueItems/url'
 
 export function mapItemToThing(item: any): Thing {
-  const thing_id = item?.item_id ? ID.parse(String(item.item_id)) : new ID(String(item?.id || item?._id))
+  const thing_id = item?.item_id ? ID.parse(String(item.item_id)) : ID.generate()
   const title = new ThingTitle({ name: String(item?.name || 'Untitled'), description: item?.description || undefined })
-  const owner_id = new ID(String(item?.offeredBy?.id || item?.offeredBy || 'unknown'))
+  const owner_id = item?.owner_uuid
+    ? ID.parse(String(item.owner_uuid))
+    : ID.generate() // fallback if no owner_uuid available
   const storage_location = new PhysicalLocation({
     latitude: null,
     longitude: null,
@@ -34,7 +35,7 @@ export function mapItemToThing(item: any): Thing {
     image_urls: [],
     purchase_cost: null,
     status: (item?.status as ThingStatus) || ThingStatus.READY,
-    requestedToBorrowBy: item?.requestedToBorrowBy ? new ID(String(item.requestedToBorrowBy?.id || item.requestedToBorrowBy)) : null,
+    requestedToBorrowBy: item?.requested_by_uuid ? ID.parse(String(item.requested_by_uuid)) : null,
   })
 }
 
@@ -55,7 +56,7 @@ export function mapReturnLocation(loc: any) {
 
 export function mapUserToPerson(user: any): Person {
   if (!user) throw new Error('User is required to map to Person')
-  const personID = new ID(String(user.id || user._id))
+  const personID = user.user_id ? ID.parse(String(user.user_id)) : ID.generate()
   const nameParts = String(user.name || '').split(' ')
   const firstName: string = nameParts[0] || 'Unknown'
   const lastName: string = (nameParts.length > 1 ? nameParts[nameParts.length - 1] : undefined) || 'Unknown'
@@ -125,6 +126,7 @@ export async function buildDomainDistributedLibraryFromData(data: any, req?: any
     maxFinesBeforeSuspension: new Money({ amount: 100, currency: Currency.USD }),
     feeSchedule: new ZeroFeeSchedule(),
     defaultLoanTime: { days: defaultDays },
+    defaultBorrowerVerification: data.defaultBorrowerVerification || [],
     mopServer: MOPServer.localhost(),
     publicURL: publicURL,
   })
@@ -185,13 +187,10 @@ export function buildDomainThingFromData(doc: any): Thing {
   }
 
   const ownerId =
-    typeof doc.offeredBy === 'object' ? doc.offeredBy.id : doc.offeredBy
+    doc.owner_uuid ||
+    (typeof doc.offeredBy === 'object' ? doc.offeredBy.user_id : null)
 
-  const requestedById = doc.requestedToBorrowBy
-    ? typeof doc.requestedToBorrowBy === 'object'
-      ? doc.requestedToBorrowBy.id
-      : doc.requestedToBorrowBy
-    : null
+  const requestedById = doc.requested_by_uuid || null
 
   const storage_location = new PhysicalLocation({
     latitude: null,
@@ -204,16 +203,21 @@ export function buildDomainThingFromData(doc: any): Thing {
   })
 
   return new Thing({
-    thing_id: doc.item_id ? ID.parse(doc.item_id) : new ID(doc.id),
+    thing_id: doc.item_id ? ID.parse(doc.item_id) : ID.generate(),
     title: new ThingTitle({
       name: String(doc.name || 'Untitled'),
       description: doc.description || undefined,
     }),
     description: doc.description || null,
-    owner_id: new ID(ownerId),
+    owner_id: ownerId ? new ID(ownerId) : ID.generate(),
     storage_location,
     image_urls: [],
     purchase_cost: null,
+    borrowerVerification: doc.borrowerVerification || [],
+    depositAmount:
+      doc.depositAmount !== undefined && doc.depositAmount !== null
+        ? new Money({ amount: doc.depositAmount, currency: Currency.USD })
+        : null,
     status: (doc.status as ThingStatus) || ThingStatus.READY,
     requestedToBorrowBy: requestedById ? new ID(requestedById) : null,
   })
@@ -228,8 +232,12 @@ export function thingToPayloadData(thing: Thing, originalDoc: any): any {
     ...originalDoc,
     item_id: thing.thing_id.toString(),
     status: thing.status,
-    requestedToBorrowBy: thing.requestedToBorrowBy?.toString() || null,
-    offeredBy: thing.owner_id.toString(),
+    requestedToBorrowBy: originalDoc.requestedToBorrowBy || null,
+    requested_by_uuid: thing.requestedToBorrowBy?.toString() || null,
+    offeredBy: originalDoc.offeredBy,
+    owner_uuid: thing.owner_id.toString(),
+    borrowerVerification: thing.borrowerVerification,
+    depositAmount: thing.depositAmount ? thing.depositAmount.amount.toNumber() : null,
   }
 }
 
@@ -243,14 +251,14 @@ export function buildDomainThingRequestFromData(doc: any): ThingRequest {
   }
 
   const requestedById =
-    typeof doc.requestedBy === 'object' ? doc.requestedBy.id : doc.requestedBy
+    typeof doc.requestedBy === 'object' ? (doc.requestedBy.user_id || doc.requestedBy.id) : doc.requestedBy
 
   return new ThingRequest({
-    thingRequestID: doc.id ? new ID(doc.id) : ID.generate(),
+    thingRequestID: doc.request_id ? ID.parse(doc.request_id) : ID.generate(),
     name: String(doc.name || ''),
     description: doc.description || null,
     status: (doc.status as ThingRequestStatus) || ThingRequestStatus.OPEN,
-    requestedBy: new ID(requestedById),
+    requestedBy: requestedById ? ID.parse(String(requestedById)) : ID.generate(),
   })
 }
 

@@ -81,6 +81,7 @@ export interface Config {
     'borrow-requests': BorrowRequest;
     distributedLibraries: DistributedLibrary;
     tags: Tag;
+    notifications: Notification;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
@@ -106,6 +107,7 @@ export interface Config {
     'borrow-requests': BorrowRequestsSelect<false> | BorrowRequestsSelect<true>;
     distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
@@ -299,6 +301,10 @@ export interface Post {
  */
 export interface Media {
   id: number;
+  /**
+   * UUID for this media
+   */
+  media_id: string;
   alt?: string | null;
   caption?: {
     root: {
@@ -391,6 +397,10 @@ export interface Media {
  */
 export interface Category {
   id: number;
+  /**
+   * UUID for this category
+   */
+  category_id: string;
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
@@ -412,7 +422,19 @@ export interface Category {
  */
 export interface User {
   id: number;
+  /**
+   * UUID for this user
+   */
+  user_id: string;
   name?: string | null;
+  /**
+   * Verification methods this user has completed.
+   */
+  verificationFlags?: ('EMAIL' | 'PHONE_NUMBER' | 'ID' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  /**
+   * Amount of money this user has in escrow for deposits.
+   */
+  escrowBalance?: number | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -780,6 +802,10 @@ export interface Form {
  */
 export interface Admin {
   id: number;
+  /**
+   * UUID for this admin
+   */
+  admin_id: string;
   name?: string | null;
   role?: string | null;
   updatedAt: string;
@@ -811,6 +837,14 @@ export interface Item {
    * UUID for the item (domain ID)
    */
   item_id: string;
+  /**
+   * UUID of the owner (domain ID)
+   */
+  owner_uuid?: string | null;
+  /**
+   * UUID of the user who requested to borrow (domain ID)
+   */
+  requested_by_uuid?: string | null;
   name: string;
   /**
    * Current availability status of this item
@@ -822,9 +856,13 @@ export interface Item {
    */
   tags?: (number | Tag)[] | null;
   /**
-   * Rules and guidelines for using this item
+   * Verification methods required for a borrower to use this item.
    */
-  rulesForUse: string;
+  borrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'ID' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  /**
+   * Amount of deposit required if DEPOSIT is selected.
+   */
+  depositAmount?: number | null;
   /**
    * Maximum borrowing time in days
    */
@@ -851,6 +889,10 @@ export interface Item {
  */
 export interface Tag {
   id: number;
+  /**
+   * UUID for this tag
+   */
+  tag_id: string;
   /**
    * Tag name (e.g., "Electronics", "Books", "Clothing")
    */
@@ -958,6 +1000,10 @@ export interface Library {
  */
 export interface ThingRequest {
   id: number;
+  /**
+   * UUID for this request
+   */
+  request_id: string;
   name: string;
   /**
    * Current status of this request
@@ -982,12 +1028,20 @@ export interface ThingRequest {
  */
 export interface BorrowRequest {
   id: number;
+  /**
+   * UUID for this request
+   */
+  borrow_request_id: string;
   item: number | Item;
   requestedBy: number | User;
   /**
    * Timestamp of when the borrow request was made
    */
   requestedAt: string;
+  /**
+   * Current status of the borrow request
+   */
+  status: 'pending' | 'approved' | 'rejected';
   updatedAt: string;
   createdAt: string;
 }
@@ -1020,6 +1074,10 @@ export interface DistributedLibrary {
    */
   default_loan_time_days: number;
   /**
+   * Default verification methods required for borrowers in this library.
+   */
+  defaultBorrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'ID' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  /**
    * Geographic service area
    */
   area: {
@@ -1034,6 +1092,31 @@ export interface DistributedLibrary {
     };
     radius_kilometers: number;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications".
+ */
+export interface Notification {
+  id: number;
+  recipient: number | User;
+  type: 'borrow_request' | 'borrow_approved' | 'borrow_rejected' | 'item_returned' | 'item_damaged';
+  message: string;
+  item?: (number | null) | Item;
+  /**
+   * The user who triggered this notification
+   */
+  triggeredBy?: (number | null) | User;
+  /**
+   * Whether the notification has been read
+   */
+  read?: boolean | null;
+  /**
+   * URL to navigate to when notification is clicked
+   */
+  actionURL?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1280,6 +1363,10 @@ export interface PayloadLockedDocument {
         value: number | Tag;
       } | null)
     | ({
+        relationTo: 'notifications';
+        value: number | Notification;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: number | Redirect;
       } | null)
@@ -1518,6 +1605,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  media_id?: T;
   alt?: T;
   caption?: T;
   updatedAt?: T;
@@ -1611,6 +1699,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
+  category_id?: T;
   title?: T;
   slug?: T;
   slugLock?: T;
@@ -1631,7 +1720,10 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  user_id?: T;
   name?: T;
+  verificationFlags?: T;
+  escrowBalance?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1654,6 +1746,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "admins_select".
  */
 export interface AdminsSelect<T extends boolean = true> {
+  admin_id?: T;
   name?: T;
   role?: T;
   updatedAt?: T;
@@ -1679,11 +1772,14 @@ export interface AdminsSelect<T extends boolean = true> {
  */
 export interface ItemsSelect<T extends boolean = true> {
   item_id?: T;
+  owner_uuid?: T;
+  requested_by_uuid?: T;
   name?: T;
   status?: T;
   description?: T;
   tags?: T;
-  rulesForUse?: T;
+  borrowerVerification?: T;
+  depositAmount?: T;
   borrowingTime?: T;
   offeredBy?: T;
   primaryImage?: T;
@@ -1777,6 +1873,7 @@ export interface LibrariesSelect<T extends boolean = true> {
  * via the `definition` "thing-requests_select".
  */
 export interface ThingRequestsSelect<T extends boolean = true> {
+  request_id?: T;
   name?: T;
   status?: T;
   description?: T;
@@ -1791,9 +1888,11 @@ export interface ThingRequestsSelect<T extends boolean = true> {
  * via the `definition` "borrow-requests_select".
  */
 export interface BorrowRequestsSelect<T extends boolean = true> {
+  borrow_request_id?: T;
   item?: T;
   requestedBy?: T;
   requestedAt?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1809,6 +1908,7 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
   members?: T;
   items?: T;
   default_loan_time_days?: T;
+  defaultBorrowerVerification?: T;
   area?:
     | T
     | {
@@ -1833,9 +1933,25 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
  * via the `definition` "tags_select".
  */
 export interface TagsSelect<T extends boolean = true> {
+  tag_id?: T;
   name?: T;
   description?: T;
   color?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications_select".
+ */
+export interface NotificationsSelect<T extends boolean = true> {
+  recipient?: T;
+  type?: T;
+  message?: T;
+  item?: T;
+  triggeredBy?: T;
+  read?: T;
+  actionURL?: T;
   updatedAt?: T;
   createdAt?: T;
 }

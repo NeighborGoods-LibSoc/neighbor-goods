@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { User, Item, ThingRequest, Loan, Media, Tag } from '@/payload-types'
 
 interface MyItemsClientProps {
@@ -34,6 +35,7 @@ const loanStatusLabels: Record<string, string> = {
 export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
   const [offeredItems, setOfferedItems] = useState<Item[]>([])
   const [requests, setRequests] = useState<ThingRequest[]>([])
+  const [pendingBorrows, setPendingBorrows] = useState<Item[]>([])
   const [borrowedLoans, setBorrowedLoans] = useState<Loan[]>([])
   const [activeTab, setActiveTab] = useState<'offering' | 'requesting' | 'borrowing'>('offering')
   const [isLoading, setIsLoading] = useState(true)
@@ -53,6 +55,15 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
         if (requestsResponse.ok) {
           const requestsData = await requestsResponse.json()
           setRequests(requestsData.docs || [])
+        }
+
+        // Fetch items user has requested to borrow (pending approval or reserved)
+        const pendingBorrowsResponse = await fetch(
+          `/api/items?where[requestedToBorrowBy][equals]=${user.id}&where[status][in]=WAITING_FOR_LENDER_APPROVAL_TO_BORROW,RESERVED&depth=1&limit=100`
+        )
+        if (pendingBorrowsResponse.ok) {
+          const pendingBorrowsData = await pendingBorrowsResponse.json()
+          setPendingBorrows(pendingBorrowsData.docs || [])
         }
 
         // Fetch user's borrowed items (loans where user is borrower)
@@ -166,7 +177,7 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
             onClick={() => setActiveTab('requesting')}
             style={{ cursor: 'pointer' }}
           >
-            Requesting ({requests.length})
+            Requesting ({requests.length + pendingBorrows.length})
           </div>
           <div
             className={`tab ${activeTab === 'borrowing' ? 'active' : ''}`}
@@ -180,51 +191,116 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
         {/* Offering Tab Content */}
         <div className={`tab-content ${activeTab === 'offering' ? 'active' : ''}`}>
           {offeredItems.length > 0 ? (
-            <div className="my-items-grid">
-              {offeredItems.map((item) => {
-                const imageUrl = getImageUrl(item.primaryImage as Media | string | null)
-                const tagNames = getTagNames(item.tags as (Tag | string)[] | null)
+            <>
+              {/* Items needing lender action */}
+              {offeredItems.filter((item) =>
+                item.status === 'WAITING_FOR_LENDER_APPROVAL_TO_BORROW' || item.status === 'RESERVED'
+              ).length > 0 && (
+                <>
+                  <h3 className="section-heading">Action Needed</h3>
+                  <div className="my-items-grid">
+                    {offeredItems
+                      .filter((item) =>
+                        item.status === 'WAITING_FOR_LENDER_APPROVAL_TO_BORROW' || item.status === 'RESERVED'
+                      )
+                      .map((item) => {
+                        const imageUrl = getImageUrl(item.primaryImage as Media | string | null)
+                        const requester = item.requestedToBorrowBy as User | string | null | undefined
+                        const requesterName =
+                          requester && typeof requester === 'object' ? requester.name : null
 
-                return (
-                  <div key={item.id} className="my-items-card">
-                    {imageUrl && (
-                      <div className="my-items-card-image">
-                        <img src={imageUrl} alt={item.name} />
-                      </div>
-                    )}
-                    <div className="my-items-card-content">
-                      <h3 className="my-items-card-title">{item.name}</h3>
-                      <div className="my-items-card-meta">
-                        <span className={`trust-indicator ${getItemStatusClass(item.status)}`}>
-                          {itemStatusLabels[item.status] || item.status}
-                        </span>
-                      </div>
-                      {item.description && (
-                        <p className="my-items-card-description">
-                          {item.description.length > 80
-                            ? `${item.description.substring(0, 80)}...`
-                            : item.description}
-                        </p>
-                      )}
-                      {tagNames.length > 0 && (
-                        <div className="my-items-card-tags">
-                          {tagNames.slice(0, 3).map((tagName) => (
-                            <span key={tagName} className="tag-badge">
-                              {tagName}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      <div className="my-items-card-footer">
-                        <Link href={`/items/${item.id}`} className="btn btn-secondary btn-sm">
-                          View / Edit
-                        </Link>
-                      </div>
-                    </div>
+                        return (
+                          <div key={item.id} className="my-items-card action-needed-card">
+                            {imageUrl && (
+                              <div className="my-items-card-image">
+                                <img src={imageUrl} alt={item.name} />
+                              </div>
+                            )}
+                            <div className="my-items-card-content">
+                              <h3 className="my-items-card-title">{item.name}</h3>
+                              <div className="my-items-card-meta">
+                                <span className={`trust-indicator ${getItemStatusClass(item.status)}`}>
+                                  {itemStatusLabels[item.status] || item.status}
+                                </span>
+                              </div>
+                              {requesterName && (
+                                <p className="requester-info">
+                                  Requested by <strong>{requesterName}</strong>
+                                </p>
+                              )}
+                              <div className="my-items-card-footer">
+                                <Link href={`/items/${item.id}`} className="btn btn-primary btn-sm">
+                                  Review Request
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
                   </div>
-                )
-              })}
-            </div>
+                </>
+              )}
+
+              {/* Other offered items */}
+              {offeredItems.filter((item) =>
+                item.status !== 'WAITING_FOR_LENDER_APPROVAL_TO_BORROW' && item.status !== 'RESERVED'
+              ).length > 0 && (
+                <>
+                  {offeredItems.some((item) =>
+                    item.status === 'WAITING_FOR_LENDER_APPROVAL_TO_BORROW' || item.status === 'RESERVED'
+                  ) && <h3 className="section-heading">Your Items</h3>}
+                  <div className="my-items-grid">
+                    {offeredItems
+                      .filter((item) =>
+                        item.status !== 'WAITING_FOR_LENDER_APPROVAL_TO_BORROW' && item.status !== 'RESERVED'
+                      )
+                      .map((item) => {
+                        const imageUrl = getImageUrl(item.primaryImage as Media | string | null)
+                        const tagNames = getTagNames(item.tags as (Tag | string)[] | null)
+
+                        return (
+                          <div key={item.id} className="my-items-card">
+                            {imageUrl && (
+                              <div className="my-items-card-image">
+                                <img src={imageUrl} alt={item.name} />
+                              </div>
+                            )}
+                            <div className="my-items-card-content">
+                              <h3 className="my-items-card-title">{item.name}</h3>
+                              <div className="my-items-card-meta">
+                                <span className={`trust-indicator ${getItemStatusClass(item.status)}`}>
+                                  {itemStatusLabels[item.status] || item.status}
+                                </span>
+                              </div>
+                              {item.description && (
+                                <p className="my-items-card-description">
+                                  {item.description.length > 80
+                                    ? `${item.description.substring(0, 80)}...`
+                                    : item.description}
+                                </p>
+                              )}
+                              {tagNames.length > 0 && (
+                                <div className="my-items-card-tags">
+                                  {tagNames.slice(0, 3).map((tagName) => (
+                                    <span key={tagName} className="tag-badge">
+                                      {tagName}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              <div className="my-items-card-footer">
+                                <Link href={`/items/${item.id}`} className="btn btn-secondary btn-sm">
+                                  View / Edit
+                                </Link>
+                              </div>
+                            </div>
+                          </div>
+                        )
+                      })}
+                  </div>
+                </>
+              )}
+            </>
           ) : (
             <div className="empty-state">
               <p>You haven&apos;t offered any items yet.</p>
@@ -237,6 +313,62 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
 
         {/* Requesting Tab Content */}
         <div className={`tab-content ${activeTab === 'requesting' ? 'active' : ''}`}>
+          {/* Pending Borrow Requests */}
+          {pendingBorrows.length > 0 && (
+            <>
+              <h3 className="section-heading">Pending Borrow Requests</h3>
+              <div className="my-items-grid">
+                {pendingBorrows.map((item) => {
+                  const imageUrl = getImageUrl(item.primaryImage as Media | string | null)
+                  const tagNames = getTagNames(item.tags as (Tag | string)[] | null)
+
+                  return (
+                    <div key={item.id} className="my-items-card">
+                      {imageUrl && (
+                        <div className="my-items-card-image">
+                          <img src={imageUrl} alt={item.name} />
+                        </div>
+                      )}
+                      <div className="my-items-card-content">
+                        <h3 className="my-items-card-title">{item.name}</h3>
+                        <div className="my-items-card-meta">
+                          <span className={`trust-indicator ${getItemStatusClass(item.status)}`}>
+                            {itemStatusLabels[item.status] || item.status}
+                          </span>
+                        </div>
+                        {item.description && (
+                          <p className="my-items-card-description">
+                            {item.description.length > 80
+                              ? `${item.description.substring(0, 80)}...`
+                              : item.description}
+                          </p>
+                        )}
+                        {tagNames.length > 0 && (
+                          <div className="my-items-card-tags">
+                            {tagNames.slice(0, 3).map((tagName) => (
+                              <span key={tagName} className="tag-badge">
+                                {tagName}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                        <div className="my-items-card-footer">
+                          <Link href={`/items/${item.id}`} className="btn btn-secondary btn-sm">
+                            View Item
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            </>
+          )}
+
+          {/* Thing Requests (want-ads) */}
+          {requests.length > 0 && pendingBorrows.length > 0 && (
+            <h3 className="section-heading">Item Requests</h3>
+          )}
           {requests.length > 0 ? (
             <div className="my-items-grid">
               {requests.map((request) => {
@@ -247,7 +379,7 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
                   <div key={request.id} className="my-items-card">
                     {imageUrl && (
                       <div className="my-items-card-image">
-                        <img src={imageUrl} alt={request.name} />
+                        <Image src={imageUrl} alt={request.name} width={400} height={300} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                       </div>
                     )}
                     <div className="my-items-card-content">
@@ -283,14 +415,14 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
                 )
               })}
             </div>
-          ) : (
+          ) : pendingBorrows.length === 0 ? (
             <div className="empty-state">
               <p>You haven&apos;t posted any requests yet.</p>
               <Link href="/items/request" className="btn btn-primary">
                 Post your first request
               </Link>
             </div>
-          )}
+          ) : null}
         </div>
 
         {/* Borrowing Tab Content */}
@@ -305,7 +437,7 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
                   <div key={loan.id} className="my-items-card">
                     {imageUrl && (
                       <div className="my-items-card-image">
-                        <img src={imageUrl} alt={item?.name || 'Item'} />
+                        <Image src={imageUrl} alt={item?.name || 'Item'} width={400} height={300} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                       </div>
                     )}
                     <div className="my-items-card-content">
@@ -493,6 +625,26 @@ export const MyItemsClient: React.FC<MyItemsClientProps> = ({ user }) => {
         .status-overdue {
           background-color: #fee2e2;
           color: #991b1b;
+        }
+
+        .section-heading {
+          font-size: 1rem;
+          font-weight: 600;
+          margin: 1rem 0 0.5rem 0;
+          padding: 0 0.25rem;
+          color: var(--foreground);
+        }
+
+        .action-needed-card {
+          border-color: #f59e0b;
+          border-width: 2px;
+          background: #fffbeb;
+        }
+
+        .requester-info {
+          font-size: 0.9rem;
+          color: var(--muted-foreground);
+          margin: 0.25rem 0 0.75rem 0;
         }
       `}</style>
     </main>

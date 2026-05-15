@@ -147,7 +147,9 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
   const borrowerId =
     typeof data.borrower === 'object' ? data.borrower?.id || data.borrower?.value : data.borrower
   if (!borrowerId) throw new Error('Borrower is required')
-  const borrower_id = new ID(String(borrowerId))
+  const borrowerDoc: any = await req.payload.findByID({ collection: 'users', id: String(borrowerId) })
+  if (!borrowerDoc?.user_id) throw new Error(`User UUID not found for borrower: ${borrowerId}`)
+  const borrower_id = new ID(String(borrowerDoc.user_id))
 
   const due_date = data.due_date ? DueDate.of(new Date(data.due_date)) : DueDate.of(null)
 

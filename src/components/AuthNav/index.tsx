@@ -10,6 +10,8 @@ export const AuthNav: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true)
   const pathname = usePathname()
 
+  const [unreadCount, setUnreadCount] = useState(0)
+
   useEffect(() => {
     const checkAuth = async () => {
       try {
@@ -30,6 +32,28 @@ export const AuthNav: React.FC = () => {
 
     checkAuth()
   }, [pathname])
+
+  useEffect(() => {
+    if (!user) return
+
+    const fetchUnreadCount = async () => {
+      try {
+        const res = await fetch(
+          `/api/notifications?where[recipient][equals]=${user.id}&where[read][equals]=false&limit=0`,
+        )
+        if (res.ok) {
+          const data = await res.json()
+          setUnreadCount(data.totalDocs || 0)
+        }
+      } catch {
+        // silently fail
+      }
+    }
+
+    fetchUnreadCount()
+    const interval = setInterval(fetchUnreadCount, 30000)
+    return () => clearInterval(interval)
+  }, [user, pathname])
 
   if (isLoading) {
     return null
@@ -67,6 +91,35 @@ export const AuthNav: React.FC = () => {
           className="text-primary hover:text-var(--light-green) transition-colors"
         >
           My Items
+        </Link>
+        <Link
+          href="/notifications"
+          className="text-primary hover:text-var(--light-green) transition-colors"
+          style={{ position: 'relative' }}
+        >
+          Notifications
+          {unreadCount > 0 && (
+            <span
+              style={{
+                position: 'absolute',
+                top: '-6px',
+                right: '-10px',
+                backgroundColor: '#ef4444',
+                color: 'white',
+                borderRadius: '50%',
+                width: '18px',
+                height: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '0.65rem',
+                fontWeight: 700,
+                lineHeight: 1,
+              }}
+            >
+              {unreadCount > 9 ? '9+' : unreadCount}
+            </span>
+          )}
         </Link>
         <button
           onClick={async () => {

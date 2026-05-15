@@ -2,10 +2,12 @@ import { Entity } from './entity'
 import {
   ID,
   InvalidThingStateTransitionError,
+  InvalidThingStatusToBorrowError,
   Location,
   Money,
   ThingStatus,
   ThingTitle,
+  BorrowerVerificationFlags,
   thingStatusTransitions
 } from '@/domain'
 
@@ -17,6 +19,8 @@ export class Thing extends Entity {
   storage_location: Location
   image_urls: string[]
   purchase_cost: Money | null
+  borrowerVerification: BorrowerVerificationFlags[]
+  depositAmount: Money | null
   private _status: ThingStatus = ThingStatus.READY
   private _requestedToBorrowBy: ID | null = null
 
@@ -28,6 +32,8 @@ export class Thing extends Entity {
     storage_location: Location
     image_urls?: string[]
     purchase_cost?: Money | null
+    borrowerVerification?: BorrowerVerificationFlags[]
+    depositAmount?: Money | null
     status?: ThingStatus
     requestedToBorrowBy?: ID | null
   }) {
@@ -39,6 +45,8 @@ export class Thing extends Entity {
     this.storage_location = params.storage_location
     this.image_urls = params.image_urls ?? []
     this.purchase_cost = params.purchase_cost ?? null
+    this.borrowerVerification = params.borrowerVerification ?? []
+    this.depositAmount = params.depositAmount ?? null
     this._status = params.status ?? ThingStatus.READY
     this._requestedToBorrowBy = params.requestedToBorrowBy ?? null
   }
@@ -76,7 +84,7 @@ export class Thing extends Entity {
       throw new Error('Cannot request to borrow your own item')
     }
     if (this._status !== ThingStatus.READY) {
-      throw new Error('Item is not available for borrowing')
+      throw new InvalidThingStatusToBorrowError(this._status)
     }
     this.status = ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW
     this._requestedToBorrowBy = requesterId

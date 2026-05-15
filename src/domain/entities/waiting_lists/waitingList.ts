@@ -1,7 +1,5 @@
-import { Entity } from "../entity";
-import { Borrower } from "../borrower";
-import { Thing } from "../thing";
-import { ID, ReservationStatus, ThingStatus, WaitingListType } from '../../valueItems'
+import { Entity, Borrower, Thing } from "..";
+import { ID, ReservationStatus, ThingStatus, WaitingListType } from '@/domain';
 
 export abstract class WaitingList extends Entity {
   waitingListId: ID;

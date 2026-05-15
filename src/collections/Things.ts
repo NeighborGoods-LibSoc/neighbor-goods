@@ -5,11 +5,13 @@ import { authenticated } from '@/access/authenticated'
 import { anyone } from '@/access/anyone'
 import { isOwner } from '@/access/isOwner'
 import { uuidField } from '@/fields/uuid'
-import { ThingStatus } from '@/domain'
-import { ID } from '@/domain'
-import { ThingService } from '@/domain'
+import { ThingStatus, ID, ThingService, BorrowerVerificationFlags, NotificationService, InvalidThingStatusToBorrowError, BorrowCooldownError } from '@/domain'
+import { APIError } from 'payload'
 import { PayloadBorrowRequestRepository } from '@/infrastructure/repositories/PayloadBorrowRequestRepository'
+import { PayloadNotificationRepository } from '@/infrastructure/repositories/PayloadNotificationRepository'
+import { PayloadPersonLookup } from '@/infrastructure/repositories/PayloadPersonLookup'
 import { buildDomainThingFromData, thingToPayloadData } from './common/mappers'
+import { v4 as uuidv4 } from 'uuid'
 
 /**
  * Custom access control for item updates:
@@ -36,6 +38,8 @@ export const Things: CollectionConfig = {
   },
   fields: [
     uuidField({ name: 'item_id', description: 'UUID for the item (domain ID)' }),
+    uuidField({ name: 'owner_uuid', description: 'UUID of the owner (domain ID)', required: false }),
+    uuidField({ name: 'requested_by_uuid', description: 'UUID of the user who requested to borrow (domain ID)', required: false }),
     {
       name: 'name',
       type: 'text',
@@ -77,11 +81,27 @@ export const Things: CollectionConfig = {
       },
     },
     {
-      name: 'rulesForUse',
-      type: 'textarea',
-      required: true,
+      name: 'borrowerVerification',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'Email', value: 'EMAIL' },
+        { label: 'Phone Number', value: 'PHONE_NUMBER' },
+        { label: 'ID', value: 'ID' },
+        { label: 'Deposit', value: 'DEPOSIT' },
+        { label: 'In-person', value: 'IN_PERSON' },
+      ],
+      required: false,
       admin: {
-        description: 'Rules and guidelines for using this item',
+        description: 'Verification methods required for a borrower to use this item.',
+      },
+    },
+    {
+      name: 'depositAmount',
+      type: 'number',
+      admin: {
+        description: 'Amount of deposit required if DEPOSIT is selected.',
+        condition: (data) => data?.borrowerVerification?.includes('DEPOSIT'),
       },
     },
     {
@@ -150,6 +170,7 @@ export const Things: CollectionConfig = {
             throw new Error('You must be logged in to offer an item')
           }
           data.offeredBy = req.user.id
+          data.owner_uuid = (req.user as any).user_id
           return data
         }
 
@@ -159,7 +180,7 @@ export const Things: CollectionConfig = {
         }
 
         const thing = buildDomainThingFromData(originalDoc)
-        const userId = new ID(req.user.id)
+        const userId = new ID((req.user as any).user_id as string)
         const newStatus = (data.status as ThingStatus) || thing.status
 
         // Non-owner requesting to borrow
@@ -168,30 +189,205 @@ export const Things: CollectionConfig = {
             throw new Error('You can only request to borrow items that are available')
           }
 
+          // Check verification requirements
+          const userFlags = (req.user && 'verificationFlags' in req.user) ? (req.user.verificationFlags as string[]) || [] : []
+          const missingFlags = thing.borrowerVerification.filter(
+            (flag) => !userFlags.includes(flag as string),
+          )
+
+          if (missingFlags.length > 0) {
+            throw new Error(
+              `You need additional verification to borrow this item: ${missingFlags.join(', ')}`,
+            )
+          }
+
+          // Check escrow balance for deposit
+          if (thing.borrowerVerification.includes(BorrowerVerificationFlags.DEPOSIT)) {
+            const escrowBalance = Number(req.user?.escrowBalance || 0)
+            const requiredDeposit = thing.depositAmount ? thing.depositAmount.amount.toNumber() : 0
+            if (escrowBalance < requiredDeposit) {
+              throw new Error(
+                `Insufficient escrow balance for deposit. Required: $${requiredDeposit}, Your balance: $${escrowBalance}`,
+              )
+            }
+          }
+
           const borrowRequestRepo = new PayloadBorrowRequestRepository(req.payload)
           const thingService = new ThingService(borrowRequestRepo)
-          await thingService.requestBorrow(thing, userId, new ID(originalDoc.id))
+          try {
+            await thingService.requestBorrow(thing, userId, new ID(originalDoc.item_id))
+          } catch (err) {
+            if (err instanceof InvalidThingStatusToBorrowError) {
+              throw new APIError('This item is not available for borrowing', 409)
+            }
+            if (err instanceof BorrowCooldownError) {
+              throw new APIError(err.message, 429)
+            }
+            throw err
+          }
 
-          return thingToPayloadData(thing, originalDoc)
+          return {
+            ...thingToPayloadData(thing, originalDoc),
+            requestedToBorrowBy: req.user.id,
+          }
         }
 
         // Owner actions
-        const currentStatus = thing.status
+        if (data.status && data.status !== thing.status) {
+          const targetStatus = data.status as ThingStatus
 
-        if (currentStatus === ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW) {
-          if (newStatus === ThingStatus.READY) {
-            thing.rejectBorrowRequest()
-          } else if (newStatus === ThingStatus.BORROWED) {
-            thing.approveBorrowRequest()
-          } else if (newStatus === ThingStatus.RESERVED) {
-            thing.reserve()
+          if (thing.status === ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW) {
+            if (targetStatus === ThingStatus.READY) {
+              thing.rejectBorrowRequest()
+            } else if (targetStatus === ThingStatus.BORROWED) {
+              thing.approveBorrowRequest()
+            } else if (targetStatus === ThingStatus.RESERVED) {
+              thing.reserve()
+            } else {
+              thing.status = targetStatus
+            }
+          } else {
+            thing.status = targetStatus
           }
-        } else if (newStatus !== currentStatus) {
-          // Generic status change - setter validates transition
-          thing.status = newStatus
         }
 
-        return thingToPayloadData(thing, originalDoc)
+        const mergedData = {
+          ...originalDoc,
+          ...data,
+          status: thing.status,
+          requested_by_uuid: thing.requestedToBorrowBy?.toString() || null,
+        }
+        const updatedThing = buildDomainThingFromData(mergedData)
+
+        return thingToPayloadData(updatedThing, mergedData)
+      },
+    ],
+    afterChange: [
+      async ({ doc, previousDoc, operation, req }) => {
+        // --- Notification logic (delegated to domain service) ---
+        if (operation === 'update' && previousDoc) {
+          const ownerUuid = doc.owner_uuid
+          const requesterUuid = doc.requested_by_uuid ?? previousDoc.requested_by_uuid
+
+          if (ownerUuid) {
+            const notificationService = new NotificationService(
+              new PayloadNotificationRepository(req.payload),
+              new PayloadPersonLookup(req.payload),
+            )
+
+            try {
+              await notificationService.notifyOnStatusChange({
+                itemId: new ID(doc.item_id),
+                itemName: doc.name || 'an item',
+                previousStatus: previousDoc.status as ThingStatus,
+                newStatus: doc.status as ThingStatus,
+                ownerId: new ID(ownerUuid),
+                requesterId: requesterUuid ? new ID(requesterUuid) : null,
+              })
+            } catch (error) {
+              console.error('Failed to create notification:', error)
+            }
+          }
+        }
+
+        // Create a Loan record when an item transitions to BORROWED
+        if (
+          operation === 'update' &&
+          doc.status === ThingStatus.BORROWED &&
+          previousDoc?.status !== ThingStatus.BORROWED
+        ) {
+          const borrowerId =
+            typeof doc.requestedToBorrowBy === 'object'
+              ? doc.requestedToBorrowBy?.id
+              : doc.requestedToBorrowBy
+
+          if (borrowerId) {
+            try {
+              // Calculate due date from borrowingTime (days)
+              const dueDate = doc.borrowingTime
+                ? new Date(Date.now() + doc.borrowingTime * 24 * 60 * 60 * 1000)
+                    .toISOString()
+                    .split('T')[0]
+                : null
+
+              await req.payload.create({
+                collection: 'loans',
+                data: {
+                  loan_id: uuidv4(),
+                  item: doc.id,
+                  borrower: borrowerId,
+                  status: 'BORROWED',
+                  due_date: dueDate,
+                },
+              })
+            } catch (error) {
+              console.error('Failed to create loan record:', error)
+            }
+          }
+        }
+
+        // When item returns to READY, mark any active loans as RETURNED
+        if (
+          operation === 'update' &&
+          doc.status === ThingStatus.READY &&
+          (previousDoc?.status === ThingStatus.BORROWED ||
+            previousDoc?.status === ThingStatus.DAMAGED)
+        ) {
+          try {
+            const activeLoans = await req.payload.find({
+              collection: 'loans',
+              where: {
+                item: { equals: doc.id },
+                status: { in: ['BORROWED', 'OVERDUE'] },
+              },
+            })
+
+            for (const loan of activeLoans.docs) {
+              await req.payload.update({
+                collection: 'loans',
+                id: loan.id,
+                data: {
+                  status: 'RETURNED',
+                  time_returned: new Date().toISOString(),
+                },
+              })
+            }
+          } catch (error) {
+            console.error('Failed to update loan records:', error)
+          }
+        }
+
+        // When item is marked DAMAGED, mark any active loans as RETURNED_DAMAGED
+        if (
+          operation === 'update' &&
+          doc.status === ThingStatus.DAMAGED &&
+          previousDoc?.status === ThingStatus.BORROWED
+        ) {
+          try {
+            const activeLoans = await req.payload.find({
+              collection: 'loans',
+              where: {
+                item: { equals: doc.id },
+                status: { in: ['BORROWED', 'OVERDUE'] },
+              },
+            })
+
+            for (const loan of activeLoans.docs) {
+              await req.payload.update({
+                collection: 'loans',
+                id: loan.id,
+                data: {
+                  status: 'RETURNED_DAMAGED',
+                  time_returned: new Date().toISOString(),
+                },
+              })
+            }
+          } catch (error) {
+            console.error('Failed to update loan records:', error)
+          }
+        }
+
+        return doc
       },
     ],
   },

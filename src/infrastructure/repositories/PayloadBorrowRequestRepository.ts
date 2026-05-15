@@ -1,20 +1,33 @@
 import { Payload } from 'payload'
-import { ID } from '../../domain/valueItems'
-import {
-  BorrowRequest,
-  BorrowRequestRepository,
-} from '../../domain/repositories/BorrowRequestRepository'
+import { ID, BorrowRequest, BorrowRequestRepository } from '@/domain'
 
 export class PayloadBorrowRequestRepository implements BorrowRequestRepository {
   constructor(private payload: Payload) {}
 
   async findLastRequest(itemId: ID, requesterId: ID): Promise<BorrowRequest | null> {
+    // Resolve domain UUIDs to Payload ObjectIds for relationship field queries
+    const itemResult = await this.payload.find({
+      collection: 'items',
+      where: { item_id: { equals: itemId.toString() } },
+      limit: 1,
+    })
+    const itemDocId = itemResult.docs[0]?.id
+    if (!itemDocId) return null
+
+    const userResult = await this.payload.find({
+      collection: 'users',
+      where: { user_id: { equals: requesterId.toString() } },
+      limit: 1,
+    })
+    const userDocId = userResult.docs[0]?.id
+    if (!userDocId) return null
+
     const result = await this.payload.find({
       collection: 'borrow-requests',
       where: {
         and: [
-          { item: { equals: itemId.toString() } },
-          { requestedBy: { equals: requesterId.toString() } },
+          { item: { equals: itemDocId } },
+          { requestedBy: { equals: userDocId } },
         ],
       },
       limit: 1,
@@ -25,20 +38,36 @@ export class PayloadBorrowRequestRepository implements BorrowRequestRepository {
 
     return {
       id: doc.id,
-      itemId: ID.parse(typeof doc.item === 'object' ? doc.item.id : doc.item),
-      requesterId: ID.parse(
-        typeof doc.requestedBy === 'object' ? doc.requestedBy.id : doc.requestedBy,
-      ),
+      itemId,
+      requesterId,
       requestedAt: new Date(doc.requestedAt),
     }
   }
 
   async recordRequest(itemId: ID, requesterId: ID): Promise<void> {
+    // Relationship fields require Payload/MongoDB ObjectIds, not domain UUIDs.
+    // Look up the Payload document id for each domain UUID.
+    const itemResult = await this.payload.find({
+      collection: 'items',
+      where: { item_id: { equals: itemId.toString() } },
+      limit: 1,
+    })
+    const itemDocId = itemResult.docs[0]?.id
+    if (!itemDocId) throw new Error(`Item not found for domain id: ${itemId.toString()}`)
+
+    const userResult = await this.payload.find({
+      collection: 'users',
+      where: { user_id: { equals: requesterId.toString() } },
+      limit: 1,
+    })
+    const userDocId = userResult.docs[0]?.id
+    if (!userDocId) throw new Error(`User not found for domain id: ${requesterId.toString()}`)
+
     await this.payload.create({
       collection: 'borrow-requests',
       data: {
-        item: itemId.toString(),
-        requestedBy: requesterId.toString(),
+        item: itemDocId,
+        requestedBy: userDocId,
         requestedAt: new Date().toISOString(),
       },
     })
