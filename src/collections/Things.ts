@@ -275,22 +275,24 @@ export const Things: CollectionConfig = {
               new PayloadPersonLookup(req.payload),
             )
 
-            try {
-              await notificationService.notifyOnStatusChange({
+            // Defer via setImmediate to avoid Mongoose connection deadlock inside afterChange
+            setImmediate(() => {
+              notificationService.notifyOnStatusChange({
                 itemId: new ID(doc.item_id),
                 itemName: doc.name || 'an item',
                 previousStatus: previousDoc.status as ThingStatus,
                 newStatus: doc.status as ThingStatus,
                 ownerId: new ID(ownerUuid),
                 requesterId: requesterUuid ? new ID(requesterUuid) : null,
+              }).catch((error) => {
+                console.error('Failed to create notification:', error)
               })
-            } catch (error) {
-              console.error('Failed to create notification:', error)
-            }
+            })
           }
         }
 
         // Create a Loan record when an item transitions to BORROWED
+        // Deferred via setImmediate to avoid Mongoose connection deadlock inside afterChange
         if (
           operation === 'update' &&
           doc.status === ThingStatus.BORROWED &&
@@ -302,89 +304,81 @@ export const Things: CollectionConfig = {
               : doc.requestedToBorrowBy
 
           if (borrowerId) {
-            try {
-              // Calculate due date from borrowingTime (days)
-              const dueDate = doc.borrowingTime
-                ? new Date(Date.now() + doc.borrowingTime * 24 * 60 * 60 * 1000)
-                    .toISOString()
-                    .split('T')[0]
-                : null
-
-              await req.payload.create({
+            const dueDate = doc.borrowingTime
+              ? new Date(Date.now() + doc.borrowingTime * 24 * 60 * 60 * 1000)
+                  .toISOString()
+                  .split('T')[0]
+              : null
+            const loanId = uuidv4()
+            const itemId = doc.id
+            setImmediate(() => {
+              req.payload.create({
                 collection: 'loans',
                 data: {
-                  loan_id: uuidv4(),
-                  item: doc.id,
+                  loan_id: loanId,
+                  item: itemId,
                   borrower: borrowerId,
                   status: 'BORROWED',
                   due_date: dueDate,
                 },
+              }).catch((error: unknown) => {
+                console.error('Failed to create loan record:', error)
               })
-            } catch (error) {
-              console.error('Failed to create loan record:', error)
-            }
+            })
           }
         }
 
         // When item returns to READY, mark any active loans as RETURNED
+        // Deferred via setImmediate to avoid Mongoose connection deadlock inside afterChange
         if (
           operation === 'update' &&
           doc.status === ThingStatus.READY &&
           (previousDoc?.status === ThingStatus.BORROWED ||
             previousDoc?.status === ThingStatus.DAMAGED)
         ) {
-          try {
-            const activeLoans = await req.payload.find({
+          const itemId = doc.id
+          setImmediate(() => {
+            req.payload.find({
               collection: 'loans',
-              where: {
-                item: { equals: doc.id },
-                status: { in: ['BORROWED', 'OVERDUE'] },
-              },
+              where: { item: { equals: itemId }, status: { in: ['BORROWED', 'OVERDUE'] } },
+            }).then((activeLoans) =>
+              Promise.all(activeLoans.docs.map((loan) =>
+                req.payload.update({
+                  collection: 'loans',
+                  id: loan.id,
+                  data: { status: 'RETURNED', time_returned: new Date().toISOString() },
+                })
+              ))
+            ).catch((error: unknown) => {
+              console.error('Failed to update loan records:', error)
             })
-
-            for (const loan of activeLoans.docs) {
-              await req.payload.update({
-                collection: 'loans',
-                id: loan.id,
-                data: {
-                  status: 'RETURNED',
-                  time_returned: new Date().toISOString(),
-                },
-              })
-            }
-          } catch (error) {
-            console.error('Failed to update loan records:', error)
-          }
+          })
         }
 
         // When item is marked DAMAGED, mark any active loans as RETURNED_DAMAGED
+        // Deferred via setImmediate to avoid Mongoose connection deadlock inside afterChange
         if (
           operation === 'update' &&
           doc.status === ThingStatus.DAMAGED &&
           previousDoc?.status === ThingStatus.BORROWED
         ) {
-          try {
-            const activeLoans = await req.payload.find({
+          const itemId = doc.id
+          setImmediate(() => {
+            req.payload.find({
               collection: 'loans',
-              where: {
-                item: { equals: doc.id },
-                status: { in: ['BORROWED', 'OVERDUE'] },
-              },
+              where: { item: { equals: itemId }, status: { in: ['BORROWED', 'OVERDUE'] } },
+            }).then((activeLoans) =>
+              Promise.all(activeLoans.docs.map((loan) =>
+                req.payload.update({
+                  collection: 'loans',
+                  id: loan.id,
+                  data: { status: 'RETURNED_DAMAGED', time_returned: new Date().toISOString() },
+                })
+              ))
+            ).catch((error: unknown) => {
+              console.error('Failed to update loan records on damage:', error)
             })
-
-            for (const loan of activeLoans.docs) {
-              await req.payload.update({
-                collection: 'loans',
-                id: loan.id,
-                data: {
-                  status: 'RETURNED_DAMAGED',
-                  time_returned: new Date().toISOString(),
-                },
-              })
-            }
-          } catch (error) {
-            console.error('Failed to update loan records:', error)
-          }
+          })
         }
 
         return doc

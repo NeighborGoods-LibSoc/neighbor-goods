@@ -34,6 +34,7 @@ export class PayloadNotificationRepository implements NotificationRepository {
 
     await this.payload.create({
       collection: 'notifications',
+      overrideAccess: true,
       data: {
         recipient: recipientMongoId,
         type: notification.type,

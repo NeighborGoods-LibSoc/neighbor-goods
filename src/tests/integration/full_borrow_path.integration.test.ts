@@ -44,6 +44,8 @@ describe("Full Borrow Happy Path Integration Test", () => {
 
       beforeAll(async () => {
         payload = await getTestPayload();
+        // Clean up stale data from previous runs (FK-safe order)
+        await cleanupTestData(payload);
       });
 
       afterAll(async () => {
@@ -229,7 +231,6 @@ describe("Full Borrow Happy Path Integration Test", () => {
           },
           req: { user: borrowerUser } as any,
         })
-
         // Verify status is now WAITING_FOR_LENDER_APPROVAL_TO_BORROW
         const itemAfterRequest = await payload.findByID({ collection: 'items', id: drillItem.id })
         expect(itemAfterRequest.status).toBe('WAITING_FOR_LENDER_APPROVAL_TO_BORROW')
@@ -250,14 +251,20 @@ describe("Full Borrow Happy Path Integration Test", () => {
         expect(itemAfterApproval.status).toBe('BORROWED')
 
         // 6d. Verify the Loan record was automatically created by the afterChange hook
-        const loanSearch = await payload.find({
-          collection: 'loans',
-          where: {
-            item: { equals: drillItem.id },
-            borrower: { equals: borrowerUser.id },
-            status: { equals: 'BORROWED' },
-          },
-        })
+        // Loan creation is deferred (setImmediate), so poll until it appears
+        let loanSearch: any = null
+        for (let i = 0; i < 20; i++) {
+          loanSearch = await payload.find({
+            collection: 'loans',
+            where: {
+              item: { equals: drillItem.id },
+              borrower: { equals: borrowerUser.id },
+              status: { equals: 'BORROWED' },
+            },
+          })
+          if (loanSearch.totalDocs > 0) break
+          await new Promise((r) => setTimeout(r, 250))
+        }
         expect(loanSearch.totalDocs).toBe(1)
         activeLoan = loanSearch.docs[0]
         expect(activeLoan.id).toBeDefined()
@@ -296,16 +303,19 @@ describe("Full Borrow Happy Path Integration Test", () => {
         })
 
         // 7c. Borrower searches for the item
-        const searchResult = await payload.find({
-          collection: 'items',
-          where: {
-            name: { equals: 'Lender Drill' },
-          },
-        })
+        // Poll until item is READY (loan status update is deferred via setImmediate)
+        let returnedItem: any = null
+        for (let i = 0; i < 20; i++) {
+          const searchResult = await payload.find({
+            collection: 'items',
+            where: { name: { equals: 'Lender Drill' } },
+          })
+          returnedItem = searchResult.docs[0]
+          if (returnedItem?.status === 'READY') break
+          await new Promise((r) => setTimeout(r, 250))
+        }
 
         // 7d. Item is listed as available again (READY)
-        expect(searchResult.totalDocs).toBe(1)
-        const returnedItem = searchResult.docs[0]
         expect(returnedItem).toBeDefined()
         expect(returnedItem!.status).toBe('READY')
       });

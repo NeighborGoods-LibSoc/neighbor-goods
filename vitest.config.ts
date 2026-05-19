@@ -14,6 +14,7 @@ export default defineConfig({
       '**/dist/**',
       '**/*.integration.test.ts',
       '**/*.integration.test.tsx',
+      'e2e/**',
     ],
   },
   resolve: {

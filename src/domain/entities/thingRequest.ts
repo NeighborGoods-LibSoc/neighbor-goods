@@ -5,6 +5,7 @@ import {
   ThingRequestStatus,
   requestStatusTransitions,
 } from '@/domain'
+import { requestStatusTransitions } from '@/domain'
 
 export class ThingRequest extends Entity {
   thingRequestID: ID
