@@ -8,6 +8,7 @@ export async function createTestUser(payload: Payload, overrides: any = {}) {
       email: overrides.email || `test-${ID.generate().toString()}@example.com`,
       password: overrides.password || 'testPassword123!',
       name: overrides.name || 'Test User',
+      user_id: ID.generate().toString(),
       ...overrides,
     },
   });

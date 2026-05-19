@@ -10,7 +10,7 @@ const databaseType = (process.env.DATABASE_TYPE || 'mongodb').toLowerCase()
 function getDatabaseAdapter() {
   const uri = process.env.DATABASE_URI || ''
   if (databaseType === 'postgres') {
-    return postgresAdapter({ pool: { connectionString: uri } })
+    return postgresAdapter({ pool: { connectionString: uri }, idType: 'uuid' })
   }
   return mongooseAdapter({ url: uri })
 }
@@ -37,6 +37,7 @@ import { Libraries } from './collections/Libraries'
 import { ThingRequests } from './collections/ThingRequests'
 import { BorrowRequests } from './collections/BorrowRequests'
 import { DistributedLibraries } from './collections/DistributedLibraries'
+import { Notifications } from './collections/Notifications'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
@@ -86,7 +87,7 @@ export default buildConfig({
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
   db: getDatabaseAdapter(),
-  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, Libraries, ThingRequests, BorrowRequests, DistributedLibraries, Tags],
+  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, Libraries, ThingRequests, BorrowRequests, DistributedLibraries, Tags, Notifications],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
