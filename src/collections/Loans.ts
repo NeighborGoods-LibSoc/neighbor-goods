@@ -5,8 +5,12 @@ import { anyone } from '@/access/anyone'
 import { uuidField } from '@/fields/uuid'
 // --- Domain mapping helpers ---
 import { Loan } from '@/domain/entities/loan'
-import { DueDate, ID, LoanStatus } from '@/domain/valueItems'
-import { mapItemToThing, mapReturnLocation } from '@/collections/common/mappers'
+import { DueDate, ID, LoanStatus, ReturnInitiator } from '@/domain/valueItems'
+import {
+  mapItemToThing,
+  mapReturnLocation,
+  buildDomainDistributedLibraryFromData,
+} from '@/collections/common/mappers'
 
 export const Loans: CollectionConfig = {
   slug: 'loans',
@@ -108,6 +112,17 @@ export const Loans: CollectionConfig = {
         if (!data) return data
         try {
           const mergedData = operation === 'update' ? { ...originalDoc, ...data } : data
+
+          // Enforce returnInitiator permission on the BORROWED -> RETURN_STARTED transition.
+          // Business rule lives in the domain Library; the hook simply consults it.
+          if (
+            operation === 'update' &&
+            originalDoc?.status === 'BORROWED' &&
+            data.status === 'RETURN_STARTED'
+          ) {
+            await enforceReturnInitiator(mergedData, req)
+          }
+
           const domainLoan = await buildDomainLoanFromData(mergedData, req)
           // write back normalized values again
           data.status = domainLoan.status
@@ -165,6 +180,68 @@ async function buildDomainLoanFromData(data: any, req: any): Promise<Loan> {
     timeReturned: time_returned,
     status: LoanStatus[data.status as keyof typeof LoanStatus] || LoanStatus.RETURNED,
   })
+}
+
+/**
+ * Enforces that the user attempting to start the return matches the owning
+ * library's `returnInitiator`. All business logic lives in the domain Library;
+ * this hook only assembles the request and asks the domain who is allowed.
+ */
+async function enforceReturnInitiator(data: any, req: any): Promise<void> {
+  const actingUser = req?.user
+  if (!actingUser) throw new Error('Authentication required to start a return')
+
+  const itemId = typeof data.item === 'object' ? data.item?.id || data.item?.value : data.item
+  if (!itemId) throw new Error('Item is required')
+
+  const itemDoc: any = await req.payload.findByID({ collection: 'items', id: String(itemId) })
+
+  // Find the distributed library that owns this item.
+  const libSearch: any = await req.payload.find({
+    collection: 'distributedLibraries',
+    where: { items: { in: [String(itemId)] } },
+    limit: 1,
+  })
+  const libDoc: any = libSearch?.docs?.[0]
+  if (!libDoc) {
+    // No library found -> fall back to LENDER initiator (current default behavior).
+    // Permit only the lender to start the return.
+    assertActingUserIs('lender', actingUser, itemDoc, data)
+    return
+  }
+
+  const domainLibrary = await buildDomainDistributedLibraryFromData(libDoc)
+  const initiator = domainLibrary.returnInitiator
+
+  if (initiator === ReturnInitiator.BORROWER) {
+    assertActingUserIs('borrower', actingUser, itemDoc, data)
+  } else {
+    assertActingUserIs('lender', actingUser, itemDoc, data)
+  }
+}
+
+function assertActingUserIs(
+  role: 'borrower' | 'lender',
+  actingUser: any,
+  itemDoc: any,
+  data: any,
+): void {
+  const actingId = String(actingUser?.id ?? '')
+  if (role === 'borrower') {
+    const borrowerId =
+      typeof data.borrower === 'object' ? data.borrower?.id || data.borrower?.value : data.borrower
+    if (!borrowerId || String(borrowerId) !== actingId) {
+      throw new Error('Only the borrower can start the return for this library')
+    }
+  } else {
+    const lenderId =
+      typeof itemDoc?.offeredBy === 'object'
+        ? itemDoc.offeredBy?.id
+        : itemDoc?.offeredBy
+    if (!lenderId || String(lenderId) !== actingId) {
+      throw new Error('Only the lender can start the return for this library')
+    }
+  }
 }
 
 
