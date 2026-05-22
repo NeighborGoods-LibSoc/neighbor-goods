@@ -6,7 +6,6 @@ on:
     paths:
       - 'src/**'
       - 'package.json'
-      - 'yarn.lock'
       - 'pnpm-lock.yaml'
       - 'Dockerfile'
       - 'start.sh'
@@ -44,7 +43,7 @@ jobs:
           echo "Checking Docker containers..."
           docker compose ps
           
-          # Wait up to 5 minutes for the application to be ready (yarn install + build can take time)
+          # Wait up to 5 minutes for the application to be ready (pnpm install + build can take time)
           TIMEOUT=300
           ELAPSED=0
           until curl -f -s http://localhost:3000 > /dev/null 2>&1 || [ $ELAPSED -eq $TIMEOUT ]; do

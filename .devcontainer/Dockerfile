@@ -13,6 +13,6 @@ RUN apk add --no-cache curl \
     docker \
     docker-compose && \
     addgroup vscode docker && \
-    npm install -g --force pnpm yarn
+    npm install -g --force pnpm
 
 USER vscode
