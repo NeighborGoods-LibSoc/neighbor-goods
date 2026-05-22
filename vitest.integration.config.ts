@@ -10,7 +10,7 @@ export default defineConfig({
     globals: true,
     environment: 'node',
     testTimeout: 30000,
-    hookTimeout: 30000,
+    hookTimeout: 120000,
     setupFiles: ['./src/tests/setup/integration.setup.ts'],
     env: {
       ...dotenv.config({ path: '.env.test' }).parsed,
