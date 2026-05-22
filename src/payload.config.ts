@@ -10,7 +10,7 @@ const databaseType = (process.env.DATABASE_TYPE || 'mongodb').toLowerCase()
 function getDatabaseAdapter() {
   const uri = process.env.DATABASE_URI || ''
   if (databaseType === 'postgres') {
-    return postgresAdapter({ pool: { connectionString: uri }, idType: 'uuid' })
+    return postgresAdapter({ pool: { connectionString: uri }, idType: 'uuid', push: process.env.NODE_ENV === 'test' })
   }
   return mongooseAdapter({ url: uri })
 }

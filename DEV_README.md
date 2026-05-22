@@ -68,7 +68,7 @@ SMTP_USER: Username for authenticating to the SMTP SMTP Server
 SMTP_PASSWORD: Password used for authenticating to the SMTP Server
 ```
 
-Install the required packages. pnpm and yarn are utilized for this.
+Install the required packages. pnpm is utilized for this.
 
 ```bash
 pnpm install
