@@ -5,7 +5,7 @@ export class PayloadBorrowRequestRepository implements BorrowRequestRepository {
   constructor(private payload: Payload) {}
 
   async findLastRequest(itemId: ID, requesterId: ID): Promise<BorrowRequest | null> {
-    // Resolve domain UUIDs to Payload ObjectIds for relationship field queries
+    // Resolve domain UUIDs to Payload document ids for relationship field queries
     const itemResult = await this.payload.find({
       collection: 'items',
       where: { item_id: { equals: itemId.toString() } },
@@ -45,7 +45,7 @@ export class PayloadBorrowRequestRepository implements BorrowRequestRepository {
   }
 
   async recordRequest(itemId: ID, requesterId: ID): Promise<void> {
-    // Relationship fields require Payload/MongoDB ObjectIds, not domain UUIDs.
+    // Relationship fields require Payload document ids, not domain UUIDs.
     // Look up the Payload document id for each domain UUID.
     const itemResult = await this.payload.find({
       collection: 'items',
