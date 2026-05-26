@@ -67,7 +67,6 @@ export const DistributedLibraries: CollectionConfig = {
       options: [
         { label: 'Email', value: 'EMAIL' },
         { label: 'Phone Number', value: 'PHONE_NUMBER' },
-        { label: 'ID', value: 'ID' },
         { label: 'Deposit', value: 'DEPOSIT' },
         { label: 'In-person', value: 'IN_PERSON' },
       ],

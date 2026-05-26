@@ -430,7 +430,7 @@ export interface User {
   /**
    * Verification methods this user has completed.
    */
-  verificationFlags?: ('EMAIL' | 'PHONE_NUMBER' | 'ID' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  verificationFlags?: ('EMAIL' | 'PHONE_NUMBER' | 'DEPOSIT' | 'IN_PERSON')[] | null;
   /**
    * Amount of money this user has in escrow for deposits.
    */
@@ -858,7 +858,7 @@ export interface Item {
   /**
    * Verification methods required for a borrower to use this item.
    */
-  borrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'ID' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  borrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'DEPOSIT' | 'IN_PERSON')[] | null;
   /**
    * Amount of deposit required if DEPOSIT is selected.
    */
@@ -1076,7 +1076,7 @@ export interface DistributedLibrary {
   /**
    * Default verification methods required for borrowers in this library.
    */
-  defaultBorrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'ID' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  defaultBorrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'DEPOSIT' | 'IN_PERSON')[] | null;
   /**
    * Geographic service area
    */
