@@ -155,7 +155,7 @@ fi
 # Ensure pnpm is installed
 if ! command -v pnpm &>/dev/null; then
     echo "pnpm not found. Installing with npm..."
-    npm install -g pnpm || {
+    npm install -g pnpm@10 || {
         echo "Failed to install pnpm. Make sure Node.js and npm are installed."
         exit 1
     }
