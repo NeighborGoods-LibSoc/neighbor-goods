@@ -3,6 +3,9 @@
 # Default all variables
 DATABASE_URI=""
 DATABASE_TYPE=""
+POSTGRES_USER=""
+POSTGRES_PASSWORD=""
+POSTGRES_DB=""
 PAYLOAD_SECRET=""
 NEXT_PUBLIC_SERVER_URL=""
 CRON_SECRET=""
@@ -53,6 +56,9 @@ if [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]]; then
         case "$key" in
             DATABASE_URI) DATABASE_URI="$value" ;;
             DATABASE_TYPE) DATABASE_TYPE="$value" ;;
+            POSTGRES_USER) POSTGRES_USER="$value" ;;
+            POSTGRES_PASSWORD) POSTGRES_PASSWORD="$value" ;;
+            POSTGRES_DB) POSTGRES_DB="$value" ;;
             NEXT_PUBLIC_SERVER_URL) NEXT_PUBLIC_SERVER_URL="$value" ;;
             PAYLOAD_SECRET) PAYLOAD_SECRET="$value" ;;
             CRON_SECRET) CRON_SECRET="$value" ;;
@@ -66,8 +72,11 @@ if [[ "$OVERWRITE_ENV" =~ ^[Nn]$ ]]; then
 fi
 
 # Set defaults if needed or using no-input mode
-[[ -z "$DATABASE_TYPE" ]] && DATABASE_TYPE="mongodb"
-[[ -z "$DATABASE_URI" ]] && DATABASE_URI="mongodb://mongo:27017/neighbor-goods"
+[[ -z "$DATABASE_TYPE" ]] && DATABASE_TYPE="postgres"
+[[ -z "$POSTGRES_USER" ]] && POSTGRES_USER="payload"
+[[ -z "$POSTGRES_PASSWORD" ]] && POSTGRES_PASSWORD="payload"
+[[ -z "$POSTGRES_DB" ]] && POSTGRES_DB="neighbor-goods"
+[[ -z "$DATABASE_URI" ]] && DATABASE_URI="postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB"
 [[ -z "$NEXT_PUBLIC_SERVER_URL" ]] && NEXT_PUBLIC_SERVER_URL="http://localhost:3000"
 [[ -z "$SMTP_SERVER" ]] && SMTP_SERVER=""
 [[ -z "$SMTP_USER" ]] && SMTP_USER=""
@@ -141,6 +150,9 @@ if [[ "$OVERWRITE_ENV" =~ ^[Yy]$ ]]; then
     cat > .env <<EOF
 DATABASE_URI=$DATABASE_URI
 DATABASE_TYPE=$DATABASE_TYPE
+POSTGRES_USER=$POSTGRES_USER
+POSTGRES_PASSWORD=$POSTGRES_PASSWORD
+POSTGRES_DB=$POSTGRES_DB
 NEXT_PUBLIC_SERVER_URL=$NEXT_PUBLIC_SERVER_URL
 PAYLOAD_SECRET=$PAYLOAD_SECRET
 CRON_SECRET=$CRON_SECRET
