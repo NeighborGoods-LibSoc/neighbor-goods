@@ -1,5 +1,15 @@
 // storage-adapter-import-placeholder
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
+import dotenv from 'dotenv';
+import { postgresAdapter } from '@payloadcms/db-postgres'
+
+dotenv.config(); // ensure env vars are loaded when config is imported
+
+function getDatabaseAdapter() {
+  const uri = process.env.DATABASE_URI || ''
+  return postgresAdapter({ pool: { connectionString: uri }, idType: 'uuid' })
+}
+
+const disableEmailForTests = process.env.DISABLE_EMAIL_FOR_TESTS === 'true';
 
 import sharp from 'sharp' // sharp-import
 import path from 'path'
@@ -17,13 +27,15 @@ import { Tags } from './collections/Tags'
 import { Users } from './collections/Users'
 import { Admins } from './collections/Admins'
 import { Loans } from './collections/Loans'
+import { Libraries } from './collections/Libraries'
 import { ThingRequests } from './collections/ThingRequests'
 import { BorrowRequests } from './collections/BorrowRequests'
 import { DistributedLibraries } from './collections/DistributedLibraries'
+import { Notifications } from './collections/Notifications'
 import { Footer } from './Footer/config'
 import { Header } from './Header/config'
 import { plugins } from './plugins'
-import { defaultLexical } from '@/fields/defaultLexical'
+import { defaultLexical } from '@/fields'
 import { getServerSideURL } from './utilities/getURL'
 
 const filename = fileURLToPath(import.meta.url)
@@ -68,10 +80,8 @@ export default buildConfig({
   },
   // This config helps us configure global or default features that the other editors can inherit
   editor: defaultLexical,
-  db: mongooseAdapter({
-    url: process.env.DATABASE_URI || '',
-  }),
-  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, ThingRequests, BorrowRequests, DistributedLibraries, Tags],
+  db: getDatabaseAdapter(),
+  collections: [Pages, Posts, Media, Categories, Users, Admins, Things, Loans, Libraries, ThingRequests, BorrowRequests, DistributedLibraries, Tags, Notifications],
   cors: [getServerSideURL()].filter(Boolean),
   globals: [Header, Footer],
   plugins: [
@@ -100,7 +110,7 @@ export default buildConfig({
     },
     tasks: [],
   },
-  email: nodemailerAdapter({
+  email: !disableEmailForTests ? nodemailerAdapter({
     defaultFromAddress: 'info@neighborgoods.com',
     defaultFromName: 'NeighborGoods',
     // Nodemailer transportOptions
@@ -112,5 +122,5 @@ export default buildConfig({
         pass: process.env.SMTP_PASSWORD,
       },
     },
-  }),
+  }) : undefined,
 })

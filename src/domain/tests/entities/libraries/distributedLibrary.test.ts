@@ -17,6 +17,7 @@ import { WaitingListType } from "../../..";
 import { LoanStatus } from "../../..";
 import { ThingStatus } from "../../..";
 import { DueDate } from "../../..";
+import { ReturnInitiator } from "../../..";
 
 class TestFeeSchedule implements FeeSchedule {
   feeForOverdueItem() {
@@ -106,6 +107,16 @@ function makeThing(owner_id: ID): Thing {
 }
 
 describe("DistributedLibrary", () => {
+  it("returnInitiator is BORROWER", () => {
+    const dl = makeDistributedLibrary();
+    expect(dl.returnInitiator).toBe(ReturnInitiator.BORROWER);
+  });
+
+  it("a SimpleLibrary's returnInitiator defaults to LENDER", () => {
+    const sl = makeSimpleLibrary("L1");
+    expect(sl.returnInitiator).toBe(ReturnInitiator.LENDER);
+  });
+
   it("aggregates lender items and borrows via owning lender", async () => {
     const dl = makeDistributedLibrary();
     const lender1 = makeSimpleLibrary("L1");

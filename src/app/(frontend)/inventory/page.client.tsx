@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import type { User, Item, ThingRequest, Media, Tag } from '@/payload-types'
 
 interface InventoryClientProps {
@@ -40,7 +41,7 @@ const requestStatusLabels: Record<string, string> = {
   CLOSED: 'Closed',
 }
 
-export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
+export const InventoryClient: React.FC<InventoryClientProps> = ({ user: _user }) => {
   const [items, setItems] = useState<Item[]>([])
   const [requests, setRequests] = useState<ThingRequest[]>([])
   const [activeTab, setActiveTab] = useState<'offers' | 'requests'>('offers')
@@ -290,7 +291,7 @@ export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
                   <div key={item.id} className="inventory-card">
                     {imageUrl && (
                       <div className="inventory-card-image">
-                        <img src={imageUrl} alt={item.name} />
+                        <Image src={imageUrl} alt={item.name} width={400} height={300} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                       </div>
                     )}
                     <div className="inventory-card-content">
@@ -356,7 +357,7 @@ export const InventoryClient: React.FC<InventoryClientProps> = ({ user }) => {
                   <div key={request.id} className="inventory-card">
                     {imageUrl && (
                       <div className="inventory-card-image">
-                        <img src={imageUrl} alt={request.name} />
+                        <Image src={imageUrl} alt={request.name} width={400} height={300} style={{ objectFit: 'cover', width: '100%', height: '100%' }} />
                       </div>
                     )}
                     <div className="inventory-card-content">

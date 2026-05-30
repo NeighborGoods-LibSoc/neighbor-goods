@@ -1,7 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '../access/authenticated'
-import { anyone } from '../access/anyone'
+import { authenticated } from '@/access/authenticated'
+import { anyone } from '@/access/anyone'
 import { uuidField } from '@/fields/uuid'
 import { buildDomainDistributedLibraryFromData, serializeArea } from '@/collections/common/mappers'
 
@@ -38,11 +38,41 @@ export const DistributedLibraries: CollectionConfig = {
       required: false,
     },
     {
+      name: 'members',
+      type: 'relationship',
+      relationTo: 'users',
+      hasMany: true,
+      required: false,
+      admin: { description: 'Users who have joined this library' },
+    },
+    {
+      name: 'items',
+      type: 'relationship',
+      relationTo: 'items',
+      hasMany: true,
+      required: false,
+      admin: { description: 'Items shared through this library' },
+    },
+    {
       name: 'default_loan_time_days',
       type: 'number',
       required: true,
       defaultValue: 14,
       admin: { description: 'Default loan time in days' },
+    },
+    {
+      name: 'defaultBorrowerVerification',
+      type: 'select',
+      hasMany: true,
+      options: [
+        { label: 'Email', value: 'EMAIL' },
+        { label: 'Phone Number', value: 'PHONE_NUMBER' },
+        { label: 'Deposit', value: 'DEPOSIT' },
+        { label: 'In-person', value: 'IN_PERSON' },
+      ],
+      admin: {
+        description: 'Default verification methods required for borrowers in this library.',
+      },
     },
     {
       name: 'area',
@@ -73,14 +103,17 @@ export const DistributedLibraries: CollectionConfig = {
   ],
   hooks: {
     beforeValidate: [
-      async ({ data, req }) => {
+      async ({ data }) => {
         if (!data) return data
         try {
-          const domainDL = buildDomainDistributedLibraryFromData(data)
+          const domainDL = await buildDomainDistributedLibraryFromData(data)
           // write back normalized values
           data.library_id = domainDL.libraryID.toString()
           data.name = String(domainDL.name)
-          data.default_loan_time_days = Math.max(1, Number(data.default_loan_time_days ?? domainDL.defaultLoanTime.days))
+          data.default_loan_time_days = Math.max(
+            1,
+            Number(data.default_loan_time_days ?? domainDL.defaultLoanTime.days),
+          )
           data.public_url = domainDL.publicURL ? String(domainDL.publicURL) : undefined
           // area normalization
           if (domainDL.area) {
@@ -93,14 +126,17 @@ export const DistributedLibraries: CollectionConfig = {
       },
     ],
     beforeChange: [
-      async ({ data, req }) => {
+      async ({ data }) => {
         if (!data) return data
         try {
-          const domainDL = buildDomainDistributedLibraryFromData(data)
+          const domainDL = await buildDomainDistributedLibraryFromData(data)
           // write back normalized values again
           data.library_id = domainDL.libraryID.toString()
           data.name = String(domainDL.name)
-          data.default_loan_time_days = Math.max(1, Number(data.default_loan_time_days ?? domainDL.defaultLoanTime.days))
+          data.default_loan_time_days = Math.max(
+            1,
+            Number(data.default_loan_time_days ?? domainDL.defaultLoanTime.days),
+          )
           data.public_url = domainDL.publicURL ? String(domainDL.publicURL) : undefined
           if (domainDL.area) {
             data.area = serializeArea(domainDL)
@@ -114,14 +150,19 @@ export const DistributedLibraries: CollectionConfig = {
     afterRead: [
       async ({ doc }) => {
         try {
-          const domainDL = buildDomainDistributedLibraryFromData(doc)
+          const domainDL = await buildDomainDistributedLibraryFromData(doc)
           // reflect any normalization
-          if (doc.library_id !== domainDL.libraryID.toString()) doc.library_id = domainDL.libraryID.toString()
+          if (doc.library_id !== domainDL.libraryID.toString())
+            doc.library_id = domainDL.libraryID.toString()
           if (doc.name !== domainDL.name) doc.name = domainDL.name
           const normalizedURL = domainDL.publicURL ? String(domainDL.publicURL) : undefined
           if (doc.public_url !== normalizedURL) doc.public_url = normalizedURL
-          const normalizedDays = Math.max(1, Number(doc.default_loan_time_days ?? domainDL.defaultLoanTime.days))
-          if (doc.default_loan_time_days !== normalizedDays) doc.default_loan_time_days = normalizedDays
+          const normalizedDays = Math.max(
+            1,
+            Number(doc.default_loan_time_days ?? domainDL.defaultLoanTime.days),
+          )
+          if (doc.default_loan_time_days !== normalizedDays)
+            doc.default_loan_time_days = normalizedDays
           if (domainDL.area) {
             doc.area = serializeArea(domainDL)
           }

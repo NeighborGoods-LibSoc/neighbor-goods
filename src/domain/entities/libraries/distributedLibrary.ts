@@ -1,15 +1,14 @@
-import { Library } from "./library";
-import { Borrower } from "../borrower";
-import { Loan } from "../loan";
-import { Thing } from "../thing";
-import { Lender } from "../lenders/lender";
-import {
-  ID,
-  DueDate,
-  LoanStatus,
-  PhysicalArea,
-  ThingStatus,
-} from "../../valueItems";
+import { Library } from './library'
+import { Borrower } from '../borrower'
+import { Loan } from '../loan'
+import { Thing } from '../thing'
+import { Lender } from '../lenders/lender'
+import { ID } from '../../valueItems/id'
+import { DueDate } from '../../valueItems/dueDate'
+import { LoanStatus } from '../../valueItems/loanStatus'
+import { PhysicalArea } from '../../valueItems/location/physicalArea'
+import { ThingStatus } from '../../valueItems/thingStatus'
+import { ReturnInitiator } from '../../valueItems/returnInitiator'
 
 export class DistributedLibrary extends Library {
   area!: PhysicalArea
@@ -17,6 +16,10 @@ export class DistributedLibrary extends Library {
 
   override get entityID(): ID {
     return this.libraryID
+  }
+
+  override get returnInitiator(): ReturnInitiator {
+    return ReturnInitiator.BORROWER
   }
 
   get allThings(): Iterable<Thing> {
@@ -38,7 +41,7 @@ export class DistributedLibrary extends Library {
     throw new Error(`Cannot find an owner for ${item.title.name}`)
   }
 
-  override async startBorrow(thing: Thing, borrower: Borrower): Promise<Thing> {
+  override async startBorrow(thing: Thing, _borrower: Borrower): Promise<Thing> {
     thing.status = ThingStatus.WAITING_FOR_LENDER_APPROVAL_TO_BORROW
     return thing;
   }

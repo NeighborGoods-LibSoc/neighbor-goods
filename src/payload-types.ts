@@ -76,14 +76,17 @@ export interface Config {
     admins: Admin;
     items: Item;
     loans: Loan;
+    libraries: Library;
     'thing-requests': ThingRequest;
     'borrow-requests': BorrowRequest;
     distributedLibraries: DistributedLibrary;
     tags: Tag;
+    notifications: Notification;
     redirects: Redirect;
     forms: Form;
     'form-submissions': FormSubmission;
     search: Search;
+    'payload-kv': PayloadKv;
     'payload-jobs': PayloadJob;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -99,14 +102,17 @@ export interface Config {
     admins: AdminsSelect<false> | AdminsSelect<true>;
     items: ItemsSelect<false> | ItemsSelect<true>;
     loans: LoansSelect<false> | LoansSelect<true>;
+    libraries: LibrariesSelect<false> | LibrariesSelect<true>;
     'thing-requests': ThingRequestsSelect<false> | ThingRequestsSelect<true>;
     'borrow-requests': BorrowRequestsSelect<false> | BorrowRequestsSelect<true>;
     distributedLibraries: DistributedLibrariesSelect<false> | DistributedLibrariesSelect<true>;
     tags: TagsSelect<false> | TagsSelect<true>;
+    notifications: NotificationsSelect<false> | NotificationsSelect<true>;
     redirects: RedirectsSelect<false> | RedirectsSelect<true>;
     forms: FormsSelect<false> | FormsSelect<true>;
     'form-submissions': FormSubmissionsSelect<false> | FormSubmissionsSelect<true>;
     search: SearchSelect<false> | SearchSelect<true>;
+    'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-jobs': PayloadJobsSelect<false> | PayloadJobsSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -115,6 +121,7 @@ export interface Config {
   db: {
     defaultIDType: string;
   };
+  fallbackLocale: null;
   globals: {
     header: Header;
     footer: Footer;
@@ -124,13 +131,10 @@ export interface Config {
     footer: FooterSelect<false> | FooterSelect<true>;
   };
   locale: null;
-  user:
-    | (User & {
-        collection: 'users';
-      })
-    | (Admin & {
-        collection: 'admins';
-      });
+  widgets: {
+    collections: CollectionsWidget;
+  };
+  user: User | Admin;
   jobs: {
     tasks: {
       schedulePublish: TaskSchedulePublish;
@@ -191,7 +195,7 @@ export interface Page {
       root: {
         type: string;
         children: {
-          type: string;
+          type: any;
           version: number;
           [k: string]: unknown;
         }[];
@@ -256,7 +260,7 @@ export interface Post {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -297,12 +301,16 @@ export interface Post {
  */
 export interface Media {
   id: string;
+  /**
+   * UUID for this media
+   */
+  media_id: string;
   alt?: string | null;
   caption?: {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -389,6 +397,10 @@ export interface Media {
  */
 export interface Category {
   id: string;
+  /**
+   * UUID for this category
+   */
+  category_id: string;
   title: string;
   slug?: string | null;
   slugLock?: boolean | null;
@@ -410,7 +422,19 @@ export interface Category {
  */
 export interface User {
   id: string;
+  /**
+   * UUID for this user
+   */
+  user_id: string;
   name?: string | null;
+  /**
+   * Verification methods this user has completed.
+   */
+  verificationFlags?: ('EMAIL' | 'PHONE_NUMBER' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  /**
+   * Amount of money this user has in escrow for deposits.
+   */
+  escrowBalance?: number | null;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -428,6 +452,7 @@ export interface User {
       }[]
     | null;
   password?: string | null;
+  collection: 'users';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -438,7 +463,7 @@ export interface CallToActionBlock {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -489,7 +514,7 @@ export interface ContentBlock {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -546,7 +571,7 @@ export interface ArchiveBlock {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -582,7 +607,7 @@ export interface FormBlock {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -639,7 +664,7 @@ export interface Form {
               root: {
                 type: string;
                 children: {
-                  type: string;
+                  type: any;
                   version: number;
                   [k: string]: unknown;
                 }[];
@@ -722,7 +747,7 @@ export interface Form {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];
@@ -754,7 +779,7 @@ export interface Form {
           root: {
             type: string;
             children: {
-              type: string;
+              type: any;
               version: number;
               [k: string]: unknown;
             }[];
@@ -777,6 +802,10 @@ export interface Form {
  */
 export interface Admin {
   id: string;
+  /**
+   * UUID for this admin
+   */
+  admin_id: string;
   name?: string | null;
   role?: string | null;
   updatedAt: string;
@@ -796,6 +825,7 @@ export interface Admin {
       }[]
     | null;
   password?: string | null;
+  collection: 'admins';
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -803,6 +833,18 @@ export interface Admin {
  */
 export interface Item {
   id: string;
+  /**
+   * UUID for the item (domain ID)
+   */
+  item_id: string;
+  /**
+   * UUID of the owner (domain ID)
+   */
+  owner_uuid?: string | null;
+  /**
+   * UUID of the user who requested to borrow (domain ID)
+   */
+  requested_by_uuid?: string | null;
   name: string;
   /**
    * Current availability status of this item
@@ -814,9 +856,13 @@ export interface Item {
    */
   tags?: (string | Tag)[] | null;
   /**
-   * Rules and guidelines for using this item
+   * Verification methods required for a borrower to use this item.
    */
-  rulesForUse: string;
+  borrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'DEPOSIT' | 'IN_PERSON')[] | null;
+  /**
+   * Amount of deposit required if DEPOSIT is selected.
+   */
+  depositAmount?: number | null;
   /**
    * Maximum borrowing time in days
    */
@@ -843,6 +889,10 @@ export interface Item {
  */
 export interface Tag {
   id: string;
+  /**
+   * UUID for this tag
+   */
+  tag_id: string;
   /**
    * Tag name (e.g., "Electronics", "Books", "Clothing")
    */
@@ -896,10 +946,64 @@ export interface Loan {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "libraries".
+ */
+export interface Library {
+  id: string;
+  name: string;
+  /**
+   * UUID for the library (domain ID)
+   */
+  library_id: string;
+  location?: {
+    latitude?: number | null;
+    longitude?: number | null;
+    street_address?: string | null;
+    city?: string | null;
+    state?: string | null;
+    zip_code?: string | null;
+    country?: string | null;
+  };
+  administrators: (string | User)[];
+  members?: (string | User)[] | null;
+  waitingListType: 'NONE' | 'QUADRATIC_WAITING_LIST' | 'FIRST_COME_FIRST_SERVE';
+  maxFinesBeforeSuspension: {
+    amount: number;
+    currency: 'USD' | 'EUR' | 'HOUR';
+  };
+  feeSchedule: {
+    feeForOverdueItem: {
+      amount: number;
+      currency: 'USD' | 'EUR' | 'HOUR';
+    };
+    feeForDamagedItem: {
+      amount: number;
+      currency: 'USD' | 'EUR' | 'HOUR';
+    };
+  };
+  /**
+   * Default loan time in days
+   */
+  defaultLoanTime: number;
+  mopServer: {
+    url: string;
+    version: string;
+  };
+  publicURL?: string | null;
+  items?: (string | Item)[] | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "thing-requests".
  */
 export interface ThingRequest {
   id: string;
+  /**
+   * UUID for this request
+   */
+  request_id: string;
   name: string;
   /**
    * Current status of this request
@@ -924,12 +1028,20 @@ export interface ThingRequest {
  */
 export interface BorrowRequest {
   id: string;
+  /**
+   * UUID for this request
+   */
+  borrow_request_id: string;
   item: string | Item;
   requestedBy: string | User;
   /**
    * Timestamp of when the borrow request was made
    */
   requestedAt: string;
+  /**
+   * Current status of the borrow request
+   */
+  status: 'pending' | 'approved' | 'rejected';
   updatedAt: string;
   createdAt: string;
 }
@@ -950,9 +1062,21 @@ export interface DistributedLibrary {
   public_url?: string | null;
   administrators?: (string | User)[] | null;
   /**
+   * Users who have joined this library
+   */
+  members?: (string | User)[] | null;
+  /**
+   * Items shared through this library
+   */
+  items?: (string | Item)[] | null;
+  /**
    * Default loan time in days
    */
   default_loan_time_days: number;
+  /**
+   * Default verification methods required for borrowers in this library.
+   */
+  defaultBorrowerVerification?: ('EMAIL' | 'PHONE_NUMBER' | 'DEPOSIT' | 'IN_PERSON')[] | null;
   /**
    * Geographic service area
    */
@@ -968,6 +1092,31 @@ export interface DistributedLibrary {
     };
     radius_kilometers: number;
   };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications".
+ */
+export interface Notification {
+  id: string;
+  recipient: string | User;
+  type: 'borrow_request' | 'borrow_approved' | 'borrow_rejected' | 'item_returned' | 'item_damaged';
+  message: string;
+  item?: (string | null) | Item;
+  /**
+   * The user who triggered this notification
+   */
+  triggeredBy?: (string | null) | User;
+  /**
+   * Whether the notification has been read
+   */
+  read?: boolean | null;
+  /**
+   * URL to navigate to when notification is clicked
+   */
+  actionURL?: string | null;
   updatedAt: string;
   createdAt: string;
 }
@@ -1044,6 +1193,23 @@ export interface Search {
     | null;
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv".
+ */
+export interface PayloadKv {
+  id: string;
+  key: string;
+  data:
+    | {
+        [k: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | number
+    | boolean
+    | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -1177,6 +1343,10 @@ export interface PayloadLockedDocument {
         value: string | Loan;
       } | null)
     | ({
+        relationTo: 'libraries';
+        value: string | Library;
+      } | null)
+    | ({
         relationTo: 'thing-requests';
         value: string | ThingRequest;
       } | null)
@@ -1193,6 +1363,10 @@ export interface PayloadLockedDocument {
         value: string | Tag;
       } | null)
     | ({
+        relationTo: 'notifications';
+        value: string | Notification;
+      } | null)
+    | ({
         relationTo: 'redirects';
         value: string | Redirect;
       } | null)
@@ -1207,10 +1381,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'search';
         value: string | Search;
-      } | null)
-    | ({
-        relationTo: 'payload-jobs';
-        value: string | PayloadJob;
       } | null);
   globalSlug?: string | null;
   user:
@@ -1435,6 +1605,7 @@ export interface PostsSelect<T extends boolean = true> {
  * via the `definition` "media_select".
  */
 export interface MediaSelect<T extends boolean = true> {
+  media_id?: T;
   alt?: T;
   caption?: T;
   updatedAt?: T;
@@ -1528,6 +1699,7 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "categories_select".
  */
 export interface CategoriesSelect<T extends boolean = true> {
+  category_id?: T;
   title?: T;
   slug?: T;
   slugLock?: T;
@@ -1548,7 +1720,10 @@ export interface CategoriesSelect<T extends boolean = true> {
  * via the `definition` "users_select".
  */
 export interface UsersSelect<T extends boolean = true> {
+  user_id?: T;
   name?: T;
+  verificationFlags?: T;
+  escrowBalance?: T;
   updatedAt?: T;
   createdAt?: T;
   email?: T;
@@ -1571,6 +1746,7 @@ export interface UsersSelect<T extends boolean = true> {
  * via the `definition` "admins_select".
  */
 export interface AdminsSelect<T extends boolean = true> {
+  admin_id?: T;
   name?: T;
   role?: T;
   updatedAt?: T;
@@ -1595,11 +1771,15 @@ export interface AdminsSelect<T extends boolean = true> {
  * via the `definition` "items_select".
  */
 export interface ItemsSelect<T extends boolean = true> {
+  item_id?: T;
+  owner_uuid?: T;
+  requested_by_uuid?: T;
   name?: T;
   status?: T;
   description?: T;
   tags?: T;
-  rulesForUse?: T;
+  borrowerVerification?: T;
+  depositAmount?: T;
   borrowingTime?: T;
   offeredBy?: T;
   primaryImage?: T;
@@ -1635,9 +1815,65 @@ export interface LoansSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "libraries_select".
+ */
+export interface LibrariesSelect<T extends boolean = true> {
+  name?: T;
+  library_id?: T;
+  location?:
+    | T
+    | {
+        latitude?: T;
+        longitude?: T;
+        street_address?: T;
+        city?: T;
+        state?: T;
+        zip_code?: T;
+        country?: T;
+      };
+  administrators?: T;
+  members?: T;
+  waitingListType?: T;
+  maxFinesBeforeSuspension?:
+    | T
+    | {
+        amount?: T;
+        currency?: T;
+      };
+  feeSchedule?:
+    | T
+    | {
+        feeForOverdueItem?:
+          | T
+          | {
+              amount?: T;
+              currency?: T;
+            };
+        feeForDamagedItem?:
+          | T
+          | {
+              amount?: T;
+              currency?: T;
+            };
+      };
+  defaultLoanTime?: T;
+  mopServer?:
+    | T
+    | {
+        url?: T;
+        version?: T;
+      };
+  publicURL?: T;
+  items?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "thing-requests_select".
  */
 export interface ThingRequestsSelect<T extends boolean = true> {
+  request_id?: T;
   name?: T;
   status?: T;
   description?: T;
@@ -1652,9 +1888,11 @@ export interface ThingRequestsSelect<T extends boolean = true> {
  * via the `definition` "borrow-requests_select".
  */
 export interface BorrowRequestsSelect<T extends boolean = true> {
+  borrow_request_id?: T;
   item?: T;
   requestedBy?: T;
   requestedAt?: T;
+  status?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1667,7 +1905,10 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
   name?: T;
   public_url?: T;
   administrators?: T;
+  members?: T;
+  items?: T;
   default_loan_time_days?: T;
+  defaultBorrowerVerification?: T;
   area?:
     | T
     | {
@@ -1692,9 +1933,25 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
  * via the `definition` "tags_select".
  */
 export interface TagsSelect<T extends boolean = true> {
+  tag_id?: T;
   name?: T;
   description?: T;
   color?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "notifications_select".
+ */
+export interface NotificationsSelect<T extends boolean = true> {
+  recipient?: T;
+  type?: T;
+  message?: T;
+  item?: T;
+  triggeredBy?: T;
+  read?: T;
+  actionURL?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -1892,6 +2149,14 @@ export interface SearchSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "payload-kv_select".
+ */
+export interface PayloadKvSelect<T extends boolean = true> {
+  key?: T;
+  data?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "payload-jobs_select".
  */
 export interface PayloadJobsSelect<T extends boolean = true> {
@@ -2059,6 +2324,16 @@ export interface FooterSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "collections_widget".
+ */
+export interface CollectionsWidget {
+  data?: {
+    [k: string]: unknown;
+  };
+  width: 'full';
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "TaskSchedulePublish".
  */
 export interface TaskSchedulePublish {
@@ -2089,7 +2364,7 @@ export interface BannerBlock {
     root: {
       type: string;
       children: {
-        type: string;
+        type: any;
         version: number;
         [k: string]: unknown;
       }[];

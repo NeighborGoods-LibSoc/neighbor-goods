@@ -1,7 +1,5 @@
-import { Entity } from "../entity";
-import { Loan } from "../loan";
-import { Thing } from "../thing";
-import { Location } from "../../valueItems";
+import { Entity, Loan, Thing } from "..";
+import { Location } from '@/domain';
 
 export abstract class Lender extends Entity {
   abstract get items(): Iterable<Thing>;

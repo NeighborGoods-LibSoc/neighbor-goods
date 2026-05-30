@@ -19,7 +19,13 @@ export const LandingPage: React.FC<LandingPageProps> = ({
         <div className="container">
           <div className="hero__logo">
             <div className="logo-text">
-              <img src="/Logo-lightbg.png"></img>
+              <Image
+                src="/Logo-lightbg.png"
+                alt="NeighborGoods Logo"
+                width={300}
+                height={100}
+                priority
+              />
             </div>
           </div>
           <h1 className="hero__title">
@@ -52,7 +58,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <div className="feature-card__content">
                 <p>
                   Borrow tools, equipment, and other items from your neighbors when you need them.
-                  No need to buy things you'll only use occasionally!
+                  No need to buy things you&apos;ll only use occasionally!
                 </p>
               </div>
             </div>
@@ -153,7 +159,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({
               <h3 className="feature-card__title">Sign Up</h3>
               <div className="feature-card__content">
                 <p>
-                  Create an account and complete your profile with items you're willing to share.
+                  Create an account and complete your profile with items you&apos;re willing to share.
                 </p>
               </div>
             </div>

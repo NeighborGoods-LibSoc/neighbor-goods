@@ -1,8 +1,7 @@
 import type { CollectionConfig } from 'payload'
 
-import { anyone } from '../access/anyone'
-import { authenticated } from '../access/authenticated'
-import { slugField } from '@/fields/slug'
+import { anyone, authenticated } from '@/access'
+import { slugField, uuidField } from '@/fields'
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
@@ -16,6 +15,7 @@ export const Categories: CollectionConfig = {
     useAsTitle: 'title',
   },
   fields: [
+    uuidField({ name: 'category_id', label: 'Category ID', description: 'UUID for this category' }),
     {
       name: 'title',
       type: 'text',

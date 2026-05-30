@@ -2,6 +2,7 @@ import configPromise from '@payload-config'
 import { getPayload } from 'payload'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { cookies } from 'next/headers'
 import type { Media, User, Tag } from '@/payload-types'
 import { DeleteThingRequestButton } from './DeleteThingRequestButton'
@@ -73,7 +74,7 @@ export default async function RequestPage({ params: paramsPromise, searchParams:
 
       <div className="page-header">
         <Link href="/dashboard" className="btn btn-secondary">
-          &larr; Back to Dashboard
+          &larr; Back to User Dashboard
         </Link>
       </div>
 
@@ -88,9 +89,11 @@ export default async function RequestPage({ params: paramsPromise, searchParams:
 
           {referenceImage?.url && (
             <div className="item-image">
-              <img
+              <Image
                 src={referenceImage.url}
                 alt={referenceImage.alt || request.name}
+                width={referenceImage.width || 800}
+                height={referenceImage.height || 600}
                 style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px' }}
               />
             </div>

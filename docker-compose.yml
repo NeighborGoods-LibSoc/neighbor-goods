@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   payload:
     image: node:22-alpine
@@ -11,20 +9,23 @@ services:
     working_dir: /home/node/app/
     command: sh -c "yarn install && yarn dev"
     depends_on:
-      - mongo
+      - postgres
     env_file:
       - .env
 
-  mongo:
-    image: mongo:latest
-    # Exposes DB publicly. Disable for production
+  postgres:
+    image: postgres:16-alpine
     ports:
-      - '27017:27017'
-    command:
-      - --storageEngine=wiredTiger
+      - '5432:5432'
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - data:/data/db
+      - pgdata:/var/lib/postgresql/data
 
 volumes:
-  data:
+  pgdata:
   node_modules:

@@ -7,7 +7,7 @@ NeighborGoods is built using the following technologies:
 - [Payload CMS](https://payloadcms.com): is a headless CMS framework for TypeScript that provides the backend API and admin interface.
 - [Next.js](https://nextjs.org): React framework that handles server-side rendering, routing, and frontend functionality.
 - [React](https://reactjs.org): JavaScript library for building the user interface components.
-- [MongoDB](https://mongodb.com): NoSQL database for storing application data.
+- [PostgreSQL](https://www.postgresql.org): Relational database for storing application data.
 - [Tailwind CSS](https://tailwindcss.com): Utility-first CSS framework for styling.
 - Docker: responsible for running the app, and used in development
 ## Getting a local development version working
@@ -57,8 +57,7 @@ Windows
 Setup your .env file. This will contain certain secrets/sensitive data and should not be shared outside the server.
 
 ```aiignore
-DATABASE_URI: URI of your database that the web portion will communicate with. Default: mongodb://mongo:27017/neighbor-goods
-DATABASE_TYPE: Payload CMS supports multiple types of server types. Recommended to keep this value at: mongodb
+DATABASE_URI: URI of your database that the web portion will communicate with. Default: postgres://neighborgoods:neighborgoods@postgres:5432/neighbor-goods
 NEXT_PUBLIC_SERVER_URL: The URL of the server that will be used for browsers and API calls
 PAYLOAD_SECRET: Secret value used by Payload CMS. Start scripts will generate one. Try to make it long and complex.
 CRON_SECRET: Secret for setting up cron jobs. Start scripts will generate one. Try to make it long and complex.
@@ -93,3 +92,9 @@ We are using GitHub issues to track what needs to be done. If you are unsure whe
 - `src/components/` - Reusable React components
 - `src/blocks/` - Payload block components for page building
 - `src/utilities/` - Helper functions and utilities
+
+### Integration tests
+To run the integration tests, you must first run the server locally.
+```bash
+docker compose up
+```

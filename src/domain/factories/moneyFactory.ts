@@ -1,4 +1,4 @@
-import { Currency, Money } from "../valueItems/money";
+import { Currency, Money } from "..";
 
 export class MoneyFactory {
   defaultCurrency: Currency = Currency.EUR;

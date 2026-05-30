@@ -1,9 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { Thing } from "../../entities/thing";
-import { ID } from "../../valueItems/id";
-import { ThingTitle } from "../../valueItems/thingTitle";
-import { ThingStatus } from "../../valueItems/thingStatus";
-import { PhysicalLocation } from "../../valueItems/location/physicalLocation";
+import { Thing, ID, ThingTitle, ThingStatus, PhysicalLocation, InvalidThingStatusToBorrowError } from '@/domain';
 
 describe("Thing", () => {
   function makeThing(): Thing {
@@ -21,6 +17,16 @@ describe("Thing", () => {
       }),
     });
   }
+
+  it("throws InvalidThingStatusToBorrowError when requesting to borrow a non-READY item", () => {
+    const thing = makeThing()
+    const borrowerId = ID.generate()
+
+    // Move to BORROWED status
+    thing.status = ThingStatus.BORROWED
+
+    expect(() => thing.requestBorrow(borrowerId)).toThrowError(InvalidThingStatusToBorrowError)
+  })
 
   it("allows valid status transitions and rejects invalid", () => {
     const thing = makeThing();
