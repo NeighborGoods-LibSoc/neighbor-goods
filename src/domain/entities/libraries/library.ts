@@ -4,20 +4,23 @@ import { Thing } from '../thing'
 import { Borrower } from '../borrower'
 import { Person } from '../people/person'
 import { WaitingList } from '../waiting_lists/waitingList'
-import { MoneyFactory } from '../../factories/moneyFactory'
-import { WaitingListFactory } from '../../factories/waitingListFactory'
-import { DueDate } from '../../valueItems/dueDate'
-import { FeeSchedule } from '../../valueItems/feeSchedules/feeSchedule'
-import { FeeStatus } from '../../valueItems/feeStatus'
-import { ID } from '../../valueItems/id'
 import { LibraryFee } from './libraryFee'
-import { LoanStatus } from '../../valueItems/loanStatus'
-import { MOPServer } from '../../valueItems/mopServer'
-import { Money } from '../../valueItems/money'
-import { ThingStatus } from '../../valueItems/thingStatus'
-import { ThingTitle } from '../../valueItems/thingTitle'
-import { WaitingListType } from '../../valueItems/waitingListTypes'
-import { BorrowerVerificationFlags } from '../../valueItems/borrowerVerificationFlags'
+import {
+  BorrowerVerificationFlags,
+  DueDate,
+  FeeSchedule,
+  FeeStatus,
+  ID,
+  LoanStatus,
+  MOPServer,
+  Money,
+  MoneyFactory,
+  ReturnInitiator,
+  ThingStatus,
+  ThingTitle,
+  WaitingListFactory,
+  WaitingListType,
+} from '../..'
 
 export abstract class Library extends Entity {
   libraryID: ID
@@ -32,6 +35,14 @@ export abstract class Library extends Entity {
   defaultLoanTime: { days: number }
   mopServer: MOPServer
   publicURL?: string | null
+
+  /**
+   * Who initiates the return flow for loans in this library.
+   * Defaults to LENDER (e.g. SimpleLibrary). DistributedLibrary overrides to BORROWER.
+   */
+  get returnInitiator(): ReturnInitiator {
+    return ReturnInitiator.LENDER
+  }
 
   protected _borrowers: Borrower[] = []
   protected _loans: Loan[] = []

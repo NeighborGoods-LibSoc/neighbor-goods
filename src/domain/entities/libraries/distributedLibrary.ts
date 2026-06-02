@@ -8,6 +8,7 @@ import { DueDate } from '../../valueItems/dueDate'
 import { LoanStatus } from '../../valueItems/loanStatus'
 import { PhysicalArea } from '../../valueItems/location/physicalArea'
 import { ThingStatus } from '../../valueItems/thingStatus'
+import { ReturnInitiator } from '../../valueItems/returnInitiator'
 
 export class DistributedLibrary extends Library {
   area!: PhysicalArea
@@ -15,6 +16,10 @@ export class DistributedLibrary extends Library {
 
   override get entityID(): ID {
     return this.libraryID
+  }
+
+  override get returnInitiator(): ReturnInitiator {
+    return ReturnInitiator.BORROWER
   }
 
   get allThings(): Iterable<Thing> {

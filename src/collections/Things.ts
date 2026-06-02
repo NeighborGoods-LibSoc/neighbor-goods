@@ -87,7 +87,6 @@ export const Things: CollectionConfig = {
       options: [
         { label: 'Email', value: 'EMAIL' },
         { label: 'Phone Number', value: 'PHONE_NUMBER' },
-        { label: 'ID', value: 'ID' },
         { label: 'Deposit', value: 'DEPOSIT' },
         { label: 'In-person', value: 'IN_PERSON' },
       ],
@@ -275,7 +274,7 @@ export const Things: CollectionConfig = {
               new PayloadPersonLookup(req.payload),
             )
 
-            // Defer via setImmediate to avoid Mongoose connection deadlock inside afterChange
+            // Defer via setImmediate to avoid DB connection deadlock inside afterChange
             setImmediate(() => {
               notificationService.notifyOnStatusChange({
                 itemId: new ID(doc.item_id),
@@ -292,7 +291,7 @@ export const Things: CollectionConfig = {
         }
 
         // Create a Loan record when an item transitions to BORROWED
-        // Deferred via setImmediate to avoid Mongoose connection deadlock inside afterChange
+        // Deferred via setImmediate to avoid DB connection deadlock inside afterChange
         if (
           operation === 'update' &&
           doc.status === ThingStatus.BORROWED &&
@@ -329,7 +328,7 @@ export const Things: CollectionConfig = {
         }
 
         // When item returns to READY, mark any active loans as RETURNED
-        // Deferred via setImmediate to avoid Mongoose connection deadlock inside afterChange
+        // Deferred via setImmediate to avoid DB connection deadlock inside afterChange
         if (
           operation === 'update' &&
           doc.status === ThingStatus.READY &&
@@ -356,7 +355,7 @@ export const Things: CollectionConfig = {
         }
 
         // When item is marked DAMAGED, mark any active loans as RETURNED_DAMAGED
-        // Deferred via setImmediate to avoid Mongoose connection deadlock inside afterChange
+        // Deferred via setImmediate to avoid DB connection deadlock inside afterChange
         if (
           operation === 'update' &&
           doc.status === ThingStatus.DAMAGED &&

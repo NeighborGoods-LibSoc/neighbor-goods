@@ -12,7 +12,7 @@ export async function getTestPayload(): Promise<Payload> {
       process.env.PAYLOAD_SECRET = 'test-secret-key-for-integration-tests';
     }
     if (!process.env.DATABASE_URI) {
-      process.env.DATABASE_URI = 'mongodb://localhost:27017/neighbor-goods-test';
+      process.env.DATABASE_URI = 'postgres://neighborgoods:neighborgoods@localhost:5432/neighbor-goods-test';
     }
 
     // Use the real app config as-is

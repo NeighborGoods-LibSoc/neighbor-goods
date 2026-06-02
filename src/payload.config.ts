@@ -1,18 +1,12 @@
 // storage-adapter-import-placeholder
 import dotenv from 'dotenv';
-import { mongooseAdapter } from '@payloadcms/db-mongodb'
 import { postgresAdapter } from '@payloadcms/db-postgres'
 
 dotenv.config(); // ensure env vars are loaded when config is imported
 
-const databaseType = (process.env.DATABASE_TYPE || 'mongodb').toLowerCase()
-
 function getDatabaseAdapter() {
   const uri = process.env.DATABASE_URI || ''
-  if (databaseType === 'postgres') {
-    return postgresAdapter({ pool: { connectionString: uri }, idType: 'uuid', push: process.env.NODE_ENV === 'test' })
-  }
-  return mongooseAdapter({ url: uri })
+  return postgresAdapter({ pool: { connectionString: uri }, idType: 'uuid' })
 }
 
 const disableEmailForTests = process.env.DISABLE_EMAIL_FOR_TESTS === 'true';

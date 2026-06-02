@@ -127,12 +127,12 @@ describe('collections/common/mappers', () => {
         name: 'Power Drill',
         description: 'Cordless drill',
         offeredBy: '00000000-0000-4000-8000-000000000002',
-        borrowerVerification: ['ID', 'DEPOSIT'],
+        borrowerVerification: ['PHONE_NUMBER', 'DEPOSIT'],
         depositAmount: 50,
         status: 'READY',
       }
       const thing = buildDomainThingFromData(doc)
-      expect(thing.borrowerVerification).toContain('ID')
+      expect(thing.borrowerVerification).toContain('PHONE_NUMBER')
       expect(thing.borrowerVerification).toContain('DEPOSIT')
       expect(thing.depositAmount?.amount.toNumber()).toBe(50)
     })
@@ -195,11 +195,11 @@ describe('collections/common/mappers', () => {
       const data = {
         library_id: '00000000-0000-4000-8000-000000000000',
         name: 'Neighborhood',
-        defaultBorrowerVerification: ['EMAIL', 'ID'],
+        defaultBorrowerVerification: ['EMAIL', 'PHONE_NUMBER'],
       }
       const dl = buildDomainDistributedLibraryFromData(data)
       expect(dl.defaultBorrowerVerification).toContain('EMAIL')
-      expect(dl.defaultBorrowerVerification).toContain('ID')
+      expect(dl.defaultBorrowerVerification).toContain('PHONE_NUMBER')
     })
   })
 

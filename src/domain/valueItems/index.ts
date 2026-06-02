@@ -1,6 +1,7 @@
 export * from "./exceptions";
 export * from "./feeStatus";
 export * from "./loanStatus";
+export * from "./returnInitiator";
 export * from "./reservationStatus";
 export * from "./thingStatus";
 export * from "./thingRequestStatus";

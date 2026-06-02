@@ -350,7 +350,6 @@ export const OfferClient: React.FC<OfferClientProps> = ({ user }) => {
               {[
                 { id: 'EMAIL', label: 'Email' },
                 { id: 'PHONE_NUMBER', label: 'Phone Number' },
-                { id: 'ID', label: 'ID' },
                 { id: 'DEPOSIT', label: 'Deposit' },
                 { id: 'IN_PERSON', label: 'In-person' },
               ].map((type) => (
