@@ -35,6 +35,7 @@ export abstract class Library extends Entity {
   defaultLoanTime: { days: number }
   mopServer: MOPServer
   publicURL?: string | null
+  private defaultBorrowerVerification: BorrowerVerificationFlags[]
 
   /**
    * Who initiates the return flow for loans in this library.
