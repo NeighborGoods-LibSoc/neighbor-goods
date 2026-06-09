@@ -61,7 +61,7 @@
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-hook-form": "7.45.4",
-    "sharp": "0.32.6",
+    "sharp": "^0.34.0",
     "tailwind-merge": "^2.6.1",
     "tailwindcss-animate": "^1.0.7",
     "uuid": "^14.0.0"
@@ -93,10 +93,5 @@
   "engines": {
     "node": "^18.20.2 || >=20.9.0",
     "pnpm": "^9 || ^10 || ^11"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "sharp"
-    ]
   }
 }
