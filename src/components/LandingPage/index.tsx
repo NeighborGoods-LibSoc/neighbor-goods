@@ -43,6 +43,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             <Link href="/login" className="btn btn-secondary">
               Sign In
             </Link>
+            <Link href="/faq" className="btn btn-secondary">
+              FAQ
+            </Link>
           </div>
         </div>
       </section>
@@ -198,6 +201,9 @@ export const LandingPage: React.FC<LandingPageProps> = ({
             </Link>
             <Link href="/login" className="btn btn-secondary">
               Log In
+            </Link>
+            <Link href="/faq" className="btn btn-secondary">
+              Read the FAQ
             </Link>
           </div>
         </div>
