@@ -78,6 +78,11 @@ append_if_missing() {
     if ! grep -q "^${key}=" .env 2>/dev/null; then
         echo "${key}=${value}" >> .env
         echo "  Added missing ${key} to .env"
+    elif grep -q "^${key}=$" .env 2>/dev/null; then
+        # Key exists but value is empty — fill it in
+        # Use a temp file to avoid sed in-place portability issues
+        awk -v k="${key}" -v v="${value}" 'BEGIN{FS=OFS="="} $1==k && NF==1 {print k"="v; next} $1==k && $2=="" {print k"="v; next} {print}' .env > .env.tmp && mv .env.tmp .env
+        echo "  Filled empty ${key} in .env"
     fi
 }
 
@@ -89,16 +94,21 @@ append_if_missing() {
 [[ -z "$SMTP_USER" ]]     && SMTP_USER=""
 [[ -z "$SMTP_PASSWORD" ]] && SMTP_PASSWORD=""
 
+# Track whether Postgres credentials were (re)generated so we can rebuild DATABASE_URI
+POSTGRES_CREDS_REGENERATED=false
+
 # Generate secrets / credentials if missing (never default to a static value)
 if [[ -z "$POSTGRES_USER" ]]; then
     echo "Generating POSTGRES_USER..."
     POSTGRES_USER="payload_$(head -c 16 /dev/urandom | base64 | tr -dc a-z0-9 | head -c 8)"
+    POSTGRES_CREDS_REGENERATED=true
     echo "Done!"
 fi
 
 if [[ -z "$POSTGRES_PASSWORD" ]]; then
     echo "Generating POSTGRES_PASSWORD..."
     POSTGRES_PASSWORD=$(head -c 32 /dev/urandom | base64 | tr -dc A-Za-z0-9 | head -c 32)
+    POSTGRES_CREDS_REGENERATED=true
     echo "Done!"
 fi
 
@@ -120,8 +130,14 @@ if [[ -z "$PREVIEW_SECRET" ]]; then
     echo "Done!"
 fi
 
-# Build DATABASE_URI from credentials if not already set
-[[ -z "$DATABASE_URI" ]] && DATABASE_URI="postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB"
+# Build DATABASE_URI from credentials if not already set, if it still points to mongo,
+# or if Postgres credentials were just (re)generated (existing URI would be stale).
+if [[ -z "$DATABASE_URI" \
+      || "$DATABASE_URI" == mongodb://* \
+      || "$DATABASE_URI" == mongodb+srv://* \
+      || "$POSTGRES_CREDS_REGENERATED" == true ]]; then
+    DATABASE_URI="postgres://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB"
+fi
 
 # Only prompt if not in CI mode and values are not set
 if [[ "$CI_MODE" == false ]]; then
