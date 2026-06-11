@@ -15,13 +15,25 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   projects: [
-    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        launchOptions: {
+          executablePath:
+            process.env.CHROME_BIN ||
+            process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH ||
+            '/usr/bin/chromium-browser',
+        },
+      },
+    },
     { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
     { name: 'webkit', use: { ...devices['Desktop Safari'] } },
   ],
   webServer: {
-    command: `./node_modules/.bin/cross-env NODE_OPTIONS=--no-deprecation NEXT_DIST_DIR=.next-e2e DATABASE_URI=mongodb://localhost:27017/neighbor-goods ./node_modules/.bin/next dev --port ${E2E_PORT}`,
+    command: `./node_modules/.bin/cross-env NODE_OPTIONS=--no-deprecation NEXT_DIST_DIR=.next-e2e DATABASE_URI=postgres://neighborgoods:neighborgoods@localhost:5432/neighbor-goods ./node_modules/.bin/next dev --port ${E2E_PORT}`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
+    timeout: 180_000,
   },
 })

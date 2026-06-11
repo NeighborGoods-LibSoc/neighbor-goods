@@ -8,6 +8,7 @@ import type { Media, User, Tag } from '@/payload-types'
 import { DeleteItemButton } from './DeleteItemButton'
 import { RequestToBorrowButton } from './RequestToBorrowButton'
 import { OwnerBorrowActions } from './OwnerBorrowActions'
+import { BorrowerReturnButton } from './BorrowerReturnButton'
 import { getClientSideURL } from '@/utilities/getURL'
 
 type Args = {
@@ -82,7 +83,7 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
         collection: 'loans',
         where: {
           item: { equals: id },
-          status: { in: ['BORROWED', 'OVERDUE'] },
+          status: { in: ['BORROWED', 'OVERDUE', 'RETURN_STARTED', 'WAITING_ON_LENDER_ACCEPTANCE'] },
         },
         depth: 1,
         limit: 1,
@@ -193,6 +194,17 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
               )}
               {isBorrower && (
                 <p><strong>You</strong> are currently borrowing this item.</p>
+              )}
+              {isBorrower &&
+                (activeLoan.status === 'BORROWED' || activeLoan.status === 'OVERDUE') && (
+                  <div style={{ marginTop: '1rem' }}>
+                    <BorrowerReturnButton loanId={activeLoan.id} itemName={item.name} />
+                  </div>
+                )}
+              {isBorrower && activeLoan.status === 'RETURN_STARTED' && (
+                <p style={{ marginTop: '0.5rem', fontStyle: 'italic' }}>
+                  Return started. Waiting for the lender to confirm.
+                </p>
               )}
               {activeLoan.due_date && (
                 <p>
