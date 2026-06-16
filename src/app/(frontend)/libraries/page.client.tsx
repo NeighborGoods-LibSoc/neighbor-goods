@@ -93,7 +93,7 @@ export const LibrariesClient: React.FC<LibrariesClientProps> = ({ user }) => {
           <h1>Libraries</h1>
         </div>
         <div>
-          <Link href="/libraries/new" className="btn btn-primary">
+          <Link href="/libraries/create" className="btn btn-primary">
             Start a Library
           </Link>
         </div>
