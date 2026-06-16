@@ -27,3 +27,4 @@ coverage/
 /blob-report/
 /playwright/.cache/
 /.junie/
+next-env.d.ts
