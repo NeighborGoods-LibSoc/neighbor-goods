@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 import type { User } from '@/payload-types'
 
 interface DashboardClientProps {
@@ -31,6 +30,34 @@ interface Event {
   description: string
   date: string
   location: string
+}
+
+export const getAvatarInitials = (name?: string | null, email?: string | null): string => {
+  const fallback = email?.split('@')[0]
+  const source = (name?.trim() || fallback?.trim() || '').trim()
+
+  if (!source) return 'NG'
+
+  const parts = source.split(/\s+/).filter(Boolean)
+  const firstPart = parts[0] ?? source
+  const lastPart = parts[parts.length - 1] ?? firstPart
+  const initials =
+    parts.length > 1
+      ? `${firstPart.charAt(0)}${lastPart.charAt(0)}`
+      : source.slice(0, 2)
+
+  return initials.toUpperCase()
+}
+
+export const DashboardAvatar: React.FC<{ user: Pick<User, 'name' | 'email'> }> = ({ user }) => {
+  const avatarInitials = getAvatarInitials(user.name, user.email)
+  const avatarLabel = `${user.name || user.email || 'NeighborGoods user'} avatar placeholder`
+
+  return (
+    <div className="avatar" role="img" aria-label={avatarLabel}>
+      {avatarInitials}
+    </div>
+  )
 }
 
 export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDeletedMessage }) => {
@@ -149,6 +176,8 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
     return formatDate(user.createdAt)
   }
 
+  const primaryAdminLibrary = adminLibraries[0]
+
   if (isLoading) {
     return (
       <main className="container">
@@ -173,8 +202,8 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
           <h1>User Dashboard</h1>
         </div>
         <div className="flex gap-2">
-          {adminLibraries.length > 0 && (
-            <Link href={`/libraries/${adminLibraries[0].id}/moderate`} className="btn btn-secondary">
+          {primaryAdminLibrary && (
+            <Link href={`/libraries/${primaryAdminLibrary.id}/moderate`} className="btn btn-secondary">
               Moderator Dashboard
             </Link>
           )}
@@ -187,9 +216,7 @@ export const DashboardClient: React.FC<DashboardClientProps> = ({ user, showDele
       {/* Profile Header */}
       <div className="card">
         <div className="profile-top">
-          <div className="avatar">
-            <Image src="/api/placeholder/120/120" alt="User Avatar" width={120} height={120} />
-          </div>
+          <DashboardAvatar user={user} />
           <div className="profile-name-section">
             <h1 className="profile-name">{user.name}</h1>
             <p>Member since {getJoinedDate()} • NeighborGoods</p>
