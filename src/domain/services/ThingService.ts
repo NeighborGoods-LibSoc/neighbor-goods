@@ -7,6 +7,10 @@ export class ThingService {
   constructor(private borrowRequestRepo: BorrowRequestRepository) {}
 
   async requestBorrow(thing: Thing, requesterId: ID, itemPayloadId?: ID): Promise<void> {
+    // Validate item status and ownership before anything else
+    // (Domain entity throws InvalidThingStatusToBorrowError if not READY)
+    thing.requestBorrow(requesterId)
+
     const itemId = itemPayloadId ?? thing.thing_id
 
     // Check cooldown for this specific user-item combination
@@ -31,8 +35,5 @@ export class ThingService {
       // Create new request record
       await this.borrowRequestRepo.recordRequest(itemId, requesterId)
     }
-
-    // Domain entity handles state change and validation
-    thing.requestBorrow(requesterId)
   }
 }

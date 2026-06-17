@@ -16,9 +16,11 @@ import { ID, PhysicalLocation, PhysicalArea } from '@/domain'
 function makeItem(overrides: any = {}) {
   return {
     id: '00000000-0000-4000-8000-000000000001',
+    item_id: '00000000-0000-4000-8000-000000000001',
     name: 'Hammer',
     description: 'A heavy hammer',
     offeredBy: { id: '00000000-0000-4000-8000-000000000002' },
+    owner_uuid: '00000000-0000-4000-8000-000000000002',
     ...overrides,
   }
 }
@@ -61,7 +63,7 @@ describe('collections/common/mappers', () => {
     })
 
     it('uses fallback names and ids if missing', () => {
-      const item = makeItem({ id: undefined, _id: '00000000-0000-4000-8000-000000000003', name: undefined, description: undefined, offeredBy: '00000000-0000-4000-8000-000000000004' })
+      const item = makeItem({ id: undefined, item_id: '00000000-0000-4000-8000-000000000003', name: undefined, description: undefined, offeredBy: '00000000-0000-4000-8000-000000000004', owner_uuid: '00000000-0000-4000-8000-000000000004' })
       const thing = mapItemToThing(item)
       expect(thing.entityID.toString()).toBe('00000000-0000-4000-8000-000000000003')
       expect(thing.title.name).toBe('Untitled')
@@ -191,13 +193,13 @@ describe('collections/common/mappers', () => {
       expect((dl.area as PhysicalArea).radius.kilometers).toBe(12)
     })
 
-    it('maps default verification flags', () => {
+    it('maps default verification flags', async () => {
       const data = {
         library_id: '00000000-0000-4000-8000-000000000000',
         name: 'Neighborhood',
         defaultBorrowerVerification: ['EMAIL', 'PHONE_NUMBER'],
       }
-      const dl = buildDomainDistributedLibraryFromData(data)
+      const dl = await buildDomainDistributedLibraryFromData(data)
       expect(dl.defaultBorrowerVerification).toContain('EMAIL')
       expect(dl.defaultBorrowerVerification).toContain('PHONE_NUMBER')
     })

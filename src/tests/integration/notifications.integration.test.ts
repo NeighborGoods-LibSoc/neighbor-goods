@@ -3,6 +3,9 @@ import { getTestPayload, cleanupPayload } from '../setup/integration.setup'
 import { createTestUser, createTestItem, cleanupTestData } from '../helpers/testData'
 import type { Payload } from 'payload'
 
+/** Wait for setImmediate callbacks and async notification creation to complete */
+const waitForNotifications = () => new Promise((resolve) => setTimeout(resolve, 500))
+
 describe('Notifications Integration Test', () => {
   let payload: Payload
   let lenderUser: any
@@ -57,6 +60,9 @@ describe('Notifications Integration Test', () => {
     const updatedItem = await payload.findByID({ collection: 'items', id: item.id })
     expect(updatedItem.status).toBe('WAITING_FOR_LENDER_APPROVAL_TO_BORROW')
 
+    // Wait for deferred notification creation (setImmediate + async)
+    await waitForNotifications()
+
     // Check that a notification was created for the lender
     const lenderNotifications = await payload.find({
       collection: 'notifications',
@@ -72,7 +78,7 @@ describe('Notifications Integration Test', () => {
     expect(notification.message).toContain('Notif Borrower')
     expect(notification.message).toContain('Request Notify Drill')
     expect(notification.read).toBe(false)
-    expect(notification.actionURL).toBe(`/items/${item.id}`)
+    expect(notification.actionURL).toBe(`/items/${item.item_id}`)
 
     // triggeredBy should reference the borrower
     const triggeredById =
@@ -108,6 +114,8 @@ describe('Notifications Integration Test', () => {
     const updatedItem = await payload.findByID({ collection: 'items', id: item.id })
     expect(updatedItem.status).toBe('BORROWED')
 
+    await waitForNotifications()
+
     // Check that an approval notification was created for the borrower
     const borrowerNotifications = await payload.find({
       collection: 'notifications',
@@ -123,7 +131,7 @@ describe('Notifications Integration Test', () => {
     expect(notification.message).toContain('approved')
     expect(notification.message).toContain('Approve Notify Drill')
     expect(notification.read).toBe(false)
-    expect(notification.actionURL).toBe(`/items/${item.id}`)
+    expect(notification.actionURL).toBe(`/items/${item.item_id}`)
   })
 
   it('should notify the borrower when the lender rejects a request', async () => {
@@ -148,6 +156,8 @@ describe('Notifications Integration Test', () => {
       data: { status: 'READY' },
       req: { user: lenderUser } as any,
     })
+
+    await waitForNotifications()
 
     // Check that a rejection notification was created for the borrower
     const borrowerNotifications = await payload.find({
@@ -191,6 +201,8 @@ describe('Notifications Integration Test', () => {
 
     const updatedItem = await payload.findByID({ collection: 'items', id: item.id })
     expect(updatedItem.status).toBe('RESERVED')
+
+    await waitForNotifications()
 
     // Check that a reservation notification was created for the borrower
     const borrowerNotifications = await payload.find({
