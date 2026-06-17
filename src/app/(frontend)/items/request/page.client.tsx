@@ -27,6 +27,11 @@ interface Tag {
   name: string
 }
 
+interface Library {
+  id: string
+  name: string
+}
+
 export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
   const router = useRouter()
   const [formData, setFormData] = useState({
@@ -38,6 +43,8 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
   const [imagePreview, setImagePreview] = useState<string>('')
   const [availableTags, setAvailableTags] = useState<Tag[]>([])
   const [selectedTags, setSelectedTags] = useState<string[]>([])
+  const [userLibraries, setUserLibraries] = useState<Library[]>([])
+  const [selectedLibraries, setSelectedLibraries] = useState<string[]>([])
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [modalState, setModalState] = useState<{
     open: boolean
@@ -47,7 +54,7 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
     requestName?: string
   }>({ open: false, type: 'success', message: '' })
 
-  // Fetch available tags on mount
+  // Fetch available tags and user's libraries on mount
   useEffect(() => {
     const fetchTags = async () => {
       try {
@@ -60,8 +67,37 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
         console.error('Error fetching tags:', error)
       }
     }
+    const fetchLibraries = async () => {
+      try {
+        // Fetch libraries where the user is a member or administrator
+        const [memberRes, adminRes] = await Promise.all([
+          fetch(`/api/libraries?where[members][in]=${user.id}&depth=0&limit=100`),
+          fetch(`/api/libraries?where[administrators][in]=${user.id}&depth=0&limit=100`),
+        ])
+        const libs = new Map<string, Library>()
+        if (memberRes.ok) {
+          const data = await memberRes.json()
+          for (const lib of data.docs || []) {
+            libs.set(lib.id, { id: lib.id, name: lib.name })
+          }
+        }
+        if (adminRes.ok) {
+          const data = await adminRes.json()
+          for (const lib of data.docs || []) {
+            libs.set(lib.id, { id: lib.id, name: lib.name })
+          }
+        }
+        const allLibs = Array.from(libs.values())
+        setUserLibraries(allLibs)
+        // Default to all libraries
+        setSelectedLibraries(allLibs.map((l) => l.id))
+      } catch (error) {
+        console.error('Error fetching libraries:', error)
+      }
+    }
     fetchTags()
-  }, [])
+    fetchLibraries()
+  }, [user.id])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target
@@ -99,6 +135,7 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
     setImageFile(null)
     setImagePreview('')
     setSelectedTags([])
+    setSelectedLibraries(userLibraries.map((l) => l.id))
   }
 
   const handleGoToRequest = () => {
@@ -123,6 +160,9 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
       }
       if (!formData.agreeToTerms) {
         throw new Error('You must agree to the terms and conditions')
+      }
+      if (selectedLibraries.length === 0) {
+        throw new Error('You must select at least one library')
       }
 
       let mediaId = null
@@ -151,6 +191,7 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
         description: formData.description || '',
         requestedBy: user.id,
         tags: selectedTags,
+        libraries: selectedLibraries,
       }
 
       if (mediaId) {
@@ -239,6 +280,46 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Libraries */}
+          <div className="space-y-2">
+            <Label>Libraries <span className="text-red-500">*</span></Label>
+            <p className="text-sm text-muted-foreground">
+              Select which libraries to post this request to
+            </p>
+            {userLibraries.length > 0 ? (
+              <div className="flex flex-wrap gap-2">
+                {userLibraries.map((lib) => (
+                  <label
+                    key={lib.id}
+                    className={`cursor-pointer rounded-full border px-3 py-1 text-sm transition-colors ${
+                      selectedLibraries.includes(lib.id)
+                        ? 'border-primary bg-primary text-primary-foreground'
+                        : 'border-input bg-background hover:bg-accent'
+                    }`}
+                  >
+                    <input
+                      type="checkbox"
+                      className="sr-only"
+                      checked={selectedLibraries.includes(lib.id)}
+                      onChange={(e) => {
+                        if (e.target.checked) {
+                          setSelectedLibraries([...selectedLibraries, lib.id])
+                        } else {
+                          setSelectedLibraries(selectedLibraries.filter((id) => id !== lib.id))
+                        }
+                      }}
+                    />
+                    {lib.name}
+                  </label>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-amber-600">
+                You are not a member of any libraries. Please join a library before making a request.
+              </p>
+            )}
+          </div>
+
           {/* Name */}
           <div className="space-y-2">
             <Label htmlFor="name">
@@ -343,7 +424,7 @@ export const RequestClient: React.FC<RequestClientProps> = ({ user }) => {
           </div>
 
           {/* Submit Button */}
-          <Button type="submit" disabled={isSubmitting} className="w-full">
+          <Button type="submit" disabled={isSubmitting || userLibraries.length === 0} className="w-full">
             {isSubmitting ? 'Submitting...' : 'Post Request'}
           </Button>
         </form>

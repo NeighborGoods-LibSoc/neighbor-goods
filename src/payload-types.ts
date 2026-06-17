@@ -1016,6 +1016,10 @@ export interface ThingRequest {
   tags?: (string | Tag)[] | null;
   requestedBy: string | User;
   /**
+   * Select which libraries to post this request to (must be a member)
+   */
+  libraries: (string | Library)[];
+  /**
    * Optional reference image showing what you are looking for
    */
   referenceImage?: (string | null) | Media;
@@ -1879,6 +1883,7 @@ export interface ThingRequestsSelect<T extends boolean = true> {
   description?: T;
   tags?: T;
   requestedBy?: T;
+  libraries?: T;
   referenceImage?: T;
   updatedAt?: T;
   createdAt?: T;

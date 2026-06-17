@@ -66,6 +66,16 @@ export const ThingRequests: CollectionConfig = {
       },
     },
     {
+      name: 'libraries',
+      type: 'relationship',
+      relationTo: 'libraries',
+      hasMany: true,
+      required: true,
+      admin: {
+        description: 'Select which libraries to post this request to (must be a member)',
+      },
+    },
+    {
       name: 'referenceImage',
       type: 'upload',
       relationTo: 'media',
@@ -87,6 +97,24 @@ export const ThingRequests: CollectionConfig = {
           }
           // Always set requestedBy to the authenticated user, ignoring client input
           data.requestedBy = req.user.id
+
+          // Validate library membership
+          const libraryIds = Array.isArray(data.libraries) ? data.libraries : [data.libraries].filter(Boolean)
+          if (libraryIds.length === 0) {
+            throw new Error('You must select at least one library for your request')
+          }
+
+          for (const libId of libraryIds) {
+            const id = typeof libId === 'object' ? libId?.id || libId?.value : libId
+            const library = await req.payload.findByID({ collection: 'libraries', id: String(id), depth: 0 })
+            const memberIds = (library.members || []).map((m: any) => typeof m === 'object' ? m?.id : m)
+            const adminIds = (library.administrators || []).map((a: any) => typeof a === 'object' ? a?.id : a)
+            const allMemberIds = [...memberIds, ...adminIds]
+            if (!allMemberIds.includes(req.user.id)) {
+              throw new Error(`You must be a member of library "${library.name}" to post a request there`)
+            }
+          }
+
           return data
         }
 
