@@ -17,6 +17,7 @@ const cabin = Cabin({
   variable: '--font-cabin',
 })
 
+import { isDevEnv } from '@/utilities/isServerAdmin'
 import { AdminBar } from '@/components/AdminBar'
 import { Footer } from '@/Footer/Component'
 import { Header } from '@/Header/Component'
@@ -30,6 +31,7 @@ import { getServerSideURL } from '@/utilities/getURL'
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { isEnabled } = await draftMode()
+  const showAdminBar = isDevEnv()
 
   return (
     <html
@@ -44,11 +46,13 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       </head>
       <body>
         <Providers>
-          <AdminBar
-            adminBarProps={{
-              preview: isEnabled,
-            }}
-          />
+          {showAdminBar && (
+            <AdminBar
+              adminBarProps={{
+                preview: isEnabled,
+              }}
+            />
+          )}
 
           <Header />
           {children}

@@ -42,8 +42,8 @@ export const AdminBar: React.FC<{
   ) as keyof typeof collectionLabels
   const router = useRouter()
 
-  const onAuthChange = React.useCallback((user: PayloadMeUser) => {
-    setShow(Boolean(user?.id))
+  const onAuthChange = React.useCallback((user: any) => {
+    setShow(Boolean(user?.id && user?.collection === 'admins'))
   }, [])
 
   return (

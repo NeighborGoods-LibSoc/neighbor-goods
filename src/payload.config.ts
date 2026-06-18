@@ -37,12 +37,14 @@ import { Header } from './Header/config'
 import { plugins } from './plugins'
 import { defaultLexical } from '@/fields'
 import { getServerSideURL } from './utilities/getURL'
+import { isDevEnv } from './utilities/isServerAdmin'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
 
 export default buildConfig({
   admin: {
+    disable: !isDevEnv(),
     components: {
       // The `BeforeLogin` component renders a message that you see while logging into your admin panel.
       // Feel free to delete this at any time. Simply remove the line below and the import `BeforeLogin` statement on line 15.
@@ -86,10 +88,10 @@ export default buildConfig({
   globals: [Header, Footer],
   plugins: [
     ...plugins,
-    openapi({ openapiVersion: '3.0', metadata: { title: 'NeighborGoods API', version: '0.0.1' } }),
-    swaggerUI({ specEndpoint: '/openapi.json', enabled: true }),
+    isDevEnv() ? openapi({ openapiVersion: '3.0', metadata: { title: 'NeighborGoods API', version: '0.0.1' } }) : null,
+    isDevEnv() ? swaggerUI({ specEndpoint: '/openapi.json', enabled: true }) : null,
     // storage-adapter-placeholder
-  ],
+  ].filter(Boolean) as any[],
   secret: process.env.PAYLOAD_SECRET,
   sharp,
   typescript: {

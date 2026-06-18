@@ -1,16 +1,16 @@
 import type { CollectionConfig } from 'payload'
 
-import { authenticated } from '@/access'
+import { hasServerAdminPrivileges } from '@/utilities/isServerAdmin'
 import { uuidField } from '@/fields'
 
 export const Admins: CollectionConfig = {
   slug: 'admins',
   access: {
-    admin: authenticated,
-    create: () => true,
-    delete: authenticated,
-    read: authenticated,
-    update: authenticated,
+    admin: ({ req }) => hasServerAdminPrivileges(req, false),
+    create: ({ req }) => hasServerAdminPrivileges(req, true),
+    delete: ({ req }) => hasServerAdminPrivileges(req, true),
+    read: ({ req }) => hasServerAdminPrivileges(req, true),
+    update: ({ req }) => hasServerAdminPrivileges(req, true),
   },
   admin: {
     defaultColumns: ['name', 'email'],
