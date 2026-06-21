@@ -16,6 +16,11 @@ export default defineConfig({
       '**/*.integration.test.tsx',
       'e2e/**',
     ],
+    coverage: {
+      provider: 'v8',
+      reporter: ['lcov', 'text'],
+      reportsDirectory: './coverage',
+    },
   },
   resolve: {
     alias: {
