@@ -22,3 +22,7 @@ Users can donate and take goods here.  Technology such as NFC or RFID chips can 
 ## BuyNothing Groups
 BuyNothing groups exist in many forms of social media.  Adapters to this allow us to treat them as a form of library as well,
 where any goods are lent without a return date, and similar to the DistributedLibrary pickup and return must be coordinated between buyers.
+
+## Community Gardens
+Community gardens can be modeled as a library as well - each plot is an item, and is lent out for a particular period
+of time (usually a growing season).
