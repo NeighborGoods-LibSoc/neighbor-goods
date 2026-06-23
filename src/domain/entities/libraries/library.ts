@@ -35,6 +35,7 @@ export abstract class Library extends Entity {
   defaultLoanTime: { days: number }
   mopServer: MOPServer
   publicURL?: string | null
+  acceptsNewMembers: boolean
   private defaultBorrowerVerification: BorrowerVerificationFlags[]
 
   /**
@@ -60,6 +61,7 @@ export abstract class Library extends Entity {
     defaultBorrowerVerification?: BorrowerVerificationFlags[]
     mopServer: MOPServer
     publicURL?: string | null
+    acceptsNewMembers?: boolean
   }) {
     super()
     this.libraryID = params.libraryID
@@ -73,6 +75,7 @@ export abstract class Library extends Entity {
     this.defaultBorrowerVerification = params.defaultBorrowerVerification ?? []
     this.mopServer = params.mopServer
     this.publicURL = params.publicURL ?? null
+    this.acceptsNewMembers = params.acceptsNewMembers ?? true
   }
 
   get entityID(): ID {

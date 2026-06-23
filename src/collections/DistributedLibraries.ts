@@ -54,6 +54,15 @@ export const DistributedLibraries: CollectionConfig = {
       admin: { description: 'Items shared through this library' },
     },
     {
+      name: 'accepts_new_members',
+      type: 'checkbox',
+      required: true,
+      defaultValue: true,
+      admin: {
+        description: 'Whether this library is currently accepting new members.',
+      },
+    },
+    {
       name: 'default_loan_time_days',
       type: 'number',
       required: true,
@@ -115,6 +124,7 @@ export const DistributedLibraries: CollectionConfig = {
             Number(data.default_loan_time_days ?? domainDL.defaultLoanTime.days),
           )
           data.public_url = domainDL.publicURL ? String(domainDL.publicURL) : undefined
+          data.accepts_new_members = domainDL.acceptsNewMembers
           // area normalization
           if (domainDL.area) {
             data.area = serializeArea(domainDL)
@@ -138,6 +148,7 @@ export const DistributedLibraries: CollectionConfig = {
             Number(data.default_loan_time_days ?? domainDL.defaultLoanTime.days),
           )
           data.public_url = domainDL.publicURL ? String(domainDL.publicURL) : undefined
+          data.accepts_new_members = domainDL.acceptsNewMembers
           if (domainDL.area) {
             data.area = serializeArea(domainDL)
           }
@@ -157,6 +168,8 @@ export const DistributedLibraries: CollectionConfig = {
           if (doc.name !== domainDL.name) doc.name = domainDL.name
           const normalizedURL = domainDL.publicURL ? String(domainDL.publicURL) : undefined
           if (doc.public_url !== normalizedURL) doc.public_url = normalizedURL
+          if (doc.accepts_new_members !== domainDL.acceptsNewMembers)
+            doc.accepts_new_members = domainDL.acceptsNewMembers
           const normalizedDays = Math.max(
             1,
             Number(doc.default_loan_time_days ?? domainDL.defaultLoanTime.days),

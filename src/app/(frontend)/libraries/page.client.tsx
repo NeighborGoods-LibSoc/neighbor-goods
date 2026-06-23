@@ -151,6 +151,15 @@ export const LibrariesClient: React.FC<LibrariesClientProps> = ({ user }) => {
                   >
                     Joined
                   </span>
+                ) : (library as any).accepts_new_members === false ? (
+                  <span
+                    style={{
+                      fontSize: '0.85rem',
+                      opacity: 0.7,
+                    }}
+                  >
+                    Not accepting new members
+                  </span>
                 ) : (
                   <button
                     className="btn btn-primary"
@@ -160,6 +169,15 @@ export const LibrariesClient: React.FC<LibrariesClientProps> = ({ user }) => {
                   >
                     {isJoining ? 'Joining...' : 'Join Library'}
                   </button>
+                )}
+                {userIsAdmin && (
+                  <Link
+                    href={`/libraries/${library.id}/edit`}
+                    className="btn"
+                    style={{ marginLeft: '0.5rem', fontSize: '0.85rem' }}
+                  >
+                    Edit Settings
+                  </Link>
                 )}
               </div>
             </div>

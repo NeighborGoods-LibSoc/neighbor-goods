@@ -12,11 +12,17 @@ import { Person } from '@/domain/entities/people/person'
 import { URL } from '@/domain/valueItems/url'
 
 export function mapItemToThing(item: any): Thing {
-  const thing_id = item?.item_id ? ID.parse(String(item.item_id)) : ID.generate()
+  const rawId = item?.id ?? item?._id ?? item?.item_id
+  const thing_id = rawId ? ID.parse(String(rawId)) : ID.generate()
   const title = new ThingTitle({ name: String(item?.name || 'Untitled'), description: item?.description || undefined })
-  const owner_id = item?.owner_uuid
-    ? ID.parse(String(item.owner_uuid))
-    : ID.generate() // fallback if no owner_uuid available
+  const offeredByRaw =
+    item?.offeredBy && typeof item.offeredBy === 'object'
+      ? (item.offeredBy.id ?? item.offeredBy._id)
+      : item?.offeredBy
+  const ownerRaw = offeredByRaw ?? item?.owner_uuid
+  const owner_id = ownerRaw
+    ? ID.parse(String(ownerRaw))
+    : ID.generate() // fallback if no owner information available
   const storage_location = new PhysicalLocation({
     latitude: null,
     longitude: null,
@@ -98,6 +104,9 @@ export async function buildDomainDistributedLibraryFromData(data: any, req?: any
   const publicURL = typeof data.public_url === 'string' && data.public_url.trim().length > 0
     ? data.public_url.trim()
     : null
+  const acceptsNewMembers = data.accepts_new_members === undefined || data.accepts_new_members === null
+    ? true
+    : Boolean(data.accepts_new_members)
 
   const resolveUsers = async (userIds: any[]) => {
     const people: Person[] = []
@@ -129,6 +138,7 @@ export async function buildDomainDistributedLibraryFromData(data: any, req?: any
     defaultBorrowerVerification: data.defaultBorrowerVerification || [],
     mopServer: MOPServer.localhost(),
     publicURL: publicURL,
+    acceptsNewMembers,
   })
 
   const area = toPhysicalArea(data.area)

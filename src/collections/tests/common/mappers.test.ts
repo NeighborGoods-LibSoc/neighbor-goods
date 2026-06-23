@@ -191,13 +191,13 @@ describe('collections/common/mappers', () => {
       expect((dl.area as PhysicalArea).radius.kilometers).toBe(12)
     })
 
-    it('maps default verification flags', () => {
+    it('maps default verification flags', async () => {
       const data = {
         library_id: '00000000-0000-4000-8000-000000000000',
         name: 'Neighborhood',
         defaultBorrowerVerification: ['EMAIL', 'PHONE_NUMBER'],
       }
-      const dl = buildDomainDistributedLibraryFromData(data)
+      const dl = await buildDomainDistributedLibraryFromData(data)
       expect(dl.defaultBorrowerVerification).toContain('EMAIL')
       expect(dl.defaultBorrowerVerification).toContain('PHONE_NUMBER')
     })

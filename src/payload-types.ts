@@ -990,6 +990,10 @@ export interface Library {
     version: string;
   };
   publicURL?: string | null;
+  /**
+   * Whether this library is currently accepting new members.
+   */
+  acceptsNewMembers: boolean;
   items?: (string | Item)[] | null;
   updatedAt: string;
   createdAt: string;
@@ -1069,6 +1073,10 @@ export interface DistributedLibrary {
    * Items shared through this library
    */
   items?: (string | Item)[] | null;
+  /**
+   * Whether this library is currently accepting new members.
+   */
+  accepts_new_members: boolean;
   /**
    * Default loan time in days
    */
@@ -1864,6 +1872,7 @@ export interface LibrariesSelect<T extends boolean = true> {
         version?: T;
       };
   publicURL?: T;
+  acceptsNewMembers?: T;
   items?: T;
   updatedAt?: T;
   createdAt?: T;
@@ -1907,6 +1916,7 @@ export interface DistributedLibrariesSelect<T extends boolean = true> {
   administrators?: T;
   members?: T;
   items?: T;
+  accepts_new_members?: T;
   default_loan_time_days?: T;
   defaultBorrowerVerification?: T;
   area?:

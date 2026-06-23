@@ -164,6 +164,15 @@ export const Libraries: CollectionConfig = {
       required: false,
     },
     {
+      name: 'acceptsNewMembers',
+      type: 'checkbox',
+      required: true,
+      defaultValue: true,
+      admin: {
+        description: 'Whether this library is currently accepting new members.',
+      },
+    },
+    {
       name: 'items',
       type: 'relationship',
       relationTo: 'items',
@@ -238,6 +247,9 @@ async function buildDomainLibraryFromData(data: any, req: any): Promise<SimpleLi
     defaultLoanTime: { days: Number(data.defaultLoanTime || 14) },
     mopServer,
     publicURL: data.publicURL ? URL.parse(data.publicURL)?.toString() ?? null : null,
+    acceptsNewMembers: data.acceptsNewMembers === undefined || data.acceptsNewMembers === null
+      ? true
+      : Boolean(data.acceptsNewMembers),
   })
 
   if (data.location) {
