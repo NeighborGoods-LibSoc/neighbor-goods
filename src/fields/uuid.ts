@@ -21,6 +21,9 @@ export function uuidField(params: {
     defaultValue: defaultValue || (() => uuidv4()),
     admin: { description },
     validate: (val: unknown) => {
+      if (val === null || val === undefined || val === '') {
+        return required ? 'Must be a valid UUID' : true
+      }
       if (typeof val !== 'string') return 'Must be a string'
       // relaxed RFC4122 UUID regex covering versions 1-5
       const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i

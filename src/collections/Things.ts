@@ -283,6 +283,7 @@ export const Things: CollectionConfig = {
                 newStatus: doc.status as ThingStatus,
                 ownerId: new ID(ownerUuid),
                 requesterId: requesterUuid ? new ID(requesterUuid) : null,
+                itemUrlId: String(doc.id),
               }).catch((error) => {
                 console.error('Failed to create notification:', error)
               })

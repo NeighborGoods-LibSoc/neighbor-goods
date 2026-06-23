@@ -21,8 +21,11 @@ export class NotificationService {
     newStatus: ThingStatus
     ownerId: ID
     requesterId: ID | null
+    /** Optional URL slug/id used for building the actionURL (defaults to itemId). */
+    itemUrlId?: string
   }): Promise<void> {
     const { itemId, itemName, previousStatus, newStatus, ownerId, requesterId } = params
+    const itemUrlId = params.itemUrlId ?? itemId.toString()
 
     // Notify owner when someone requests to borrow
     if (
@@ -38,7 +41,7 @@ export class NotificationService {
             message: `${requesterName} has requested to borrow "${itemName}"`,
             itemId,
             triggeredBy: requesterId,
-            actionURL: `/items/${itemId.toString()}`,
+            actionURL: `/items/${itemUrlId}`,
           }),
         )
       }
@@ -57,7 +60,7 @@ export class NotificationService {
             message: `Your request to borrow "${itemName}" has been approved!`,
             itemId,
             triggeredBy: ownerId,
-            actionURL: `/items/${itemId.toString()}`,
+            actionURL: `/items/${itemUrlId}`,
           }),
         )
       }
@@ -76,7 +79,7 @@ export class NotificationService {
             message: `Your request to borrow "${itemName}" was declined`,
             itemId,
             triggeredBy: ownerId,
-            actionURL: `/items/${itemId.toString()}`,
+            actionURL: `/items/${itemUrlId}`,
           }),
         )
       }
@@ -95,7 +98,7 @@ export class NotificationService {
             message: `"${itemName}" has been reserved for you — please arrange pickup!`,
             itemId,
             triggeredBy: ownerId,
-            actionURL: `/items/${itemId.toString()}`,
+            actionURL: `/items/${itemUrlId}`,
           }),
         )
       }

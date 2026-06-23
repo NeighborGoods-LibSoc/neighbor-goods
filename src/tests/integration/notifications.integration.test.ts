@@ -8,6 +8,24 @@ describe('Notifications Integration Test', () => {
   let lenderUser: any
   let borrowerUser: any
 
+  // Notifications are created in a deferred `setImmediate` inside the
+  // items collection `afterChange` hook to avoid DB connection deadlocks.
+  // This helper polls until a matching notification exists (or times out).
+  const waitForNotifications = async (
+    where: Record<string, any>,
+    expected = 1,
+    timeoutMs = 5000,
+  ) => {
+    const start = Date.now()
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const result = await payload.find({ collection: 'notifications', where })
+      if (result.totalDocs >= expected) return result
+      if (Date.now() - start > timeoutMs) return result
+      await new Promise((r) => setTimeout(r, 50))
+    }
+  }
+
   beforeAll(async () => {
     payload = await getTestPayload()
 
@@ -58,13 +76,10 @@ describe('Notifications Integration Test', () => {
     expect(updatedItem.status).toBe('WAITING_FOR_LENDER_APPROVAL_TO_BORROW')
 
     // Check that a notification was created for the lender
-    const lenderNotifications = await payload.find({
-      collection: 'notifications',
-      where: {
-        recipient: { equals: lenderUser.id },
-        type: { equals: 'borrow_request' },
-        item: { equals: item.id },
-      },
+    const lenderNotifications = await waitForNotifications({
+      recipient: { equals: lenderUser.id },
+      type: { equals: 'borrow_request' },
+      item: { equals: item.id },
     })
 
     expect(lenderNotifications.totalDocs).toBe(1)
@@ -109,13 +124,10 @@ describe('Notifications Integration Test', () => {
     expect(updatedItem.status).toBe('BORROWED')
 
     // Check that an approval notification was created for the borrower
-    const borrowerNotifications = await payload.find({
-      collection: 'notifications',
-      where: {
-        recipient: { equals: borrowerUser.id },
-        type: { equals: 'borrow_approved' },
-        item: { equals: item.id },
-      },
+    const borrowerNotifications = await waitForNotifications({
+      recipient: { equals: borrowerUser.id },
+      type: { equals: 'borrow_approved' },
+      item: { equals: item.id },
     })
 
     expect(borrowerNotifications.totalDocs).toBe(1)
@@ -150,13 +162,10 @@ describe('Notifications Integration Test', () => {
     })
 
     // Check that a rejection notification was created for the borrower
-    const borrowerNotifications = await payload.find({
-      collection: 'notifications',
-      where: {
-        recipient: { equals: borrowerUser.id },
-        type: { equals: 'borrow_rejected' },
-        item: { equals: item.id },
-      },
+    const borrowerNotifications = await waitForNotifications({
+      recipient: { equals: borrowerUser.id },
+      type: { equals: 'borrow_rejected' },
+      item: { equals: item.id },
     })
 
     expect(borrowerNotifications.totalDocs).toBe(1)
@@ -193,13 +202,10 @@ describe('Notifications Integration Test', () => {
     expect(updatedItem.status).toBe('RESERVED')
 
     // Check that a reservation notification was created for the borrower
-    const borrowerNotifications = await payload.find({
-      collection: 'notifications',
-      where: {
-        recipient: { equals: borrowerUser.id },
-        type: { equals: 'borrow_approved' },
-        item: { equals: item.id },
-      },
+    const borrowerNotifications = await waitForNotifications({
+      recipient: { equals: borrowerUser.id },
+      type: { equals: 'borrow_approved' },
+      item: { equals: item.id },
     })
 
     expect(borrowerNotifications.totalDocs).toBe(1)
