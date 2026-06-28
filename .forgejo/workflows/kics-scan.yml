@@ -13,17 +13,16 @@ jobs:
     name: KICS Security Scan
     runs-on: ubuntu-latest
     permissions:
-      security-events: write
       contents: read
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: https://code.forgejo.org/actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Run KICS IaC Scan
-        uses: checkmarx/kics-github-action@b974e53df1e3a2cd22ea90f0ec01882394feede4
+        uses: https://github.com/checkmarx/kics-github-action@b974e53df1e3a2cd22ea90f0ec01882394feede4
         continue-on-error: true
         with:
           path: '.'
@@ -35,7 +34,9 @@ jobs:
         run: sudo chown -R $USER:$USER kics-results
 
       - name: Upload KICS Scan results
-        uses: github/codeql-action/upload-sarif@v3
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         if: always()
         with:
-          sarif_file: kics-results/results.sarif
+          name: kics-scan-results
+          path: kics-results/
+          retention-days: 14

@@ -15,10 +15,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: https://code.forgejo.org/actions/checkout@v4
 
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: https://code.forgejo.org/actions/setup-go@v5
         with:
           go-version: '1.25'
 
@@ -26,9 +26,9 @@ jobs:
         run: |
           go install -v=0 github.com/projectdiscovery/nuclei/v3/cmd/nuclei@latest
           nuclei -version
-      
+
       - name: Set up Docker Compose
-        uses: docker/setup-compose-action@v1
+        uses: https://github.com/docker/setup-compose-action@v1
         with:
           version: latest
 
@@ -36,19 +36,19 @@ jobs:
         run: |
           chmod +x ./start.sh
           ./start.sh --ci
-        
+
       - name: Wait for application to be ready
         run: |
           echo "Waiting for the application to start..."
           echo "Checking Docker containers..."
           docker compose ps
-          
+
           # Wait up to 5 minutes for the application to be ready (pnpm install + build can take time)
           TIMEOUT=300
           ELAPSED=0
           until curl -f -s http://localhost:3000 > /dev/null 2>&1 || [ $ELAPSED -eq $TIMEOUT ]; do
             echo "Waiting for application... ($ELAPSED/$TIMEOUT seconds)"
-            
+
             # Check if containers are still running
             if ! docker compose ps | grep -q "Up"; then
               echo "ERROR: Containers stopped running!"
@@ -56,11 +56,11 @@ jobs:
               docker compose logs
               exit 1
             fi
-            
+
             sleep 10
             ELAPSED=$((ELAPSED + 10))
           done
-          
+
           if [ $ELAPSED -eq $TIMEOUT ]; then
             echo "Application failed to start within $TIMEOUT seconds"
             echo "=== Docker Container Status ==="
@@ -71,7 +71,7 @@ jobs:
             docker compose logs mongo
             exit 1
           fi
-          
+
           echo "Application is ready!"
           curl -v http://localhost:3000
 
@@ -80,8 +80,8 @@ jobs:
           nuclei -target http://localhost:3000 -timeout 5 -page-timeout 10 -silent -me nuclei-reports/ || true
 
       - name: Upload Nuclei reports
-        uses: actions/upload-artifact@v4
+        uses: https://code.forgejo.org/forgejo/upload-artifact@v4
         with:
           name: nuclei-security-reports
           path: nuclei-reports/
-          retention-days: 14   
+          retention-days: 14
