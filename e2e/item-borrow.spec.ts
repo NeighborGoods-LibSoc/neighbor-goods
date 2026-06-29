@@ -11,11 +11,11 @@ test.describe('Item Borrowing Flow', () => {
     // Wait for redirect after login
     await page.waitForURL('/')
 
-    // Navigate to items listing
-    await page.goto('/items')
+    // Navigate to the items browse listing
+    await page.goto('/browse')
 
-    // Click the first available item
-    await page.getByRole('link').filter({ hasText: /borrow/i }).first().click()
+    // Click the first item card (cards link to an item detail page)
+    await page.locator('a[href^="/items/"]').first().click()
 
     // Request to borrow
     const borrowButton = page.getByRole('button', { name: /Request to Borrow/i })
@@ -26,15 +26,20 @@ test.describe('Item Borrowing Flow', () => {
     await expect(page.getByText(/request/i)).toBeVisible()
   })
 
-  test('visitor sees item details without borrow option', async ({ page }) => {
-    // Navigate directly to items listing without logging in
-    await page.goto('/items')
+  test('visitor sees item details without borrow option', async ({ page, request }) => {
+    // The browse listing requires authentication, but individual item detail
+    // pages are publicly viewable. Look up an existing item via the public
+    // browse API, then visit its detail page directly as an unauthenticated visitor.
+    const response = await request.get('/api/browse?limit=1')
+    expect(response.ok()).toBeTruthy()
+    const data = await response.json()
+    const firstItem = data.items?.[0]
+    test.skip(!firstItem, 'No items available to view')
 
-    // Click the first item link
-    await page.getByRole('link').first().click()
+    await page.goto(`/items/${firstItem.id}`)
 
-    // Item details should be visible
-    await expect(page.getByRole('heading')).toBeVisible()
+    // Item details should be visible (the item name is rendered as the page's h1)
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible()
 
     // Borrow button should not be visible for unauthenticated users
     await expect(page.getByRole('button', { name: /Request to Borrow/i })).not.toBeVisible()
