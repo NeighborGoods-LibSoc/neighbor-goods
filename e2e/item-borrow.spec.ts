@@ -1,29 +1,59 @@
 import { test, expect } from '@playwright/test'
 
 test.describe('Item Borrowing Flow', () => {
-  test('logged-in user can request to borrow an available item', async ({ page }) => {
-    // Log in
+  test('logged-in user can request to borrow an available item', async ({ page, request }) => {
+    // Create a dedicated READY item for this test (owned by a different user,
+    // so the logged-in neighbor is allowed to request it). Using a fresh item
+    // keeps parallel browser projects from contending over the same fixture.
+    const seedResponse = await request.post('/api/test-seed?fresh=1')
+    expect(seedResponse.ok()).toBeTruthy()
+    const { itemId } = await seedResponse.json()
+    expect(itemId).toBeTruthy()
+
+    // Log in as a dedicated borrower (not the shared neighbor@example.com that
+    // other specs use in parallel) so this login never races with another
+    // test's concurrent login for the same user.
     await page.goto('/login')
-    await page.getByLabel('Email').fill('neighbor@example.com')
+    await page.getByLabel('Email').fill('borrower@example.com')
     await page.getByLabel('Password').fill('password123')
-    await page.getByRole('button', { name: 'Login' }).click()
 
-    // Wait for redirect after login
-    await page.waitForURL('/')
+    // Wait for the login request to complete so the auth cookie is committed
+    // before we navigate away (avoids a logged-out item page under load).
+    const [loginResponse] = await Promise.all([
+      page.waitForResponse(
+        (res) => res.url().includes('/api/users/login') && res.request().method() === 'POST',
+      ),
+      page.getByRole('button', { name: 'Log In' }).click(),
+    ])
+    expect(loginResponse.ok()).toBeTruthy()
 
-    // Navigate to the items browse listing
-    await page.goto('/browse')
+    // Wait for redirect to the dashboard after a successful login
+    await page.waitForURL('**/dashboard')
 
-    // Click the first item card (cards link to an item detail page)
-    await page.locator('a[href^="/items/"]').first().click()
+    // Make sure the auth cookie is actually present before navigating, so the
+    // item page renders for an authenticated user (and shows the borrow button).
+    await expect
+      .poll(async () => (await page.context().cookies()).some((c) => c.name === 'payload-token'))
+      .toBeTruthy()
 
-    // Request to borrow
-    const borrowButton = page.getByRole('button', { name: /Request to Borrow/i })
-    await expect(borrowButton).toBeVisible()
+    // Open the dedicated item's detail page. The borrow button only renders for
+    // an authenticated, non-owner user; under heavy load the dev server can
+    // occasionally render a stale logged-out page, so retry the navigation until
+    // the authenticated view (with the borrow button) is shown.
+    const borrowButton = page.getByRole('button', { name: 'Request to Borrow' })
+    await expect(async () => {
+      await page.goto(`/items/${itemId}`)
+      await expect(borrowButton).toBeVisible({ timeout: 5000 })
+    }).toPass({ timeout: 30000 })
+
+    // Request to borrow (opens a confirmation dialog)
     await borrowButton.click()
 
-    // Verify the request was acknowledged
-    await expect(page.getByText(/request/i)).toBeVisible()
+    // Confirm the request in the dialog
+    await page.getByRole('button', { name: 'Yes, Request Item' }).click()
+
+    // Verify the request was acknowledged: the item is now pending approval
+    await expect(page.getByText('Pending Approval')).toBeVisible()
   })
 
   test('visitor sees item details without borrow option', async ({ page, request }) => {

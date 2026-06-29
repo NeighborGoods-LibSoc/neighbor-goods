@@ -2,18 +2,20 @@ import { test, expect } from '@playwright/test'
 
 test.describe('Thing Request – Library Selection', () => {
   test('request form shows library selection UI for logged-in user', async ({ page }) => {
-    // Log in
+    // Log in as a dedicated, per-test user. The suite runs with
+    // `fullyParallel: true`, so sharing one account across these tests would
+    // race on Payload's auth session array and intermittently log the user out.
     await page.goto('/login')
-    await page.getByLabel('Email').fill('neighbor@example.com')
+    await page.getByLabel('Email').fill('requester-1@example.com')
     await page.getByLabel('Password').fill('password123')
-    await page.getByRole('button', { name: 'Login' }).click()
-    await page.waitForURL('/')
+    await page.getByRole('button', { name: 'Log In' }).click()
+    await page.waitForURL('/dashboard')
 
     // Navigate to the request form
     await page.goto('/items/request')
 
     // The Libraries section should be visible
-    await expect(page.getByText('Libraries')).toBeVisible()
+    await expect(page.getByText(/^Libraries\b/)).toBeVisible()
 
     // Should show either library chips or a "not a member" message
     const hasLibraries = await page.locator('label').filter({ hasText: /./}).count()
@@ -24,12 +26,12 @@ test.describe('Thing Request – Library Selection', () => {
 
   test('submit button is disabled when user has no libraries', async ({ page }) => {
     // This test verifies the disabled state when no libraries are available
-    // Log in with a user that may not have library memberships
+    // Log in with a dedicated, per-test user (see note in the first test).
     await page.goto('/login')
-    await page.getByLabel('Email').fill('neighbor@example.com')
+    await page.getByLabel('Email').fill('requester-2@example.com')
     await page.getByLabel('Password').fill('password123')
-    await page.getByRole('button', { name: 'Login' }).click()
-    await page.waitForURL('/')
+    await page.getByRole('button', { name: 'Log In' }).click()
+    await page.waitForURL('/dashboard')
 
     await page.goto('/items/request')
 
@@ -45,12 +47,12 @@ test.describe('Thing Request – Library Selection', () => {
   })
 
   test('library chips can be toggled on and off', async ({ page }) => {
-    // Log in
+    // Log in as a dedicated, per-test user (see note in the first test).
     await page.goto('/login')
-    await page.getByLabel('Email').fill('neighbor@example.com')
+    await page.getByLabel('Email').fill('requester-3@example.com')
     await page.getByLabel('Password').fill('password123')
-    await page.getByRole('button', { name: 'Login' }).click()
-    await page.waitForURL('/')
+    await page.getByRole('button', { name: 'Log In' }).click()
+    await page.waitForURL('/dashboard')
 
     await page.goto('/items/request')
     await page.waitForSelector('form')
@@ -76,12 +78,12 @@ test.describe('Thing Request – Library Selection', () => {
   })
 
   test('form submission fails without selecting a library', async ({ page }) => {
-    // Log in
+    // Log in as a dedicated, per-test user (see note in the first test).
     await page.goto('/login')
-    await page.getByLabel('Email').fill('neighbor@example.com')
+    await page.getByLabel('Email').fill('requester-4@example.com')
     await page.getByLabel('Password').fill('password123')
-    await page.getByRole('button', { name: 'Login' }).click()
-    await page.waitForURL('/')
+    await page.getByRole('button', { name: 'Log In' }).click()
+    await page.waitForURL('/dashboard')
 
     await page.goto('/items/request')
     await page.waitForSelector('form')

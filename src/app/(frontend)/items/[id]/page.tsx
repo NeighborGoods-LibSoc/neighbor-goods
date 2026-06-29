@@ -3,12 +3,11 @@ import { getPayload } from 'payload'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import Image from 'next/image'
-import { cookies } from 'next/headers'
+import { headers as getHeaders } from 'next/headers'
 import type { Media, User, Tag } from '@/payload-types'
 import { DeleteItemButton } from './DeleteItemButton'
 import { RequestToBorrowButton } from './RequestToBorrowButton'
 import { OwnerBorrowActions } from './OwnerBorrowActions'
-import { getClientSideURL } from '@/utilities/getURL'
 
 type Args = {
   params: Promise<{
@@ -25,25 +24,16 @@ export default async function ItemPage({ params: paramsPromise, searchParams: se
   const isNewlyCreated = created === 'true'
   const payload = await getPayload({ config: configPromise })
 
-  // Get current user to check ownership
-  const cookieStore = await cookies()
-  const token = cookieStore.get('payload-token')?.value
+  // Get current user to check ownership. Resolve via Payload's in-process local
+  // API auth instead of an SSR HTTP self-fetch to /api/users/me: the self-fetch
+  // depends on NEXT_PUBLIC_SERVER_URL and a network hop, which can intermittently
+  // fail under load (flaky e2e) and leave the user appearing logged out.
   let currentUser: User | null = null
-
-  if (token) {
-    try {
-      const meUserReq = await fetch(`${getClientSideURL()}/api/users/me`, {
-        headers: {
-          Authorization: `JWT ${token}`,
-        },
-      })
-      if (meUserReq.ok) {
-        const data = await meUserReq.json()
-        currentUser = data.user
-      }
-    } catch {
-      // User not logged in, that's fine
-    }
+  try {
+    const { user } = await payload.auth({ headers: await getHeaders() })
+    currentUser = (user as User) ?? null
+  } catch {
+    // User not logged in, that's fine
   }
 
   const item = await payload.findByID({
